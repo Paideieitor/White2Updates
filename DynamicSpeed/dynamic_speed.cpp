@@ -1,4 +1,4 @@
-#include "kernel/kPrint.h"
+#include "kPrint.h"
 
 #include "Battle.h"
 
