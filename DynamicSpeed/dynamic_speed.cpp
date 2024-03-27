@@ -1,6 +1,6 @@
 #include "kernel/kPrint.h"
 
-#include "custom/Battle.h"
+#include "Battle.h"
 
 // DONE: speed stat boost mid turn update
 // DONE: take into account trick room

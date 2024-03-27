@@ -1,6 +1,6 @@
 #include "kernel/kPrint.h"
 
-#include "custom/Battle.h"
+#include "Battle.h"
 
 #define LVL_CAP_VAR 16415
 #define LVL_CAP_AMOUNT 10u
