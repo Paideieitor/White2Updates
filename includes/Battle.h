@@ -1566,9 +1566,8 @@ struct SWAN_ALIGNED(8) ServerFlow
     char field_7C1[24];
     char switchCount[4];
     char field_7DD;
-    PokeSet* monsInBattle;
-    int field_7E4;
-    _BYTE gap7E8[104];
+    ActionOrderWork actionOrderWork[6];
+    ActionOrderWork tmpActionOrderWork;
     PokeSet* setTargetOriginal;
     PokeSet* setTarget;
     PokeSet* setAlly;
@@ -1598,7 +1597,7 @@ struct SWAN_ALIGNED(8) ServerFlow
     char field_1C8A;
     char field_1C97;
     _BYTE gap1C98[224];
-    int HEManager;
+    int HEManager; // *HEManager -> 504 bytes
     _BYTE gap1D7C[8];
     char field_1D84;
     SWAN_ALIGNED(4) char field_1D88;
@@ -2861,6 +2860,81 @@ enum BattleFieldEffect
     EFFECT_MUD_SPORT = 0x5,
     EFFECT_WONDER_ROOM = 0x6,
     EFFECT_MAGIC_ROOM = 0x7,
+};
+
+struct HandlerParam_Header
+{
+    u32 flags;
+};
+
+enum BattleHandlerEffect
+{
+    EFFECT_USE_HELD_ITEM = 0x0,
+    EFFECT_USE_HELD_ITEM_ANIMATION = 0x1,
+    EFFECT_ABILITY_POPUP_ADD = 0x2,
+    EFFECT_ABILITY_POPUP_REMOVE = 0x3,
+    EFFECT_MESSAGE = 0x4,
+    EFFECT_RECOVER_HP = 0x5,
+    EFFECT_DRAIN = 0x6,
+    EFFECT_DAMAGE = 0x7,
+    EFFECT_CHANGE_HP = 0x8,
+    EFFECT_RESTORE_PP = 0x9,
+    EFFECT_DECREMENT_PP = 0xA,
+    EFFECT_CURE_STATUS = 0xB,
+    EFFECT_ADD_CONDITION = 0xC,
+    EFFECT_CHANGE_STAT_STAGE = 0xE,
+    EFFECT_SET_STAT_STAGE = 0xF,
+    EFFECT_RESET_STAT_STAGE = 0x10,
+    EFFECT_SET_STAT = 0x11,
+    EFFECT_RESTORE_STAT_STAGE = 0x12,
+    EFFECT_FAINT = 0x13,
+    EFFECT_CHANGE_TYPE = 0x14,
+    EFFECT_SET_TURN_FLAG = 0x15,
+    EFFECT_RESET_TURN_FLAG = 0x16,
+    EFFECT_SET_CONDITION_FLAG = 0x17,
+    EFFECT_RESET_CONDITION_FLAG = 0x18,
+    EFFECT_ADD_SIDE_EFFECT = 0x19,
+    EFFECT_REMOVE_SIDE_EFFECT = 0x1A,
+    EFFECT_ADD_FIELD_EFFECT = 0x1B,
+    EFFECT_REMOVE_FIELD_EFFECT = 0x1C,
+    EFFECT_CHANGE_WEATHER = 0x1D,
+    EFFECT_ADD_POS_EFFECT = 0x1E,
+    EFFECT_CHANGE_ABILITY = 0x1F,
+    EFFECT_SET_HELD_ITEM = 0x20,
+    EFFECT_CHECK_HELD_ITEM = 0x21,
+    EFFECT_FORCE_USE_HELD_ITEM = 0x22,
+    EFFECT_CONSUME_ITEM = 0x23,
+    EFFECT_SWAP_ITEM = 0x24,
+    EFFECT_UPDATE_MOVE = 0x25,
+    EFFECT_COUNTER = 0x26,
+    EFFECT_DELAY_MOVE_DAMAGE = 0x27,
+    EFFECT_QUIT_BATTLE = 0x28,
+    EFFECT_SWITCH = 0x29,
+    EFFECT_BATON_PASS = 0x2A,
+    EFFECT_FLINCH = 0x2B,
+    EFFECT_REVIVE = 0x2C,
+    EFFECT_SET_WEIGHT = 0x2D,
+    EFFECT_FORCE_SWITCH = 0x2E,
+    EFFECT_INTERRUPT_ACTION = 0x2F,
+    EFFECT_INTERRUPT_MOVE = 0x30,
+    EFFECT_SEND_LAST = 0x31,
+    EFFECT_SWAP_POKE = 0x32,
+    EFFECT_TRANSFORM = 0x33,
+    EFFECT_ILLUSION_BREAK = 0x34,
+    EFFECT_GRAVITY_CHECK = 0x35,
+    EFFECT_CANCEL_SEMI_INVULN = 0x36,
+    EFFECT_ADD_ANIMATION = 0x37,
+    EFFECT_REMOVE_MESSAGE_WINDOW = 0x38,
+    EFFECT_CHANGE_FORM = 0x39,
+    EFFECT_SET_ANIMATION_ID = 0x3A,
+    EFFECT_PLAY_ANIMATION = 0x3B,
+};
+
+struct HandlerParam_SendLast
+{
+    HandlerParam_Header header;
+    u8 pokeID;
+    HandlerParam_StrParams exStr;
 };
 
 C_DECL_BEGIN
