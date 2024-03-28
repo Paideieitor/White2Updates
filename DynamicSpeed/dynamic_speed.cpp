@@ -120,7 +120,7 @@ u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action
                                         if (poke2_speed == poke1_speed) // completly break speed tie to avoid an infinite loop
                                             BreakSpeedTie(action_order, speed_stats, i);
                                     }
-                                    if (poke2_speed == poke1_speed) // also break speed tie if the second lost
+                                    if (speed_stats[j] == speed_stats[i]) // also break speed tie if the second lost
                                         BreakSpeedTie(action_order, speed_stats, j);
                                 }
                             }
