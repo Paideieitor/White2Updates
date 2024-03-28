@@ -8,7 +8,8 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - To increase the level cap in-game you will need to modify the game variable at the LVL_CAP_VAR index using CTRMap or some other editor (untested, pretty sure it works... 65% sure)
 ### Dynamic Speed
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
-  - I have tested several scenarios where this is relevant
+  - Fully functional with speed/priority items and the moves After You and Quash
+  - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
 
 ## How to Install
   - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin

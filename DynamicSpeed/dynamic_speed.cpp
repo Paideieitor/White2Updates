@@ -1,4 +1,6 @@
+#ifdef DEBUG_PRINT
 #include "kPrint.h"
+#endif
 
 #include "Battle.h"
 
@@ -7,6 +9,7 @@
 // DONE: take into account priority
 // DONE: weather abilities and speed abilities in general
 // DONE: apply special priorities (lagging tail, prankster, etc)
+// DONE: quash and after you work as intended
 
 C_DECL_BEGIN
 void SwapPokemonOrder(ActionOrderWork* action_order, u32* speed_stats, u32* priority, u16 slow_idx, u16 fast_idx)
@@ -58,15 +61,14 @@ void BreakSpeedTie(ActionOrderWork* action_order, u32* speed_stats, u32 loser_id
                 speed_stats[i] = speed_stats[i] + 1;
 }
 
-u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action_order, u32 first_idx, u8 current_idx)
+u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action_order, u32 first_idx, u8 current_idx, short* quash_order)
 {
-    u32 poke_amount = server_flow->numActOrder - first_idx;
-    if (poke_amount > 1)
+    u32 poke_amount = server_flow->numActOrder - first_idx; // first_idx is used for "half" turns. Ex. when a mon faints the turn ends regardles of the mons left to move,
+    if (poke_amount > 1)                                    // so to keep going, the next "turn" starts with the mon that should have moved next
     {
         u32 isTrickRoom = BattleField_CheckEffect(EFFECT_TRICK_ROOM);
         u32 speed_stats[6];
         u32 priority[6];
-        k::Print("DYNAMIC SPEED:\n");
         for (u32 i = first_idx; i < first_idx + poke_amount; ++i)
         {
             if (!BattleMon_IsFainted(action_order[i].battleMon))
@@ -76,16 +78,12 @@ u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action
                 priority[i] = (action_order[i].field_8 >> 16) & 0x3FFFFF;
                 int special_priority = ((action_order[i].field_8 >> 13) & 0x7); // special priority takes into account item & ability prio boosts (1 = no added prio)
                 priority[i] += (special_priority - 1);
-
-                k::Printf("[ ID: %d | SPECIES: %d | PRIORITY: %d | SPECIAL PRIORITY: %d | SPEED: %d ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species, priority[i], special_priority, speed_stats[i]);
             }
             else
             {
                 priority[i] = 0xFFFFFFFF;
-                k::Printf("[ID:% d | SPECIES : % d | IS FAINTED ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species);
             }
         }
-        k::Print("---\n");
 
         u32 start_idx = current_idx + 1; // Skip the mons that have already moved
         u16 changes = 1;
@@ -131,6 +129,27 @@ u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action
                 }
             }
         }
+
+        for (u16 i = 0; i < 6; ++i)
+            for (u16 j = first_idx + start_idx; j < first_idx + poke_amount - 1; ++j) // loop from the "current" to the one before the last one, the last can't be slower :(
+                if (action_order[j].battleMon->ID == quash_order[i])
+                    SwapPokemonOrder(action_order, speed_stats, priority, j, j + 1);
+
+#ifdef DEBUG_PRINT
+        k::Print("DYNAMIC SPEED:\n");
+        for (u32 i = first_idx; i < first_idx + poke_amount; ++i)
+        {
+            if (!BattleMon_IsFainted(action_order[i].battleMon))
+            {
+                k::Printf("[ ID: %d | SPECIES: %d | PRIORITY: %d | SPEED: %d ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species, priority[i], speed_stats[i]);
+            }
+            else
+            {
+                k::Printf("[ID:% d | SPECIES : % d | IS FAINTED ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species);
+            }
+        }
+        k::Print("---\n");
+#endif
     }
 
     return poke_amount;
@@ -139,7 +158,7 @@ u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action
 unsigned int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* a1, unsigned int a2)
 {
     unsigned int current_idx; // r4
-    PokeSet** p_monsInBattle; // r7
+    ActionOrderWork* action_order_work; // r7
     int v5; // r6
     int Action; // r0
     BattleMon* PokeParam; // r0
@@ -151,7 +170,7 @@ unsigned int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* a1, unsigned i
     int Count_1; // r4
     int v15; // [sp+0h] [bp-28h]
     int v16; // [sp+4h] [bp-24h]
-    int* v17; // [sp+8h] [bp-20h]
+    BattleActionParam* v17; // [sp+8h] [bp-20h]
     char* p_numActOrder; // [sp+Ch] [bp-1Ch]
 
     v15 = 0;
@@ -187,28 +206,51 @@ unsigned int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* a1, unsigned i
     }
     else
     {
-        p_monsInBattle = &a1->monsInBattle;
-        v17 = &a1->field_7E4;
+        action_order_work = a1->actionOrderWork;
         p_numActOrder = &a1->numActOrder;
 
-        k::Printf("START TURN\n");
-        Dynamic_PokeSet_SortBySpeed(a1, (ActionOrderWork*)p_monsInBattle, a2, current_idx);
-        k::Printf("UPDATE\n");
+        short quash_order[6];
+        for (u16 i = 0; i < 6; ++i)
+            quash_order[i] = -1;
+
+        Dynamic_PokeSet_SortBySpeed(a1, action_order_work, a2, current_idx, quash_order); // pre-calc speed to take into account switch-in speed modifiers (weather...)
+
         while (1)
         {
             v5 = 4 * current_idx;
-            BattleMon* battle_mon = *(BattleMon**)((int)&p_monsInBattle[v5]);
+            BattleMon* battle_mon = action_order_work[current_idx].battleMon;
             if (!BattleMon_IsFainted(battle_mon)) // I don't remember when I added this if, may not be necessary
             {
-                Action = BattleAction_GetAction((BattleActionParam*)&v17[v5]);
+                BattleActionParam* battle_action = action_order_work[current_idx].Action;
+
+                Action = BattleAction_GetAction(battle_action);
                 if (v15 == 6 && Action != 6)
                 {
                     ServerControl_CheckActivation(a1);
-                    sub_219FB7C(a1, (int)&p_monsInBattle[v5], (unsigned __int8)*p_numActOrder - current_idx);
+                    sub_219FB7C(a1, (int)&action_order_work[current_idx], (unsigned __int8)*p_numActOrder - current_idx);
                 }
-                v15 = ActionOrder_Proc(a1, (int)&p_monsInBattle[v5]);
+                v15 = ActionOrder_Proc(a1, (int)&action_order_work[current_idx]);
 
-                Dynamic_PokeSet_SortBySpeed(a1, (ActionOrderWork*)p_monsInBattle, a2, current_idx);
+                int action[7];
+                action[0] = (int)battle_action;
+                int move_ID = (*action >> 7);
+                
+                if (move_ID == 511) // Quash: this move overrides the last pokemon on the list, so we save it to always keep it there
+                {
+                    u16 free_slot = 0;
+                    for (free_slot; free_slot < 6; ++free_slot)
+                        if (quash_order[free_slot] == -1)
+                            break;
+
+                    BattleMon* last_mon = action_order_work[*p_numActOrder - 1].battleMon;
+                    if (!BattleMon_IsFainted(last_mon))
+                    {
+                        quash_order[free_slot] = last_mon->ID;
+                    }
+                }
+
+                if (move_ID != 495) // After You: this move overrides the next pokemon to move, we don't need to calc speed this iteration
+                    Dynamic_PokeSet_SortBySpeed(a1, action_order_work, a2, current_idx, quash_order); // re-calc speed
 
                 v16 = (unsigned __int8)ServerControl_CheckExpGet(a1);
                 PokeParam = PokeCon_GetPokeParam(a1->pokeCon, 0);
@@ -242,6 +284,5 @@ unsigned int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* a1, unsigned i
         a1->flowResult = 3;
         return current_idx + 1;
     }
-    k::Printf("END TURN\n");
 }
 C_DECL_END
