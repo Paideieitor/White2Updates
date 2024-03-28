@@ -9,6 +9,7 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
 ### Dynamic Speed
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
   - I have tested several scenarios where this is relevant
+  - Not tested with moves like after you, quash or me first
 
 ## How to Install
   - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin
