@@ -3,14 +3,20 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
 
 ## Patches
 ### Hard Level Caps
-  - Limits the maximum level a pokemon can be (doesn't affect Rare Candy yet)
+  - Limits the maximum level a pokemon can be (doesn't affect Rare Candy, use the Rare Candy Level Caps patch to add this feature)
   - To change this caps modify the LEVEL_CAPS definition in exp_cap.cpp, don't forget to modify LEVEL_CAP_AMOUNT acording to the number of entries in LEVEL_CAPS
   - To increase the level cap in-game you will need to modify the game variable at the LVL_CAP_VAR index using CTRMap or some other editor (untested, pretty sure it works... 65% sure)
+### Rare Candy Level Caps
+  - Limits the maximum level a pokemon can be using Rare Candy
+  - unusable until I update hard lvl caps, mb
 ### Dynamic Speed
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
   - Fully functional with speed/priority items and the moves After You and Quash
   - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
-  - There is a bug where After You might not work when in a 2v1, working on it...
+### Work In Progress
+  - Changing level cap system to store the level cap directly on the unused variable
+  - Infinite Rare Candy Key Item
+  - Item expansion
 
 ## How to Install
   - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin
