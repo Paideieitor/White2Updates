@@ -10,6 +10,7 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
   - Fully functional with speed/priority items and the moves After You and Quash
   - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
+  - There is a bug where After You might not work when in a 2v1, working on it...
 
 ## How to Install
   - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin
