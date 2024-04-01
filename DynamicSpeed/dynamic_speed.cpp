@@ -1,4 +1,4 @@
-#include "custom/include_all.h"
+#include "include_all.h"
 
 // DONE: speed stat boost mid turn update
 // DONE: take into account trick room
@@ -7,7 +7,7 @@
 // DONE: apply special priorities (lagging tail, prankster, etc)
 // DONE: quash and after you work as intended
 // DONE: fixed ActionOrder array when a mon faints (fixes the After You bug)
-// TODO: make quash and after you trigger because of the battle handler and not the move ID
+// DONE: make quash and after you trigger because of the battle handler and not the move ID
 
 #define ORDER_ALTERING_MOVE_VAR 16400
 

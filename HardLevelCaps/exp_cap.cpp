@@ -1,27 +1,8 @@
-#include "kPrint.h"
+#include "level_cap.h"
 
-#include "Battle.h"
-
-#define LVL_CAP_VAR 16415
-#define LVL_CAP_AMOUNT 10u
-#define LVL_CAPS { 10u, 20u, 30u, 40u, 50u, 60u, 70u, 80u, 90u, 100u }
+#define GIVE_EVS false
 
 C_DECL_BEGIN
-u32 GetCurrentLvlCap()
-{
-    u32 lvl_caps[LVL_CAP_AMOUNT] = LVL_CAPS;
-
-    EventWorkSave* eventWork = GameData_GetEventWork(*(GameData**)(g_GameBeaconSys + 4));
-    u16 lvl_cap_idx = *EventWork_GetWkPtr(eventWork, LVL_CAP_VAR);
-
-    if (lvl_cap_idx >= LVL_CAP_AMOUNT)
-        lvl_cap_idx = LVL_CAP_AMOUNT - 1u;
-
-    k::Printf("Current lvl cap: %d\n", lvl_caps[lvl_cap_idx]);
-
-    return lvl_caps[lvl_cap_idx];
-}
-
 void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int DefeatedMon, _DWORD* a4)
 {
     CalcExpWork* expEvs = (CalcExpWork*)a4;
@@ -64,7 +45,7 @@ void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int D
         BaseExp = 15 * BaseExp / 10;
     }
 
-    sys_memset(expEvs, 0, 0xCu * 0x6u);
+    sys_memset(expEvs, 0, 12 * 6);
 
     count = 0;
     if (NumMonsInParty)
@@ -194,6 +175,12 @@ void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int D
         if (expEvs[n].level > exp_to_cap)
         {
             expEvs[n].level = exp_to_cap;
+        }
+
+        if (GIVE_EVS)
+        {
+            BattleMon* party_member = BattleParty_GetPartyMember(party, n);
+            AddEVs(party_member, (BattleMon*)DefeatedMon, &expEvs[n].hp);
         }
     }
 }

@@ -3,7 +3,7 @@
 
 #define DEBUG_PRINT
 #ifdef DEBUG_PRINT
-#include "kernel/kPrint.h"
+#include "kPrint.h"
 #endif
 
 #include "swantypes.h"
