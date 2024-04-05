@@ -1,26 +1,25 @@
-#include "level_cap.h"
+#include "custom/level_cap.h"
+
+#define INFINITE_CANDY_ID 622
+#define RARE_CANDY_IGNORE_LVL_CAP true
 
 C_DECL_BEGIN
 //BagItem* BagSave_AddItemCore(BagSaveData* bag, u16 item_idx, u16 quantity, HeapID heapId);
 //bool THUMB_BRANCH_BagSave_AddItem(BagSaveData* bag, u16 itemId, u16 quantity, HeapID heapId)
 //{
-//    itemId = 622;
+//    itemId = INFINITE_CANDY_ID;
 //    return BagSave_AddItemCore(bag, itemId, quantity, heapId) != 0;
 //}
 
-int THUMB_BRANCH_s002A_WorkSet(ScriptVM* vm, FieldScriptEnv* env)
+int THUMB_BRANCH_PokeList_SubItem(PokeList* a1, u16 a2)
 {
-    u16* Var; // r4
-
-    Var = ScriptReadVar(vm, env);
-    k::Printf("WORK SET VAR PTR: %d\n", Var);
-    k::Printf("WORK SET VAR OLD: %d\n", *Var);
-    *Var = ScriptReadAny(vm, env);
-    k::Printf("WORK SET VAR NEW: %d\n", *Var);
-    return 0;
+    if (a2 != INFINITE_CANDY_ID)
+        return BagSave_SubItem(a1->field_28C->bagSaveData, a2, 1u, a1->heapID);
+    else
+        return 0;
 }
 
-bool THUMB_BRANCH_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned int a2, int a3, unsigned __int16 a4)
+bool THUMB_BRANCH_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned int item_ID, int a3, unsigned __int16 a4)
 {
     ItemData* DataFile; // r4
     u32 Status; // r5
@@ -41,7 +40,7 @@ bool THUMB_BRANCH_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned i
     signed __int32 v23; // [sp+10h] [bp-20h]
     signed __int32 v24; // [sp+14h] [bp-1Ch]
     a4 = HEAPID_POKELIST;
-    DataFile = (ItemData*)PML_ItemReadDataFile(a2, 0, a4);
+    DataFile = (ItemData*)PML_ItemReadDataFile(item_ID, 0, a4);
     if (PML_ItemGetParam(DataFile, ITSTAT_HAS_BATTLE_STATS) == 1)
     {
         Status = PokeParty_GetStatusCond(a1);
@@ -71,7 +70,9 @@ bool THUMB_BRANCH_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned i
             goto LABEL_102;
         }
 
-        u32 level_cap = GetLvlCap();
+        u32 level_cap = 100;
+        if (item_ID == INFINITE_CANDY_ID || !RARE_CANDY_IGNORE_LVL_CAP)
+            level_cap = GetLvlCap();
         u32 level = PokeParty_GetParam(a1, PF_Level, 0);
         if (PML_ItemGetParam(DataFile, ITSTAT_BOOST_RARECANDY) && level < level_cap)
         {
