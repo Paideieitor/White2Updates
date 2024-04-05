@@ -3771,6 +3771,2003 @@ struct HandlerParam_InterruptPoke
     HandlerParam_StrParams exStr;
 };
 
+struct ShortcutSave
+{
+    u8 KeyItemIDs[34];
+    __int16 field_22;
+};
+
+struct PokeList_Party
+{
+    PokeParty* pokeParty;
+    BagSaveData* bagSaveData;
+    int field_8;
+    int field_C;
+    int field_10;
+    int field_14;
+    int field_18;
+    int field_1C;
+    ShortcutSave* shortcutSave;
+    int field_24;
+    int field_28;
+    int field_2C;
+    int field_30;
+    int field_34;
+    int field_38;
+    int field_3C;
+    __int16 field_40;
+    __int16 field_42;
+    int ItemUseType;
+    int field_48;
+    int SelectedSlot;
+    int field_50;
+    __int16 ItemID;
+    __int16 MoveToLearn;
+    char field_58;
+    char field_59;
+    char field_5A;
+    char field_5B;
+    int field_5C;
+    int field_60;
+    int field_64;
+    int field_68;
+    __int16 field_6C;
+    char field_6E;
+    char field_6F;
+    char field_70;
+    char field_71;
+    char field_72;
+    char field_73;
+    int field_74;
+    int field_78;
+    int field_7C;
+    int field_80;
+    int field_84;
+    int field_88;
+    int field_8C;
+    int field_90;
+    int field_94;
+    int field_98;
+    int field_9C;
+    int field_A0;
+    char field_A4;
+    char field_A5;
+    char field_A6;
+    char field_A7;
+};
+
+struct PokeList_Plate
+{
+    PartyPkm* partyPkm;
+    char Slot;
+    char field_5;
+    __int16 CurrentHP;
+    __int16 CurrentHP2;
+    __int16 field_A;
+    int IsEgg;
+    int field_10;
+    int field_14;
+    int field_18;
+    int field_1C;
+    GFLBitmap* Bitmap;
+    int field_24;
+    int field_28;
+    int field_2C;
+    int field_30;
+    int field_34;
+    int field_38;
+    int field_3C;
+    int field_40;
+    char field_44;
+    char field_45;
+    char field_46;
+    char field_47;
+};
+
+struct WordSetBuffer
+{
+    char field_0;
+    char field_1;
+    char field_2;
+    char field_3;
+    char Skip84Pixels;
+    char Pad1;
+    u16 Pad2;
+    StrBuf* Strbuf;
+};
+
+struct WordSetSystem
+{
+    int WordSetCount;
+    int HeapID;
+    WordSetBuffer* Buffers;
+    StrBuf* MainStrbuf;
+    int field_10;
+};
+
+struct PokeList_Message
+{
+    int field_0;
+    BmpWin* bmpWin;
+    int field_8;
+    int field_C;
+    StrBuf* strBuf;
+    int field_14;
+    int field_18;
+    int field_1C;
+    int field_20;
+    int field_24;
+    int field_28;
+    WordSetSystem* wordSetSystem;
+    int field_30;
+    int field_34;
+};
+
+struct PokeList_Menu
+{
+    char field_0;
+    char field_1;
+    u16 field_2[3];
+    int field_8;
+    int field_C;
+    int field_10;
+    int field_14;
+    _BYTE gap18[88];
+    int field_70;
+    int field_74;
+    int field_78;
+    int field_7C;
+    int field_80;
+};
+
+struct PokeList
+{
+    HeapID heapID;
+    __int16 field_2;
+    int field_4;
+    int field_8;
+    char field_C;
+    char field_D;
+    char field_E;
+    char field_F;
+    int field_10;
+    int field_14;
+    int field_18;
+    int field_1C;
+    int field_20;
+    int field_24;
+    int field_28;
+    int field_2C;
+    int SelectedSlot;
+    int TargetedSlot;
+    int field_38;
+    PartyPkm* SelectedPkm;
+    int field_40;
+    int field_44;
+    int field_48;
+    int field_4C;
+    int field_50;
+    int field_54;
+    int field_58;
+    int field_5C;
+    int field_60;
+    int field_64;
+    int field_68;
+    int field_6C;
+    int field_70;
+    int field_74;
+    int field_78;
+    int field_7C;
+    int field_80;
+    int field_84;
+    int field_88;
+    int field_8C;
+    int field_90;
+    int field_94;
+    int field_98;
+    int field_9C;
+    int field_A0;
+    int field_A4;
+    int field_A8;
+    int field_AC;
+    int field_B0;
+    int field_B4;
+    int field_B8;
+    int field_BC;
+    int field_C0;
+    int field_C4;
+    int field_C8;
+    int field_CC;
+    int field_D0;
+    int field_D4;
+    int field_D8;
+    int field_DC;
+    int field_E0;
+    int field_E4;
+    int field_E8;
+    int field_EC;
+    int field_F0;
+    int field_F4;
+    int field_F8;
+    int field_FC;
+    int field_100;
+    char field_104;
+    char field_105;
+    __int16 field_106;
+    char field_108;
+    char field_109;
+    char field_10A;
+    char field_10B;
+    int field_10C;
+    int field_110;
+    __int16 field_114;
+    __int16 field_116;
+    char field_118;
+    char field_119;
+    char field_11A;
+    char field_11B;
+    int field_11C;
+    __int16 CurrentHP;
+    char field_122;
+    char field_123;
+    int field_124;
+    u16 field_128[6];
+    BmpWin* bmpWin;
+    MsgData* msgData;
+    GFLFont* Font1;
+    GFLFont* Font2;
+    int PrintSys;
+    int field_148;
+    int field_14C;
+    int field_150;
+    PokeList_Message* pokeList_Message;
+    PokeList_Menu* pokeList_Menu;
+    int field_15C;
+    int field_160;
+    PokeList_Plate* pokeList_Plate[6];
+    int field_17C[23];
+    int field_1D8;
+    int field_1DC;
+    int field_1E0;
+    int field_1E4;
+    int field_1E8;
+    int field_1EC;
+    int field_1F0;
+    int field_1F4;
+    int field_1F8;
+    int field_1FC;
+    int field_200;
+    int field_204;
+    int field_208;
+    int field_20C;
+    int field_210;
+    char field_214;
+    char field_215;
+    char field_216;
+    char field_217;
+    int field_218;
+    int field_21C;
+    int field_220;
+    int field_224;
+    int field_228;
+    int field_22C;
+    int field_230;
+    __int16 field_234;
+    __int16 field_236;
+    int field_238;
+    int field_23C;
+    int field_240;
+    int field_244;
+    int field_248;
+    int field_24C;
+    int field_250;
+    __int16 field_254;
+    __int16 field_256;
+    int field_258;
+    int field_25C;
+    G3DCamera* g3DCamera;
+    int field_264[2];
+    int field_26C[2];
+    int field_274;
+    char field_278;
+    char field_279;
+    char field_27A;
+    char field_27B;
+    __int16 field_27C;
+    __int16 field_27E;
+    int field_280;
+    int field_284;
+    int field_288;
+    PokeList_Party* field_28C;
+};
+
+enum ItemRestoreType
+{
+    RESTORETYPE_X_ITEM = 0x0,
+    RESTORETYPE_SACRED_ASH = 0x1,
+    RESTORETYPE_RARE_CANDY = 0x2,
+    RESTORETYPE_SLEEP = 0x3,
+    RESTORETYPE_POISON = 0x4,
+    RESTORETYPE_BURN = 0x5,
+    RESTORETYPE_FREEZE = 0x6,
+    RESTORETYPE_PARALYSIS = 0x7,
+    RESTORETYPE_CONFUSE = 0x8,
+    RESTORETYPE_FULL_HEAL = 0x9,
+    RESTORETYPE_A = 0xA,
+    RESTORETYPE_FULL_RESTORE = 0xB,
+    RESTORETYPE_REVIVE = 0xC,
+    RESTORETYPE_EV_HP = 0xD,
+    RESTORETYPE_EV_ATK = 0xE,
+    RESTORETYPE_EV_DEF = 0xF,
+    RESTORETYPE_EV_SPE = 0x10,
+    RESTORETYPE_EV_SPA = 0x11,
+    RESTORETYPE_EV_SPD = 0x12,
+    RESTORETYPE_EV_HP_DECREASE = 0x13,
+    RESTORETYPE_EV_ATK_DECREASE = 0x14,
+    RESTORETYPE_EV_DEF_DECREASE = 0x15,
+    RESTORETYPE_EV_SPE_DECREASE = 0x16,
+    RESTORETYPE_EV_SPA_DECREASE = 0x17,
+    RESTORETYPE_EV_SPD_DECREASE = 0x18,
+    RESTORETYPE_EVO_STONE = 0x19,
+    RESTORETYPE_BOOST_PP_1 = 0x1A,
+    RESTORETYPE_BOOST_PP_MAX = 0x1B,
+    RESTORETYPE_PP_REPLENISH = 0x1C,
+};
+
+enum SoundResID
+{
+    SEQ_NULL = 0x0,
+    SEQ_PV001 = 0x1,
+    SEQ_PV = 0x2,
+    SEQ_PV_END = 0x3,
+    SEQ_BGM_DUMMY = 0x3E8,
+    SEQ_BGM_SILENCE_FIELD = 0x3E9,
+    SEQ_BGM_SILENCE_DUNGEON = 0x3EA,
+    SEQ_BGM_TITLE = 0x3EB,
+    SEQ_BGM_TITLE01 = 0x3EC,
+    SEQ_BGM_OPENING_TITLE_B = 0x3ED,
+    SEQ_BGM_OPENING_TITLE_W = 0x3EE,
+    SEQ_BGM_POKEMON_THEME = 0x3EF,
+    SEQ_BGM_STARTING = 0x3F0,
+    SEQ_BGM_STARTING2 = 0x3F1,
+    SEQ_BGM_SHINKA = 0x3F2,
+    SEQ_BGM_KOUKAN = 0x3F3,
+    SEQ_BGM_BICYCLE = 0x3F4,
+    SEQ_BGM_NAMINORI = 0x3F5,
+    SEQ_BGM_DIVING = 0x3F6,
+    SEQ_BGM_E_DENDOUIRI = 0x3F7,
+    SEQ_BGM_ENDING = 0x3F8,
+    SEQ_BGM_ENDING2 = 0x3F9,
+    SEQ_BGM_T_01 = 0x3FA,
+    SEQ_BGM_T_02 = 0x3FB,
+    SEQ_BGM_T_03 = 0x3FC,
+    SEQ_BGM_T_04 = 0x3FD,
+    SEQ_BGM_T_05_SP = 0x3FE,
+    SEQ_BGM_T_05_SU = 0x3FF,
+    SEQ_BGM_T_05_AU = 0x400,
+    SEQ_BGM_T_05_WI = 0x401,
+    SEQ_BGM_C_01 = 0x402,
+    SEQ_BGM_C_02 = 0x403,
+    SEQ_BGM_C_03 = 0x404,
+    SEQ_BGM_C_04 = 0x405,
+    SEQ_BGM_SW_C_5_NEW = 0x406,
+    SEQ_BGM_C_06 = 0x407,
+    SEQ_BGM_C_07 = 0x408,
+    SEQ_BGM_C_08_B = 0x409,
+    SEQ_BGM_C_08_W = 0x40A,
+    SEQ_BGM_C_10_B = 0x40B,
+    SEQ_BGM_C_10_W = 0x40C,
+    SEQ_BGM_R_A = 0x40D,
+    SEQ_BGM_R_B_SP = 0x40E,
+    SEQ_BGM_R_B_SU = 0x40F,
+    SEQ_BGM_R_B_AU = 0x410,
+    SEQ_BGM_R_B_WI = 0x411,
+    SEQ_BGM_R_C_SP = 0x412,
+    SEQ_BGM_R_C_SU = 0x413,
+    SEQ_BGM_R_C_AU = 0x414,
+    SEQ_BGM_R_C_WI = 0x415,
+    SEQ_BGM_R_D_SP = 0x416,
+    SEQ_BGM_R_D_SU = 0x417,
+    SEQ_BGM_R_D_AU = 0x418,
+    SEQ_BGM_R_D_WI = 0x419,
+    SEQ_BGM_R_E_SP = 0x41A,
+    SEQ_BGM_R_E_SU = 0x41B,
+    SEQ_BGM_R_E_AU = 0x41C,
+    SEQ_BGM_R_E_WI = 0x41D,
+    SEQ_BGM_R_F = 0x41E,
+    SEQ_BGM_H_01 = 0x41F,
+    SEQ_BGM_H_02 = 0x420,
+    SEQ_BGM_H_03 = 0x421,
+    SEQ_BGM_H_04 = 0x422,
+    SEQ_BGM_H_05 = 0x423,
+    SEQ_BGM_POKECEN = 0x424,
+    SEQ_BGM_FS = 0x425,
+    SEQ_BGM_GYM = 0x426,
+    SEQ_BGM_GROUND_GYM_01 = 0x427,
+    SEQ_BGM_LABO = 0x428,
+    SEQ_BGM_GATE = 0x429,
+    SEQ_BGM_GEAR_STATION = 0x42A,
+    SEQ_BGM_BATTLE_SUBWAY = 0x42B,
+    SEQ_BGM_PALPARK = 0x42C,
+    SEQ_BGM_PLEASURE_BOAT = 0x42D,
+    SEQ_BGM_PALACE = 0x42E,
+    SEQ_BGM_UNITED_NATIONS = 0x42F,
+    SEQ_BGM_POKEMON_LEAGUE = 0x430,
+    SEQ_BGM_POKEMON_LEAGUE2 = 0x431,
+    SEQ_BGM_SW_D_N_CASTLE = 0x432,
+    SEQ_BGM_D_01 = 0x433,
+    SEQ_BGM_D_02 = 0x434,
+    SEQ_BGM_D_03 = 0x435,
+    SEQ_BGM_D_04 = 0x436,
+    SEQ_BGM_D_05 = 0x437,
+    SEQ_BGM_D_06 = 0x438,
+    SEQ_BGM_D_CHAMPROAD = 0x439,
+    SEQ_BGM_MUGEN_lobby_B = 0x43A,
+    SEQ_BGM_MUGEN_lobby_W = 0x43B,
+    SEQ_BGM_MUGEN_D_B = 0x43C,
+    SEQ_BGM_MUGEN_D_W = 0x43D,
+    SEQ_BGM_E_TSURETEKE2 = 0x43E,
+    SEQ_BGM_E_CHEREN = 0x43F,
+    SEQ_BGM_E_BERU = 0x440,
+    SEQ_BGM_E_DOCTOR = 0x441,
+    SEQ_BGM_E_DOCTOR2 = 0x442,
+    SEQ_BGM_E_N_SWAN = 0x443,
+    SEQ_BGM_E_SAGE = 0x444,
+    SEQ_BGM_E_NEW_G_CIS = 0x445,
+    SEQ_BGM_E_INISHIE = 0x446,
+    SEQ_BGM_E_EMOTION = 0x447,
+    SEQ_BGM_ERECTRIC_GYM_01 = 0x448,
+    SEQ_BGM_ERECTRIC_GYM_02 = 0x449,
+    SEQ_BGM_INSECT_GYM_01 = 0x44A,
+    SEQ_BGM_POISONE_GYM_00 = 0x44B,
+    SEQ_BGM_POISONE_GYM_01 = 0x44C,
+    SEQ_BGM_E_CHAMPION = 0x44D,
+    SEQ_BGM_SW_DEMO_OPENING = 0x44E,
+    SEQ_BGM_E_KANRANSYA = 0x44F,
+    SEQ_BGM_SW_C_12 = 0x450,
+    SEQ_BGM_SW_C_13 = 0x451,
+    SEQ_BGM_SW_C_14 = 0x452,
+    SEQ_BGM_MSL_FIELD = 0x453,
+    SEQ_BGM_MSL_DRESSUP = 0x454,
+    SEQ_BGM_MSL_BEFORE = 0x455,
+    SEQ_BGM_MSL_01 = 0x456,
+    SEQ_BGM_MSL_02 = 0x457,
+    SEQ_BGM_MSL_03 = 0x458,
+    SEQ_BGM_MSL_04 = 0x459,
+    SEQ_BGM_EYE_01 = 0x45A,
+    SEQ_BGM_EYE_02 = 0x45B,
+    SEQ_BGM_EYE_03 = 0x45C,
+    SEQ_BGM_EYE_04 = 0x45D,
+    SEQ_BGM_EYE_05 = 0x45E,
+    SEQ_BGM_EYE_06 = 0x45F,
+    SEQ_BGM_EYE_07 = 0x460,
+    SEQ_BGM_EYE_08 = 0x461,
+    SEQ_BGM_EYE_09 = 0x462,
+    SEQ_BGM_EYE_10 = 0x463,
+    SEQ_BGM_EYE_11 = 0x464,
+    SEQ_BGM_EYE_12 = 0x465,
+    SEQ_BGM_EYE_13 = 0x466,
+    SEQ_BGM_EYE_NEO_PLASMA = 0x467,
+    SEQ_BGM_VS_NORAPOKE = 0x468,
+    SEQ_BGM_VS_TSUYOPOKE = 0x469,
+    SEQ_BGM_VS_TRAINER = 0x46A,
+    SEQ_BGM_VS_SUBWAY_TRAINER = 0x46B,
+    SEQ_BGM_VS_GYMLEADER = 0x46C,
+    SEQ_BGM_VS_RIVAL = 0x46D,
+    SEQ_BGM_VS_DPLEGEND = 0x46E,
+    SEQ_BGM_VS_SHITENNO = 0x46F,
+    SEQ_BGM_VS_CHAMP = 0x470,
+    SEQ_BGM_VS_SWAN_N = 0x471,
+    SEQ_BGM_VS_UMA = 0x472,
+    SEQ_BGM_VS_REGI = 0x473,
+    SEQ_BGM_VS_SHIN = 0x474,
+    SEQ_BGM_VS_MU = 0x475,
+    SEQ_BGM_VS_RAI = 0x476,
+    SEQ_BGM_VS_MOVEPOKE = 0x477,
+    SEQ_BGM_VS_SETPOKE = 0x478,
+    SEQ_BGM_VS_SHIRONA = 0x479,
+    SEQ_BGM_BATTLEPINCH = 0x47A,
+    SEQ_BGM_BATTLESUPERIOR = 0x47B,
+    SEQ_BGM_WIN1 = 0x47C,
+    SEQ_BGM_WIN2 = 0x47D,
+    SEQ_BGM_WIN3 = 0x47E,
+    SEQ_BGM_WIN4 = 0x47F,
+    SEQ_BGM_WIN5 = 0x480,
+    SEQ_BGM_WIFI_ACCESS = 0x481,
+    SEQ_BGM_WIFI_PRESENT = 0x482,
+    SEQ_BGM_GAME_SYNC = 0x483,
+    SEQ_BGM_GLTERMINAL = 0x484,
+    SEQ_BGM_GURUGURU = 0x485,
+    SEQ_BGM_GTS = 0x486,
+    SEQ_BGM_WCS = 0x487,
+    SEQ_BGM_E_SHIRONA = 0x488,
+    SEQ_BGM_VS_TRAINER_M = 0x489,
+    SEQ_BGM_VS_TRAINER_S = 0x48A,
+    SEQ_BGM_VS_WCS = 0x48B,
+    SEQ_BGM_VS_TRAINER_WIFI = 0x48C,
+    SEQ_BGM_WIN6 = 0x48D,
+    SEQ_BGM_E_LEGEND_BORN_B = 0x48E,
+    SEQ_BGM_E_LEGEND_BORN_W = 0x48F,
+    SEQ_BGM_SW_D_N_ROOM = 0x490,
+    SEQ_BGM_E_EPIROGUE = 0x491,
+    SEQ_BGM_E_EPIROGUE_W = 0x492,
+    SEQ_BGM_GF_LOGO = 0x493,
+    SEQ_BGM_MSL_DL_01 = 0x494,
+    SEQ_BGM_MSL_DL_02 = 0x495,
+    SEQ_BGM_MSL_DL_03 = 0x496,
+    SEQ_BGM_MSL_DL_04 = 0x497,
+    SEQ_BGM_SW_R_19_SP = 0x498,
+    SEQ_BGM_SW_R_19_SU = 0x499,
+    SEQ_BGM_SW_R_19_AU = 0x49A,
+    SEQ_BGM_SW_R_19_WI = 0x49B,
+    SEQ_BGM_SW_R_22_SP = 0x49C,
+    SEQ_BGM_SW_R_22_SU = 0x49D,
+    SEQ_BGM_SW_R_22_AU = 0x49E,
+    SEQ_BGM_SW_R_22_WI = 0x49F,
+    SEQ_BGM_SW_R_23 = 0x4A0,
+    SEQ_BGM_SW_KAZAN = 0x4A1,
+    SEQ_BGM_SW_T_06 = 0x4A2,
+    SEQ_BGM_SW_T_07 = 0x4A3,
+    SEQ_BGM_SW_D_22 = 0x4A4,
+    SEQ_BGM_SW_D_23 = 0x4A5,
+    SEQ_BGM_SW_D_GESUI = 0x4A6,
+    SEQ_BGM_SW_D_24_W = 0x4A7,
+    SEQ_BGM_SW_D_24_B = 0x4A8,
+    SEQ_BGM_SW_D_25 = 0x4A9,
+    SEQ_BGM_SW_D_27_F_AJITO = 0x4AA,
+    SEQ_BGM_SW_D_27_L_AJITO = 0x4AB,
+    SEQ_BGM_SW_D_27_G_AJITO = 0x4AC,
+    SEQ_BGM_SW_D_REGI = 0x4AD,
+    SEQ_BGM_SW_D_UMA = 0x4AE,
+    SEQ_BGM_SW_H_06 = 0x4AF,
+    SEQ_BGM_WBT_LOBBY = 0x4B0,
+    SEQ_BGM_WBT_GROUND = 0x4B1,
+    SEQ_BGM_WBT_FANFARE = 0x4B2,
+    SEQ_BGM_PW_LAND = 0x4B3,
+    SEQ_BGM_PW_FILMING = 0x4B4,
+    SEQ_BGM_PW_SCENARIO_01_F = 0x4B5,
+    SEQ_BGM_PW_SCENARIO_01_L = 0x4B6,
+    SEQ_BGM_PW_SCENARIO_02_F = 0x4B7,
+    SEQ_BGM_PW_SCENARIO_02_L = 0x4B8,
+    SEQ_BGM_PW_SCENARIO_03_F = 0x4B9,
+    SEQ_BGM_PW_SCENARIO_03_L = 0x4BA,
+    SEQ_BGM_PW_SCENARIO_04_F = 0x4BB,
+    SEQ_BGM_PW_SCENARIO_04_L = 0x4BC,
+    SEQ_BGM_PW_SCENARIO_05_F = 0x4BD,
+    SEQ_BGM_PW_SCENARIO_05_L = 0x4BE,
+    SEQ_BGM_PW_SCENARIO_06_F = 0x4BF,
+    SEQ_BGM_PW_SCENARIO_06_L = 0x4C0,
+    SEQ_BGM_PW_SCENARIO_07_F = 0x4C1,
+    SEQ_BGM_PW_SCENARIO_07_L = 0x4C2,
+    SEQ_BGM_PW_SCENARIO_08_F = 0x4C3,
+    SEQ_BGM_FLIGHT_GYM_01 = 0x4C4,
+    SEQ_BGM_WATER_GYM_01 = 0x4C5,
+    SEQ_BGM_DRAGON_GYM_01 = 0x4C6,
+    SEQ_BGM_LCG_01 = 0x4C7,
+    SEQ_BGM_LCG_02 = 0x4C8,
+    SEQ_BGM_DATA_CONV = 0x4C9,
+    SEQ_BGM_REZO_RIZO = 0x4CA,
+    SEQ_BGM_FES = 0x4CB,
+    SEQ_BGM_SW_DEMO_SHIP = 0x4CC,
+    SEQ_BGM_SW_DEMO_FLIGHT = 0x4CD,
+    SEQ_BGM_SW_DEMO_UNION_00 = 0x4CE,
+    SEQ_BGM_SW_DEMO_UNION_01 = 0x4CF,
+    SEQ_BGM_SW_DEMO_UNION_02 = 0x4D0,
+    SEQ_BGM_SW_DEMO_UNION_03B = 0x4D1,
+    SEQ_BGM_SW_DEMO_UNION_03W = 0x4D2,
+    SEQ_BGM_SW_DEMO_AJITO_SHIP = 0x4D3,
+    SEQ_BGM_SW_DEMO_FRIGATE = 0x4D4,
+    SEQ_BGM_E_HUE = 0x4D5,
+    SEQ_BGM_E_ACHROMA = 0x4D6,
+    SEQ_BGM_DARK_TRINITY = 0x4D7,
+    SEQ_BGM_E_7_SAGE = 0x4D8,
+    SEQ_BGM_E_C08_ICE = 0x4D9,
+    SEQ_BGM_E_EPILOGUE = 0x4DA,
+    SEQ_BGM_EYE_DANCER = 0x4DB,
+    SEQ_BGM_EYE_CLOWN = 0x4DC,
+    SEQ_BGM_VS_RG_LEADER = 0x4DD,
+    SEQ_BGM_VS_RG_CHAMP = 0x4DE,
+    SEQ_BGM_VS_GS_LEADER = 0x4DF,
+    SEQ_BGM_VS_GS_CHAMP = 0x4E0,
+    SEQ_BGM_VS_RS_LEADER = 0x4E1,
+    SEQ_BGM_VS_RS_CHAMP = 0x4E2,
+    SEQ_BGM_VS_DP_LEADER = 0x4E3,
+    SEQ_BGM_VS_DP_CHAMP = 0x4E4,
+    SEQ_BGM_VS_BW_CHAMP = 0x4E5,
+    SEQ_BGM_VS_WBT = 0x4E6,
+    SEQ_BGM_VS_KYURAMU = 0x4E7,
+    SEQ_BGM_VS_KYUROMU = 0x4E8,
+    SEQ_BGM_VS_NEO_PLASMA = 0x4E9,
+    SEQ_BGM_VS_ACHROMA = 0x4EA,
+    SEQ_BGM_VS_NEW_G_CIS = 0x4EB,
+    SEQ_BGM_VS_IRIS = 0x4EC,
+    SEQ_BGM_VS_BANJIROU = 0x4ED,
+    SEQ_BGM_VS_HUE = 0x4EE,
+    SEQ_BGM_WIN_WBT = 0x4EF,
+    SEQ_BGM_KEMONOMICHI = 0x4F0,
+    SEQ_BGM_JAPARADE = 0x4F1,
+    SEQ_BGM_E_PLASMA = 0x4F2,
+    SEQ_BGM_VS_ELITE_PLASMA = 0x4F3,
+    SEQ_BGM_THEEND = 0x4F4,
+    SEQ_BGM_EV_GIANTHOLE_01 = 0x4F5,
+    SEQ_BGM_EV_GIANTHOLE_02 = 0x4F6,
+    SEQ_BGM_EV_GIANTHOLE_03 = 0x4F7,
+    SEQ_BGM_END = 0x4F8,
+    SEQ_ME_ASA = 0x514,
+    SEQ_ME_LVUP = 0x515,
+    SEQ_ME_ITEM = 0x516,
+    SEQ_ME_KEYITEM = 0x517,
+    SEQ_ME_POKEGET = 0x518,
+    SEQ_ME_SHINKAOME = 0x519,
+    SEQ_ME_BADGE = 0x51A,
+    SEQ_ME_WAZA = 0x51B,
+    SEQ_ME_ACCE = 0x51C,
+    SEQ_ME_WASURE = 0x51D,
+    SEQ_ME_KINOMI = 0x51E,
+    SEQ_ME_HYOUKA1 = 0x51F,
+    SEQ_ME_HYOUKA2 = 0x520,
+    SEQ_ME_HYOUKA3 = 0x521,
+    SEQ_ME_HYOUKA4 = 0x522,
+    SEQ_ME_HYOUKA5 = 0x523,
+    SEQ_ME_HYOUKA6 = 0x524,
+    SEQ_ME_TAMAGO_GET = 0x525,
+    SEQ_ME_BPGET = 0x526,
+    SEQ_ME_AISHOU_H = 0x527,
+    SEQ_ME_AISHOU_M = 0x528,
+    SEQ_ME_AISHOU_L = 0x529,
+    SEQ_ME_AISHOU_KIDOU = 0x52A,
+    SEQ_ME_MISSION_START = 0x52B,
+    SEQ_ME_MISSION_CLEAR = 0x52C,
+    SEQ_ME_MISSION_FAILED = 0x52D,
+    SEQ_ME_ITEM_MYSTERY = 0x52E,
+    SEQ_ME_CALL = 0x52F,
+    SEQ_ME_QUIZ = 0x530,
+    SEQ_ME_DEL_POWER = 0x531,
+    SEQ_ME_02 = 0x532,
+    SEQ_ME_LCG_01 = 0x533,
+    SEQ_ME_LCG_02 = 0x534,
+    SEQ_ME_LCG_03 = 0x535,
+    SEQ_ME_LCG_04 = 0x536,
+    SEQ_ME_MD_FAN01 = 0x537,
+    SEQ_ME_MD_FAN03 = 0x538,
+    SEQ_ME_MD_FAN04 = 0x539,
+    SEQ_ME_KEY_OPEN = 0x53A,
+    SEQ_ME_OTAMARO = 0x53B,
+    SEQ_ME_AVENUE_01 = 0x53C,
+    SEQ_ME_AVENUE_02 = 0x53D,
+    SEQ_ME_AVENUE_03 = 0x53E,
+    SEQ_ME_CALL_LONG = 0x53F,
+    SEQ_ME_ZUKAN_01 = 0x540,
+    SEQ_ME_ZUKAN_02 = 0x541,
+    SEQ_ME_POKEWOOD = 0x542,
+    SEQ_ME_END = 0x543,
+    SEQ_SE_DUMMY = 0x546,
+    SEQ_SE_MESSAGE = 0x547,
+    SEQ_SE_SELECT1 = 0x548,
+    SEQ_SE_SELECT2 = 0x549,
+    SEQ_SE_SELECT3 = 0x54A,
+    SEQ_SE_SELECT4 = 0x54B,
+    SEQ_SE_DECIDE1 = 0x54C,
+    SEQ_SE_DECIDE2 = 0x54D,
+    SEQ_SE_DECIDE3 = 0x54E,
+    SEQ_SE_DECIDE4 = 0x54F,
+    SEQ_SE_DECIDE5 = 0x550,
+    SEQ_SE_CANCEL1 = 0x551,
+    SEQ_SE_CANCEL2 = 0x552,
+    SEQ_SE_CANCEL3 = 0x553,
+    SEQ_SE_OPEN1 = 0x554,
+    SEQ_SE_OPEN2 = 0x555,
+    SEQ_SE_CLOSE1 = 0x556,
+    SEQ_SE_BEEP = 0x557,
+    SEQ_SE_SAVE = 0x558,
+    SEQ_SE_KAIDAN = 0x559,
+    SEQ_SE_WALL_HIT = 0x55A,
+    SEQ_SE_PC_ON = 0x55B,
+    SEQ_SE_PC_LOGIN = 0x55C,
+    SEQ_SE_PC_LOGOFF = 0x55D,
+    SEQ_SE_DANSA = 0x55E,
+    SEQ_SE_BICYCLE = 0x55F,
+    SEQ_SE_DUMMY5 = 0x560,
+    SEQ_SE_BC01 = 0x561,
+    SEQ_SE_BC02 = 0x562,
+    SEQ_SE_KOUKA_H = 0x563,
+    SEQ_SE_KOUKA_M = 0x564,
+    SEQ_SE_KOUKA_L = 0x565,
+    SEQ_SE_NAGERU = 0x566,
+    SEQ_SE_BOWA2 = 0x567,
+    SEQ_SE_BOWA1 = 0x568,
+    SEQ_SE_BOWA3 = 0x569,
+    SEQ_SE_NIGERU = 0x56A,
+    SEQ_SE_KON = 0x56B,
+    SEQ_SE_DEAD = 0x56C,
+    SEQ_SE_EXP = 0x56D,
+    SEQ_SE_EXPMAX = 0x56E,
+    SEQ_SE_RECOVERY = 0x56F,
+    SEQ_SE_TB_START = 0x570,
+    SEQ_SE_TB_KON = 0x571,
+    SEQ_SE_TB_KARA = 0x572,
+    SEQ_SE_SHOOTER = 0x573,
+    SEQ_SE_GETTING = 0x574,
+    SEQ_SE_HINSHI = 0x575,
+    SEQ_SE_TOUJOU_LARGE = 0x576,
+    SEQ_SE_TOUJOU_MID = 0x577,
+    SEQ_SE_TOUJOU_SMALL = 0x578,
+    SEQ_SE_ROTATION_S = 0x579,
+    SEQ_SE_ROTATION_B = 0x57A,
+    SEQ_SE_TRIPLE_S = 0x57B,
+    SEQ_SE_NAGERU2 = 0x57C,
+    SEQ_SE_DUMMY29 = 0x57D,
+    SEQ_SE_DUMMY30 = 0x57E,
+    SEQ_SE_W055_01 = 0x57F,
+    SEQ_SE_W055_04 = 0x580,
+    SEQ_SE_W055_05 = 0x581,
+    SEQ_SE_W075_01 = 0x582,
+    SEQ_SE_W075_02 = 0x583,
+    SEQ_SE_W075_03 = 0x584,
+    SEQ_SE_W075_04 = 0x585,
+    SEQ_SE_W075_05 = 0x586,
+    SEQ_SE_W075_06 = 0x587,
+    SEQ_SE_W157_01 = 0x588,
+    SEQ_SE_W157_02 = 0x589,
+    SEQ_SE_W157_03 = 0x58A,
+    SEQ_SE_W157_04 = 0x58B,
+    SEQ_SE_W001_01 = 0x58C,
+    SEQ_SE_W002_01 = 0x58D,
+    SEQ_SE_W003_01 = 0x58E,
+    SEQ_SE_W010_01 = 0x58F,
+    SEQ_SE_W011_01 = 0x590,
+    SEQ_SE_W307_01 = 0x591,
+    SEQ_SE_W307_02 = 0x592,
+    SEQ_SE_W307_03 = 0x593,
+    SEQ_SE_W307_04 = 0x594,
+    SEQ_SE_W307_05 = 0x595,
+    SEQ_SE_W006_01 = 0x596,
+    SEQ_SE_W006_02 = 0x597,
+    SEQ_SE_W006_03 = 0x598,
+    SEQ_SE_W006_04 = 0x599,
+    SEQ_SE_W014_01 = 0x59A,
+    SEQ_SE_W014_02 = 0x59B,
+    SEQ_SE_W014_03 = 0x59C,
+    SEQ_SE_W015_01 = 0x59D,
+    SEQ_SE_W017_01 = 0x59E,
+    SEQ_SE_W018_01 = 0x59F,
+    SEQ_SE_W018_02 = 0x5A0,
+    SEQ_SE_W020_01 = 0x5A1,
+    SEQ_SE_W022_01 = 0x5A2,
+    SEQ_SE_W022_02 = 0x5A3,
+    SEQ_SE_W026_01 = 0x5A4,
+    SEQ_SE_W027_01 = 0x5A5,
+    SEQ_SE_W028_01 = 0x5A6,
+    SEQ_SE_W028_02 = 0x5A7,
+    SEQ_SE_W029_01 = 0x5A8,
+    SEQ_SE_W043_01 = 0x5A9,
+    SEQ_SE_W048_01 = 0x5AA,
+    SEQ_SE_W048_02 = 0x5AB,
+    SEQ_SE_W051_01 = 0x5AC,
+    SEQ_SE_W051_02 = 0x5AD,
+    SEQ_SE_W051_03 = 0x5AE,
+    SEQ_SE_W054_01 = 0x5AF,
+    SEQ_SE_W074_01 = 0x5B0,
+    SEQ_SE_W077_01 = 0x5B1,
+    SEQ_SE_W077_02 = 0x5B2,
+    SEQ_SE_W088_01 = 0x5B3,
+    SEQ_SE_W088_02 = 0x5B4,
+    SEQ_SE_W095_01 = 0x5B5,
+    SEQ_SE_W095_02 = 0x5B6,
+    SEQ_SE_W099_01 = 0x5B7,
+    SEQ_SE_W099_02 = 0x5B8,
+    SEQ_SE_W102_01 = 0x5B9,
+    SEQ_SE_W102_02 = 0x5BA,
+    SEQ_SE_W103_01 = 0x5BB,
+    SEQ_SE_W111_01 = 0x5BC,
+    SEQ_SE_W111_02 = 0x5BD,
+    SEQ_SE_W112_01 = 0x5BE,
+    SEQ_SE_W112_02 = 0x5BF,
+    SEQ_SE_W113_01 = 0x5C0,
+    SEQ_SE_W113_02 = 0x5C1,
+    SEQ_SE_W116_01 = 0x5C2,
+    SEQ_SE_W121_01 = 0x5C3,
+    SEQ_SE_W122_01 = 0x5C4,
+    SEQ_SE_W122_02 = 0x5C5,
+    SEQ_SE_W123_01 = 0x5C6,
+    SEQ_SE_W123_02 = 0x5C7,
+    SEQ_SE_W124_01 = 0x5C8,
+    SEQ_SE_W129_01 = 0x5C9,
+    SEQ_SE_W129_03 = 0x5CA,
+    SEQ_SE_W129_04 = 0x5CB,
+    SEQ_SE_W165_01 = 0x5CC,
+    SEQ_SE_W179_01 = 0x5CD,
+    SEQ_SE_W179_02 = 0x5CE,
+    SEQ_SE_W179_03 = 0x5CF,
+    SEQ_SE_W181_01 = 0x5D0,
+    SEQ_SE_W216_01 = 0x5D1,
+    SEQ_SE_W216_02 = 0x5D2,
+    SEQ_SE_W225_01 = 0x5D3,
+    SEQ_SE_W225_02 = 0x5D4,
+    SEQ_SE_W227_01 = 0x5D5,
+    SEQ_SE_W227_02 = 0x5D6,
+    SEQ_SE_W235_01 = 0x5D7,
+    SEQ_SE_W235_03 = 0x5D8,
+    SEQ_SE_W239_01 = 0x5D9,
+    SEQ_SE_W239_02 = 0x5DA,
+    SEQ_SE_W240_01 = 0x5DB,
+    SEQ_SE_W253_01 = 0x5DC,
+    SEQ_SE_W253_02 = 0x5DD,
+    SEQ_SE_W260_01 = 0x5DE,
+    SEQ_SE_W281_01 = 0x5DF,
+    SEQ_SE_W295_01 = 0x5E0,
+    SEQ_SE_W295_02 = 0x5E1,
+    SEQ_SE_W298_01 = 0x5E2,
+    SEQ_SE_W310_01 = 0x5E3,
+    SEQ_SE_W310_02 = 0x5E4,
+    SEQ_SE_W319_01 = 0x5E5,
+    SEQ_SE_W319_02 = 0x5E6,
+    SEQ_SE_W323_01 = 0x5E7,
+    SEQ_SE_W320_01 = 0x5E8,
+    SEQ_SE_W331_01 = 0x5E9,
+    SEQ_SE_W348_02 = 0x5EA,
+    SEQ_SE_W363_01 = 0x5EB,
+    SEQ_SE_W368_01 = 0x5EC,
+    SEQ_SE_W377_01 = 0x5ED,
+    SEQ_SE_W377_02 = 0x5EE,
+    SEQ_SE_W399_01 = 0x5EF,
+    SEQ_SE_W401_01 = 0x5F0,
+    SEQ_SE_W465_01 = 0x5F1,
+    SEQ_SE_W009_01 = 0x5F2,
+    SEQ_SE_W047_01 = 0x5F3,
+    SEQ_SE_W050_01 = 0x5F4,
+    SEQ_SE_W187_01 = 0x5F5,
+    SEQ_SE_W012_01 = 0x5F6,
+    SEQ_SE_W039_01 = 0x5F7,
+    SEQ_SE_W044_01 = 0x5F8,
+    SEQ_SE_W061_01 = 0x5F9,
+    SEQ_SE_W146_01 = 0x5FA,
+    SEQ_SE_W155_01 = 0x5FB,
+    SEQ_SE_W155_02 = 0x5FC,
+    SEQ_SE_W195_01 = 0x5FD,
+    SEQ_SE_W199_01 = 0x5FE,
+    SEQ_SE_W464_01 = 0x5FF,
+    SEQ_SE_W464_02 = 0x600,
+    SEQ_SE_W306_01 = 0x601,
+    SEQ_SE_W019_01 = 0x602,
+    SEQ_SE_W042_01 = 0x603,
+    SEQ_SE_W215_01 = 0x604,
+    SEQ_SE_W215_02 = 0x605,
+    SEQ_SE_W274_01 = 0x606,
+    SEQ_SE_W289_01 = 0x607,
+    SEQ_SE_PASA1 = 0x608,
+    SEQ_SE_PASA2 = 0x609,
+    SEQ_SE_BE_SE_01 = 0x60A,
+    SEQ_SE_BE_SE_02 = 0x60B,
+    SEQ_SE_BE_SE_03 = 0x60C,
+    SEQ_SE_BE_SE_04 = 0x60D,
+    SEQ_SE_BE_SE_05 = 0x60E,
+    SEQ_SE_BE_SE_06 = 0x60F,
+    SEQ_SE_BE_SE_07 = 0x610,
+    SEQ_SE_BE_SE_08 = 0x611,
+    SEQ_SE_BE_SE_09 = 0x612,
+    SEQ_SE_BE_SE_10 = 0x613,
+    SEQ_SE_BE_SE_11 = 0x614,
+    SEQ_SE_BE_SE_12 = 0x615,
+    SEQ_SE_BE_SE_13 = 0x616,
+    SEQ_SE_BE_SE_14 = 0x617,
+    SEQ_SE_BE_SE_015 = 0x618,
+    SEQ_SE_BE_SE_016 = 0x619,
+    SEQ_SE_BE_SE_017 = 0x61A,
+    SEQ_SE_BE_SE_018 = 0x61B,
+    SEQ_SE_BE_SE_019 = 0x61C,
+    SEQ_SE_BE_SE_020 = 0x61D,
+    SEQ_SE_BE_SE_021 = 0x61E,
+    SEQ_SE_BE_SE_022 = 0x61F,
+    SEQ_SE_BE_SE_023 = 0x620,
+    SEQ_SE_BE_SE_024 = 0x621,
+    SEQ_SE_MSCL_01 = 0x622,
+    SEQ_SE_MSCL_02 = 0x623,
+    SEQ_SE_MSCL_03 = 0x624,
+    SEQ_SE_MSCL_04 = 0x625,
+    SEQ_SE_MSCL_05 = 0x626,
+    SEQ_SE_MSCL_06 = 0x627,
+    SEQ_SE_MSCL_07 = 0x628,
+    SEQ_SE_MSCL_08 = 0x629,
+    SEQ_SE_MSCL_09 = 0x62A,
+    SEQ_SE_MSCL_10 = 0x62B,
+    SEQ_SE_MSCL_11 = 0x62C,
+    SEQ_SE_MSCL_12 = 0x62D,
+    SEQ_SE_MSCL_13 = 0x62E,
+    SEQ_SE_MSCL_14 = 0x62F,
+    SEQ_SE_MSCL_15 = 0x630,
+    SEQ_SE_MSCL_16 = 0x631,
+    SEQ_SE_MSCL_17 = 0x632,
+    SEQ_SE_MSCL_18 = 0x633,
+    SEQ_SE_MSCL_19 = 0x634,
+    SEQ_SE_SHINKA_W025 = 0x635,
+    SEQ_SE_SHINKA_W060C = 0x636,
+    SEQ_SE_SHINKA_W062 = 0x637,
+    SEQ_SE_SHINKA_W080 = 0x638,
+    SEQ_SE_SYS_73 = 0x639,
+    SEQ_SE_SYS_74 = 0x63A,
+    SEQ_SE_SYS_75 = 0x63B,
+    SEQ_SE_FLD_123 = 0x63C,
+    SEQ_SE_SYS_76 = 0x63D,
+    SEQ_SE_SYS_77 = 0x63E,
+    SEQ_SE_SYS_78 = 0x63F,
+    SEQ_SE_SYS_01 = 0x640,
+    SEQ_SE_SYS_02 = 0x641,
+    SEQ_SE_SYS_03 = 0x642,
+    SEQ_SE_SYS_04 = 0x643,
+    SEQ_SE_SYS_05 = 0x644,
+    SEQ_SE_SYS_06 = 0x645,
+    SEQ_SE_SYS_07 = 0x646,
+    SEQ_SE_SYS_08 = 0x647,
+    SEQ_SE_SYS_09 = 0x648,
+    SEQ_SE_SYS_10 = 0x649,
+    SEQ_SE_SYS_11 = 0x64A,
+    SEQ_SE_SYS_12 = 0x64B,
+    SEQ_SE_SYS_13 = 0x64C,
+    SEQ_SE_SYS_14 = 0x64D,
+    SEQ_SE_SYS_15 = 0x64E,
+    SEQ_SE_SYS_16 = 0x64F,
+    SEQ_SE_SYS_17 = 0x650,
+    SEQ_SE_SYS_18 = 0x651,
+    SEQ_SE_SYS_19 = 0x652,
+    SEQ_SE_SYS_20 = 0x653,
+    SEQ_SE_SYS_21 = 0x654,
+    SEQ_SE_SYS_22 = 0x655,
+    SEQ_SE_SYS_23 = 0x656,
+    SEQ_SE_SYS_24 = 0x657,
+    SEQ_SE_SYS_25 = 0x658,
+    SEQ_SE_SYS_26 = 0x659,
+    SEQ_SE_SYS_27 = 0x65A,
+    SEQ_SE_SYS_28 = 0x65B,
+    SEQ_SE_SYS_29 = 0x65C,
+    SEQ_SE_SYS_30 = 0x65D,
+    SEQ_SE_SYS_31 = 0x65E,
+    SEQ_SE_SYS_32 = 0x65F,
+    SEQ_SE_SYS_33 = 0x660,
+    SEQ_SE_SYS_34 = 0x661,
+    SEQ_SE_SYS_35 = 0x662,
+    SEQ_SE_SYS_36 = 0x663,
+    SEQ_SE_SYS_37 = 0x664,
+    SEQ_SE_SYS_38 = 0x665,
+    SEQ_SE_SYS_39 = 0x666,
+    SEQ_SE_SYS_40 = 0x667,
+    SEQ_SE_SYS_41 = 0x668,
+    SEQ_SE_SYS_42 = 0x669,
+    SEQ_SE_SYS_43 = 0x66A,
+    SEQ_SE_SYS_44 = 0x66B,
+    SEQ_SE_SYS_45 = 0x66C,
+    SEQ_SE_SYS_46 = 0x66D,
+    SEQ_SE_SYS_47 = 0x66E,
+    SEQ_SE_SYS_48 = 0x66F,
+    SEQ_SE_SYS_49 = 0x670,
+    SEQ_SE_SYS_50 = 0x671,
+    SEQ_SE_FLD_01 = 0x672,
+    SEQ_SE_FLD_02 = 0x673,
+    SEQ_SE_FLD_03 = 0x674,
+    SEQ_SE_FLD_04 = 0x675,
+    SEQ_SE_FLD_05 = 0x676,
+    SEQ_SE_FLD_06 = 0x677,
+    SEQ_SE_FLD_07 = 0x678,
+    SEQ_SE_FLD_08 = 0x679,
+    SEQ_SE_FLD_09 = 0x67A,
+    SEQ_SE_FLD_10 = 0x67B,
+    SEQ_SE_FLD_11 = 0x67C,
+    SEQ_SE_FLD_12 = 0x67D,
+    SEQ_SE_FLD_13 = 0x67E,
+    SEQ_SE_FLD_14 = 0x67F,
+    SEQ_SE_FLD_15 = 0x680,
+    SEQ_SE_FLD_16 = 0x681,
+    SEQ_SE_FLD_17 = 0x682,
+    SEQ_SE_FLD_18 = 0x683,
+    SEQ_SE_FLD_19 = 0x684,
+    SEQ_SE_FLD_20 = 0x685,
+    SEQ_SE_FLD_21 = 0x686,
+    SEQ_SE_FLD_22 = 0x687,
+    SEQ_SE_FLD_23 = 0x688,
+    SEQ_SE_FLD_24 = 0x689,
+    SEQ_SE_FLD_25 = 0x68A,
+    SEQ_SE_FLD_26 = 0x68B,
+    SEQ_SE_FLD_27 = 0x68C,
+    SEQ_SE_FLD_28 = 0x68D,
+    SEQ_SE_FLD_29 = 0x68E,
+    SEQ_SE_FLD_30 = 0x68F,
+    SEQ_SE_FLD_31 = 0x690,
+    SEQ_SE_FLD_32 = 0x691,
+    SEQ_SE_FLD_33 = 0x692,
+    SEQ_SE_FLD_34 = 0x693,
+    SEQ_SE_FLD_35 = 0x694,
+    SEQ_SE_FLD_36 = 0x695,
+    SEQ_SE_FLD_37 = 0x696,
+    SEQ_SE_FLD_38 = 0x697,
+    SEQ_SE_FLD_39 = 0x698,
+    SEQ_SE_FLD_40 = 0x699,
+    SEQ_SE_FLD_41 = 0x69A,
+    SEQ_SE_FLD_42 = 0x69B,
+    SEQ_SE_FLD_43 = 0x69C,
+    SEQ_SE_FLD_44 = 0x69D,
+    SEQ_SE_FLD_45 = 0x69E,
+    SEQ_SE_FLD_46 = 0x69F,
+    SEQ_SE_FLD_47 = 0x6A0,
+    SEQ_SE_FLD_48 = 0x6A1,
+    SEQ_SE_FLD_49 = 0x6A2,
+    SEQ_SE_FLD_50 = 0x6A3,
+    SEQ_SE_W008_01 = 0x6A4,
+    SEQ_SE_W012_02 = 0x6A5,
+    SEQ_SE_W016_01 = 0x6A6,
+    SEQ_SE_W023_01 = 0x6A7,
+    SEQ_SE_W032_01 = 0x6A8,
+    SEQ_SE_W034_01 = 0x6A9,
+    SEQ_SE_W063_01 = 0x6AA,
+    SEQ_SE_W063_02 = 0x6AB,
+    SEQ_SE_W096_01 = 0x6AC,
+    SEQ_SE_W100_01 = 0x6AD,
+    SEQ_SE_W084_01 = 0x6AE,
+    SEQ_SE_W269_01 = 0x6AF,
+    SEQ_SE_W269_02 = 0x6B0,
+    SEQ_SE_W278_01 = 0x6B1,
+    SEQ_SE_W321_01 = 0x6B2,
+    SEQ_SE_W452_01 = 0x6B3,
+    SEQ_SE_W063_03 = 0x6B4,
+    SEQ_SE_W059_01 = 0x6B5,
+    SEQ_SE_W077_03 = 0x6B6,
+    SEQ_SE_W008_02 = 0x6B7,
+    SEQ_SE_W044_02 = 0x6B8,
+    SEQ_SE_W100_02 = 0x6B9,
+    SEQ_SE_W125_01 = 0x6BA,
+    SEQ_SE_W142_01 = 0x6BB,
+    SEQ_SE_W148_01 = 0x6BC,
+    SEQ_SE_W163_01 = 0x6BD,
+    SEQ_SE_W175_01 = 0x6BE,
+    SEQ_SE_W188_01 = 0x6BF,
+    SEQ_SE_W194_01 = 0x6C0,
+    SEQ_SE_W208_01 = 0x6C1,
+    SEQ_SE_FLD_51 = 0x6C2,
+    SEQ_SE_FLD_52 = 0x6C3,
+    SEQ_SE_FLD_53 = 0x6C4,
+    SEQ_SE_FLD_54 = 0x6C5,
+    SEQ_SE_FLD_55 = 0x6C6,
+    SEQ_SE_FLD_56 = 0x6C7,
+    SEQ_SE_FLD_57 = 0x6C8,
+    SEQ_SE_FLD_58 = 0x6C9,
+    SEQ_SE_FLD_59 = 0x6CA,
+    SEQ_SE_FLD_60 = 0x6CB,
+    SEQ_SE_FLD_61 = 0x6CC,
+    SEQ_SE_FLD_62 = 0x6CD,
+    SEQ_SE_FLD_63 = 0x6CE,
+    SEQ_SE_FLD_64 = 0x6CF,
+    SEQ_SE_FLD_65 = 0x6D0,
+    SEQ_SE_FLD_66 = 0x6D1,
+    SEQ_SE_FLD_67 = 0x6D2,
+    SEQ_SE_FLD_68 = 0x6D3,
+    SEQ_SE_FLD_69 = 0x6D4,
+    SEQ_SE_FLD_70 = 0x6D5,
+    SEQ_SE_FLD_71 = 0x6D6,
+    SEQ_SE_FLD_72 = 0x6D7,
+    SEQ_SE_FLD_73 = 0x6D8,
+    SEQ_SE_FLD_74 = 0x6D9,
+    SEQ_SE_FLD_75 = 0x6DA,
+    SEQ_SE_FLD_76 = 0x6DB,
+    SEQ_SE_FLD_77 = 0x6DC,
+    SEQ_SE_FLD_78 = 0x6DD,
+    SEQ_SE_FLD_79 = 0x6DE,
+    SEQ_SE_FLD_80 = 0x6DF,
+    SEQ_SE_FLD_81 = 0x6E0,
+    SEQ_SE_FLD_82 = 0x6E1,
+    SEQ_SE_FLD_83 = 0x6E2,
+    SEQ_SE_FLD_84 = 0x6E3,
+    SEQ_SE_FLD_85 = 0x6E4,
+    SEQ_SE_DMY_097 = 0x6E5,
+    SEQ_SE_LVUP = 0x6E6,
+    SEQ_SE_FLD_86 = 0x6E7,
+    SEQ_SE_FLD_87 = 0x6E8,
+    SEQ_SE_FLD_88 = 0x6E9,
+    SEQ_SE_FLD_89 = 0x6EA,
+    SEQ_SE_FLD_90 = 0x6EB,
+    SEQ_SE_FLD_91 = 0x6EC,
+    SEQ_SE_FLD_92 = 0x6ED,
+    SEQ_SE_FLD_93 = 0x6EE,
+    SEQ_SE_FLD_94 = 0x6EF,
+    SEQ_SE_FLD_95 = 0x6F0,
+    SEQ_SE_W213_01 = 0x6F1,
+    SEQ_SE_W227_03 = 0x6F2,
+    SEQ_SE_W254_04 = 0x6F3,
+    SEQ_SE_W234_HIKARI = 0x6F4,
+    SEQ_SE_W288_ONNEN = 0x6F5,
+    SEQ_SE_W357_JIRORI = 0x6F6,
+    SEQ_SE_W379_POWER = 0x6F7,
+    SEQ_SE_W381_OMAJINAI = 0x6F8,
+    SEQ_SE_W396_HADOKEN = 0x6F9,
+    SEQ_SE_W445_YUUWAKU = 0x6FA,
+    SEQ_SE_W343_HOSHIGARI = 0x6FB,
+    SEQ_SE_FLD_96 = 0x6FC,
+    SEQ_SE_FLD_97 = 0x6FD,
+    SEQ_SE_BREC_01 = 0x6FE,
+    SEQ_SE_BREC_02 = 0x6FF,
+    SEQ_SE_BREC_03 = 0x700,
+    SEQ_SE_BREC_04 = 0x701,
+    SEQ_SE_BREC_05 = 0x702,
+    SEQ_SE_BREC_06 = 0x703,
+    SEQ_SE_BREC_07 = 0x704,
+    SEQ_SE_BREC_08 = 0x705,
+    SEQ_SE_BE_SE_025 = 0x706,
+    SEQ_SE_BE_SE_026 = 0x707,
+    SEQ_SE_BE_SE_027 = 0x708,
+    SEQ_SE_BE_SE_028 = 0x709,
+    SEQ_SE_BE_SE_029 = 0x70A,
+    SEQ_SE_BE_SE_030 = 0x70B,
+    SEQ_SE_BE_SE_031 = 0x70C,
+    SEQ_SE_BE_SE_032 = 0x70D,
+    SEQ_SE_BE_SE_033 = 0x70E,
+    SEQ_SE_BE_SE_034 = 0x70F,
+    SEQ_SE_BE_SE_035 = 0x710,
+    SEQ_SE_BE_SE_036 = 0x711,
+    SEQ_SE_BE_SE_037 = 0x712,
+    SEQ_SE_BE_SE_038 = 0x713,
+    SEQ_SE_BE_SE_039 = 0x714,
+    SEQ_SE_BE_SE_040 = 0x715,
+    SEQ_SE_BE_SE_041 = 0x716,
+    SEQ_SE_W221_NOISE = 0x717,
+    SEQ_SE_W229_KIIN = 0x718,
+    SEQ_SE_W245_JUMP = 0x719,
+    SEQ_SE_W245_BUCKL = 0x71A,
+    SEQ_SE_W250_UZUSHIO = 0x71B,
+    SEQ_SE_W258_ARARE = 0x71C,
+    SEQ_SE_W300_PITYA = 0x71D,
+    SEQ_SE_FLD_98 = 0x71E,
+    SEQ_SE_FLD_99 = 0x71F,
+    SEQ_SE_FLD_101 = 0x720,
+    SEQ_SE_W259_BOSO = 0x721,
+    SEQ_SE_W259_PAKIP = 0x722,
+    SEQ_SE_W275_PIRA = 0x723,
+    SEQ_SE_SYS_51 = 0x724,
+    SEQ_SE_SYS_52 = 0x725,
+    SEQ_SE_SYS_53 = 0x726,
+    SEQ_SE_SYS_54 = 0x727,
+    SEQ_SE_SYS_55 = 0x728,
+    SEQ_SE_SYS_56 = 0x729,
+    SEQ_SE_SYS_57 = 0x72A,
+    SEQ_SE_SYS_58 = 0x72B,
+    SEQ_SE_SYS_59 = 0x72C,
+    SEQ_SE_SYS_60 = 0x72D,
+    SEQ_SE_SYS_61 = 0x72E,
+    SEQ_SE_SYS_62 = 0x72F,
+    SEQ_SE_SYS_63 = 0x730,
+    SEQ_SE_SYS_64 = 0x731,
+    SEQ_SE_SYS_65 = 0x732,
+    SEQ_SE_SYS_66 = 0x733,
+    SEQ_SE_SYS_67 = 0x734,
+    SEQ_SE_SYS_68 = 0x735,
+    SEQ_SE_FLD_102 = 0x736,
+    SEQ_SE_FLD_103 = 0x737,
+    SEQ_SE_W255_BU = 0x738,
+    SEQ_SE_W288_DORO = 0x739,
+    SEQ_SE_SYS_69 = 0x73A,
+    SEQ_SE_SYS_70 = 0x73B,
+    SEQ_SE_SYS_71 = 0x73C,
+    SEQ_SE_SYS_72 = 0x73D,
+    SEQ_SE_FLD_104 = 0x73E,
+    SEQ_SE_FLD_105 = 0x73F,
+    SEQ_SE_FLD_106 = 0x740,
+    SEQ_SE_FLD_107 = 0x741,
+    SEQ_SE_FLD_108 = 0x742,
+    SEQ_SE_FLD_109 = 0x743,
+    SEQ_SE_FLD_110 = 0x744,
+    SEQ_SE_FLD_111 = 0x745,
+    SEQ_SE_FLD_112 = 0x746,
+    SEQ_SE_FLD_113 = 0x747,
+    SEQ_SE_FLD_114 = 0x748,
+    SEQ_SE_FLD_115 = 0x749,
+    SEQ_SE_W255_MOMOMO = 0x74A,
+    SEQ_SE_W288_HYUU = 0x74B,
+    SEQ_SE_W312_HARP = 0x74C,
+    SEQ_SE_W319_SWARD = 0x74D,
+    SEQ_SE_W300_BESYO = 0x74E,
+    SEQ_SE_W322_COSMO = 0x74F,
+    SEQ_SE_W325_BUNN = 0x750,
+    SEQ_SE_W350_PASU = 0x751,
+    SEQ_SE_W454_MUSHI = 0x752,
+    SEQ_SE_W360_MOMOMON = 0x753,
+    SEQ_SE_W437_NOISEHIT = 0x754,
+    SEQ_SE_FLD_116 = 0x755,
+    SEQ_SE_FLD_117 = 0x756,
+    SEQ_SE_FLD_118 = 0x757,
+    SEQ_SE_FLD_119 = 0x758,
+    SEQ_SE_W448_ONPU = 0x759,
+    SEQ_SE_W065_DODODO = 0x75A,
+    SEQ_SE_W470_WA = 0x75B,
+    SEQ_SE_W307_EXP = 0x75C,
+    SEQ_SE_W474_GUTSU = 0x75D,
+    SEQ_SE_W474_DOKU = 0x75E,
+    SEQ_SE_FLD_120 = 0x75F,
+    SEQ_SE_FLD_121 = 0x760,
+    SEQ_SE_FLD_122 = 0x761,
+    SEQ_SE_SYS_79 = 0x762,
+    SEQ_SE_FLD_124 = 0x763,
+    SEQ_SE_FLD_125 = 0x764,
+    SEQ_SE_FLD_126 = 0x765,
+    SEQ_SE_FLD_127 = 0x766,
+    SEQ_SE_FLD_128 = 0x767,
+    SEQ_SE_FLD_129 = 0x768,
+    SEQ_SE_SYS_80 = 0x769,
+    SEQ_SE_SYS_81 = 0x76A,
+    SEQ_SE_SYS_82 = 0x76B,
+    SEQ_SE_SYS_83 = 0x76C,
+    SEQ_SE_FLD_130 = 0x76D,
+    SEQ_SE_SYS_84 = 0x76E,
+    SEQ_SE_W532_SASU = 0x76F,
+    SEQ_SE_W532_CHU = 0x770,
+    SEQ_SE_W540_KYUN = 0x771,
+    SEQ_SE_FLD_131 = 0x772,
+    SEQ_SE_FLD_132 = 0x773,
+    SEQ_SE_FLD_133 = 0x774,
+    SEQ_SE_FLD_134 = 0x775,
+    SEQ_SE_FLD_135 = 0x776,
+    SEQ_SE_FLD_136 = 0x777,
+    SEQ_SE_FLD_137 = 0x778,
+    SEQ_SE_FLD_138 = 0x779,
+    SEQ_SE_FLD_139 = 0x77A,
+    SEQ_SE_W547_INIMELO = 0x77B,
+    SEQ_SE_SYS_85 = 0x77C,
+    SEQ_SE_FLD_140 = 0x77D,
+    SEQ_SE_FLD_141 = 0x77E,
+    SEQ_SE_W542_BOUFU = 0x77F,
+    SEQ_SE_W554_PAKIN = 0x780,
+    SEQ_SE_FLD_142 = 0x781,
+    SEQ_SE_FLD_143 = 0x782,
+    SEQ_SE_FLD_144 = 0x783,
+    SEQ_SE_TDEMO_001 = 0x784,
+    SEQ_SE_TDEMO_002 = 0x785,
+    SEQ_SE_TDEMO_003 = 0x786,
+    SEQ_SE_TDEMO_004 = 0x787,
+    SEQ_SE_TDEMO_005 = 0x788,
+    SEQ_SE_TDEMO_006 = 0x789,
+    SEQ_SE_TDEMO_007 = 0x78A,
+    SEQ_SE_TDEMO_008 = 0x78B,
+    SEQ_SE_TDEMO_009 = 0x78C,
+    SEQ_SE_TDEMO_010 = 0x78D,
+    SEQ_SE_TDEMO_011 = 0x78E,
+    SEQ_SE_SYS_86 = 0x78F,
+    SEQ_SE_SYS_87 = 0x790,
+    SEQ_SE_FLD_145 = 0x791,
+    SEQ_SE_FLD_146 = 0x792,
+    SEQ_SE_SYS_88 = 0x793,
+    SEQ_SE_SYS_89 = 0x794,
+    SEQ_SE_W556_FUUN = 0x795,
+    SEQ_SE_NDEMO_01 = 0x796,
+    SEQ_SE_NDEMO_02 = 0x797,
+    SEQ_SE_W556_KAZE = 0x798,
+    SEQ_SE_DDEMO_01 = 0x799,
+    SEQ_SE_DDEMO_02A = 0x79A,
+    SEQ_SE_DDEMO_02B = 0x79B,
+    SEQ_SE_DDEMO_03 = 0x79C,
+    SEQ_SE_DDEMO_04 = 0x79D,
+    SEQ_SE_SYS_90 = 0x79E,
+    SEQ_SE_FLD_147 = 0x79F,
+    SEQ_SE_FLD_148 = 0x7A0,
+    SEQ_SE_EDEMO_01 = 0x7A1,
+    SEQ_SE_EDEMO_02 = 0x7A2,
+    SEQ_SE_SDEMO_01 = 0x7A3,
+    SEQ_SE_SDEMO_02 = 0x7A4,
+    SEQ_SE_FLD_149 = 0x7A5,
+    SEQ_SE_FLD_150 = 0x7A6,
+    SEQ_SE_EDEMO_03 = 0x7A7,
+    SEQ_SE_MSCL_20 = 0x7A8,
+    SEQ_SE_MSCL_21 = 0x7A9,
+    SEQ_SE_W063_BEEMB = 0x7AA,
+    SEQ_SE_W281_AKUBI = 0x7AB,
+    SEQ_SE_W248_TIKIRIN = 0x7AC,
+    SEQ_SE_W411_HAAA = 0x7AD,
+    SEQ_SE_EDEMO_04 = 0x7AE,
+    SEQ_SE_EDEMO_05 = 0x7AF,
+    SEQ_SE_FLD_151 = 0x7B0,
+    SEQ_SE_SYS_91 = 0x7B1,
+    SEQ_SE_BDEMO_01 = 0x7B2,
+    SEQ_SE_BDEMO_02 = 0x7B3,
+    SEQ_SE_BDEMO_03 = 0x7B4,
+    SEQ_SE_BDEMO_04 = 0x7B5,
+    SEQ_SE_FLD_152 = 0x7B6,
+    SEQ_SE_SDEMO_03 = 0x7B7,
+    SEQ_SE_LBDEMO_01 = 0x7B8,
+    SEQ_SE_LBDEMO_02 = 0x7B9,
+    SEQ_SE_LBDEMO_03 = 0x7BA,
+    SEQ_SE_LBDEMO_04 = 0x7BB,
+    SEQ_SE_LBDEMO_05 = 0x7BC,
+    SEQ_SE_LBDEMO_06 = 0x7BD,
+    SEQ_SE_LBDEMO_07 = 0x7BE,
+    SEQ_SE_LBDEMO_08 = 0x7BF,
+    SEQ_SE_LBDEMO_09 = 0x7C0,
+    SEQ_SE_FLD_153 = 0x7C1,
+    SEQ_SE_FLD_154 = 0x7C2,
+    SEQ_SE_FLD_155 = 0x7C3,
+    SEQ_SE_FLD_156 = 0x7C4,
+    SEQ_SE_FLD_157 = 0x7C5,
+    SEQ_SE_FLD_158 = 0x7C6,
+    SEQ_SE_FLD_159 = 0x7C7,
+    SEQ_SE_FLD_160 = 0x7C8,
+    SEQ_SE_FLD_161 = 0x7C9,
+    SEQ_SE_FLD_162 = 0x7CA,
+    SEQ_SE_FLD_163 = 0x7CB,
+    SEQ_SE_SYS_92 = 0x7CC,
+    SEQ_SE_FLD_164 = 0x7CD,
+    SEQ_SE_SYS_93 = 0x7CE,
+    SEQ_SE_FLD_165 = 0x7CF,
+    SEQ_SE_SYS_94 = 0x7D0,
+    SEQ_SE_SYS_95 = 0x7D1,
+    SEQ_SE_SYS_96 = 0x7D2,
+    SEQ_SE_SYS_97 = 0x7D3,
+    SEQ_SE_SYS_98 = 0x7D4,
+    SEQ_SE_FLD_166 = 0x7D5,
+    SEQ_SE_VDEMO_01 = 0x7D6,
+    SEQ_SE_VDEMO_02 = 0x7D7,
+    SEQ_SE_SYS_99 = 0x7D8,
+    SEQ_SE_BGDEMO_01 = 0x7D9,
+    SEQ_SE_BGDEMO_02 = 0x7DA,
+    SEQ_SE_SHDEMO_01 = 0x7DB,
+    SEQ_SE_SHDEMO_02 = 0x7DC,
+    SEQ_SE_SHDEMO_03 = 0x7DD,
+    SEQ_SE_SHDEMO_04 = 0x7DE,
+    SEQ_SE_SHDEMO_05 = 0x7DF,
+    SEQ_SE_NDEMO_03 = 0x7E0,
+    SEQ_SE_ARDEMO_01 = 0x7E1,
+    SEQ_SE_SYS_100 = 0x7E2,
+    SEQ_SE_RIZDEMO_01 = 0x7E3,
+    SEQ_SE_FLD_167 = 0x7E4,
+    SEQ_SE_FLD_168 = 0x7E5,
+    SEQ_SE_FLD_169 = 0x7E6,
+    SEQ_SE_FLD_170 = 0x7E7,
+    SEQ_SE_VDEMO_03 = 0x7E8,
+    SEQ_SE_RIZDEMO_02 = 0x7E9,
+    SEQ_SE_FLD_171 = 0x7EA,
+    SEQ_SE_FLD_172 = 0x7EB,
+    SEQ_SE_FLD_173 = 0x7EC,
+    SEQ_SE_END_01 = 0x7ED,
+    SEQ_SE_FLD_174 = 0x7EE,
+    SEQ_SE_END_02 = 0x7EF,
+    SEQ_SE_W156_BABBLE2 = 0x7F0,
+    SEQ_SE_FLD_175 = 0x7F1,
+    SEQ_SE_ZORO_01 = 0x7F2,
+    SEQ_SE_BE_SE_04R = 0x7F3,
+    SEQ_SE_TOUJOU_INTRO = 0x7F4,
+    SEQ_SE_END_03 = 0x7F5,
+    SEQ_SE_OPEN_01 = 0x7F6,
+    SEQ_SE_OPEN_02 = 0x7F7,
+    SEQ_SE_OPEN_03 = 0x7F8,
+    SEQ_SE_END_04 = 0x7F9,
+    SEQ_SE_END_05 = 0x7FA,
+    SEQ_SE_SW_MDUN_BL_06 = 0x7FB,
+    SEQ_SE_MEET_02 = 0x7FC,
+    SEQ_SE_MEET_03 = 0x7FD,
+    SEQ_SE_MEET_04 = 0x7FE,
+    SEQ_SE_WCS_01 = 0x7FF,
+    SEQ_SE_WCS_02 = 0x800,
+    SEQ_SE_WCS_03 = 0x801,
+    SEQ_SE_WCS_04 = 0x802,
+    SEQ_SE_LCDEMO_01 = 0x803,
+    SEQ_SE_LCDEMO_02 = 0x804,
+    SEQ_SE_SYS_101 = 0x805,
+    SEQ_SE_END_06 = 0x806,
+    SEQ_SE_END_07 = 0x807,
+    SEQ_SE_LOGO_01 = 0x808,
+    SEQ_SE_LOGO_02 = 0x809,
+    SEQ_SE_LOGO_03 = 0x80A,
+    SEQ_SE_FLD_176 = 0x80B,
+    SEQ_SE_SYS_102 = 0x80C,
+    SEQ_SE_DECIDE6 = 0x80D,
+    SEQ_SE_GYM_E01 = 0x80E,
+    SEQ_SE_GYM_E02 = 0x80F,
+    SEQ_SE_GYM_E03 = 0x810,
+    SEQ_SE_GYM_E04 = 0x811,
+    SEQ_SE_GYM_M01 = 0x812,
+    SEQ_SE_GYM_M02 = 0x813,
+    SEQ_SE_GYM_M03 = 0x814,
+    SEQ_SE_GYM_M04 = 0x815,
+    SEQ_SE_GYM_M05 = 0x816,
+    SEQ_SE_GYM_M06 = 0x817,
+    SEQ_SE_GYM_H01 = 0x818,
+    SEQ_SE_GYM_H02 = 0x819,
+    SEQ_SE_GYM_H03 = 0x81A,
+    SEQ_SE_GYM_H04 = 0x81B,
+    SEQ_SE_GYM_H05 = 0x81C,
+    SEQ_SE_GYM_H06 = 0x81D,
+    SEQ_SE_GYM_H07 = 0x81E,
+    SEQ_SE_GYM_H08 = 0x81F,
+    SEQ_SE_LCG_01 = 0x820,
+    SEQ_SE_LCG_02 = 0x821,
+    SEQ_SE_LCG_03 = 0x822,
+    SEQ_SE_LCG_04 = 0x823,
+    SEQ_SE_LCG_05 = 0x824,
+    SEQ_SE_LCG_06 = 0x825,
+    SEQ_SE_LCG_07 = 0x826,
+    SEQ_SE_LCG_08 = 0x827,
+    SEQ_SE_LCG_09 = 0x828,
+    SEQ_SE_LCG_10 = 0x829,
+    SEQ_SE_LCG_11 = 0x82A,
+    SEQ_SE_MD_01 = 0x82B,
+    SEQ_SE_MD_02 = 0x82C,
+    SEQ_SE_MD_03 = 0x82D,
+    SEQ_SE_MD_04 = 0x82E,
+    SEQ_SE_SW_WBT_01 = 0x82F,
+    SEQ_SE_SW_WBT_02 = 0x830,
+    SEQ_SE_SW_WBT_03 = 0x831,
+    SEQ_SE_SW_WBT_04 = 0x832,
+    SEQ_SE_SW_WBT_05 = 0x833,
+    SEQ_SE_SW_WBT_06 = 0x834,
+    SEQ_SE_SW_WBT_07 = 0x835,
+    SEQ_SE_SW_WBT_09 = 0x836,
+    SEQ_SE_SW_WBT_10 = 0x837,
+    SEQ_SE_SW_WBT_11 = 0x838,
+    SEQ_SE_SW_WBT_12 = 0x839,
+    SEQ_SE_SW_WBT_13 = 0x83A,
+    SEQ_SE_SW_WBT_15 = 0x83B,
+    SEQ_SE_SW_WBT_16 = 0x83C,
+    SEQ_SE_SW_WBT_17 = 0x83D,
+    SEQ_SE_SW_WBT_18 = 0x83E,
+    SEQ_SE_SW_WBT_19 = 0x83F,
+    SEQ_SE_SW_WBT_20 = 0x840,
+    SEQ_SE_SW_WBT_21 = 0x841,
+    SEQ_SE_SW_WBT_22 = 0x842,
+    SEQ_SE_SW_FES_01 = 0x843,
+    SEQ_SE_SW_FES_02 = 0x844,
+    SEQ_SE_SW_FES_03 = 0x845,
+    SEQ_SE_SW_FES_04 = 0x846,
+    SEQ_SE_SW_FES_05 = 0x847,
+    SEQ_SE_SW_FES_06 = 0x848,
+    SEQ_SE_SW_FES_07 = 0x849,
+    SEQ_SE_SW_FES_08 = 0x84A,
+    SEQ_SE_SW_FES_09 = 0x84B,
+    SEQ_SE_SW_FES_10 = 0x84C,
+    SEQ_SE_SW_FES_11 = 0x84D,
+    SEQ_SE_SW_FES_12 = 0x84E,
+    SEQ_SE_SW_FES_13 = 0x84F,
+    SEQ_SE_SW_FES_14 = 0x850,
+    SEQ_SE_SW_FES_15 = 0x851,
+    SEQ_SE_SW_FES_16 = 0x852,
+    SEQ_SE_SW_MDUN_BL_01 = 0x853,
+    SEQ_SE_SW_MDUN_BL_02 = 0x854,
+    SEQ_SE_SW_MDUN_BL_03 = 0x855,
+    SEQ_SE_SW_MDUN_BL_04 = 0x856,
+    SEQ_SE_SW_MDUN_BL_05 = 0x857,
+    SEQ_SE_SW_MDUN_WH_01 = 0x858,
+    SEQ_SE_SW_MDUN_WH_02 = 0x859,
+    SEQ_SE_SW_MDUN_WH_03 = 0x85A,
+    SEQ_SE_SW_MDUN_WH_04 = 0x85B,
+    SEQ_SE_SW_MDUN_WH_05 = 0x85C,
+    SEQ_SE_SW_MDUN_BL_07 = 0x85D,
+    SEQ_SE_SW_MDUN_WH_07 = 0x85E,
+    SEQ_SE_SW_CARD_01 = 0x85F,
+    SEQ_SE_SW_CARD_02 = 0x860,
+    SEQ_SE_SW_CARD_03 = 0x861,
+    SEQ_SE_SW_CARD_04 = 0x862,
+    SEQ_SE_SW_CARD_05 = 0x863,
+    SEQ_SE_SW_CARD_06 = 0x864,
+    SEQ_SE_SW_CARD_07 = 0x865,
+    SEQ_SE_SW_CARD_08 = 0x866,
+    SEQ_SE_SW_CARD_09 = 0x867,
+    SEQ_SE_SW_CARD_10 = 0x868,
+    SEQ_SE_SW_CARD_11 = 0x869,
+    SEQ_SE_SW_CARD_12 = 0x86A,
+    SEQ_SE_SW_CARD_13 = 0x86B,
+    SEQ_SE_SW_CARD_14 = 0x86C,
+    SEQ_SE_SW_CARD_15 = 0x86D,
+    SEQ_SE_SW_CARD_16 = 0x86E,
+    SEQ_SE_SW_CARD_17 = 0x86F,
+    SEQ_SE_SW_CARD_18 = 0x870,
+    SEQ_SE_SW_CARD_19 = 0x871,
+    SEQ_SE_SW_CARD_20 = 0x872,
+    SEQ_SE_SW_CARD_21 = 0x873,
+    SEQ_SE_SW_CARD_22 = 0x874,
+    SEQ_SE_SW_GRGYM_01 = 0x875,
+    SEQ_SE_SW_GRGYM_02 = 0x876,
+    SEQ_SE_SW_NPOKE = 0x877,
+    SEQ_SE_SW_KYUREM_01 = 0x878,
+    SEQ_SE_SW_KYUREM_02 = 0x879,
+    SEQ_SE_SW_KYUREM_03 = 0x87A,
+    SEQ_SE_SW_KYUREM_04 = 0x87B,
+    SEQ_SE_SW_MIZUGYM_01 = 0x87C,
+    SEQ_SE_SW_MIZUGYM_02 = 0x87D,
+    SEQ_SE_OCHIBA_01 = 0x87E,
+    SEQ_SE_OCHIBA_02 = 0x87F,
+    SEQ_SE_SW_ZKN_KAIHOU = 0x880,
+    SEQ_SE_SW_LC_NO = 0x881,
+    SEQ_SE_SW_GEEMA_01 = 0x882,
+    SEQ_SE_SW_GEEMA_02 = 0x883,
+    SEQ_SE_SW_GEEMA_03 = 0x884,
+    SEQ_SE_SW_GEEMA_04 = 0x885,
+    SEQ_SE_SW_DRGGYM_01 = 0x886,
+    SEQ_SE_SW_DRGGYM_02 = 0x887,
+    SEQ_SE_SW_DRGGYM_03 = 0x888,
+    SEQ_SE_SW_DRGGYM_04 = 0x889,
+    SEQ_SE_SW_DRGGYM_05 = 0x88A,
+    SEQ_SE_SW_DRGGYM_06 = 0x88B,
+    SEQ_SE_SW_DRGGYM_07 = 0x88C,
+    SEQ_SE_SW_CATTLEYA_01 = 0x88D,
+    SEQ_SE_SW_CATTLEYA_02 = 0x88E,
+    SEQ_SE_SW_CATTLEYA_03 = 0x88F,
+    SEQ_SE_SW_SHIKIMI_01 = 0x890,
+    SEQ_SE_SW_SHIKIMI_02 = 0x891,
+    SEQ_SE_SW_SHIKIMI_03 = 0x892,
+    SEQ_SE_SW_SHIKIMI_04 = 0x893,
+    SEQ_SE_SW_SHIKIMI_05 = 0x894,
+    SEQ_SE_SW_SHIKIMI_06 = 0x895,
+    SEQ_SE_SW_RENBU_01 = 0x896,
+    SEQ_SE_SW_RENBU_02 = 0x897,
+    SEQ_SE_SW_RENBU_03 = 0x898,
+    SEQ_SE_SW_RENBU_04 = 0x899,
+    SEQ_SE_SW_RENBU_05 = 0x89A,
+    SEQ_SE_SW_BCG_01 = 0x89B,
+    SEQ_SE_SW_BCG_02 = 0x89C,
+    SEQ_SE_SW_BCG_03 = 0x89D,
+    SEQ_SE_SW_BCG_04 = 0x89E,
+    SEQ_SE_SW_BCG_05 = 0x89F,
+    SEQ_SE_SW_BCG_06 = 0x8A0,
+    SEQ_SE_SW_BCG_07 = 0x8A1,
+    SEQ_SE_SW_KEYSYS_01 = 0x8A2,
+    SEQ_SE_SW_KEYSYS_02 = 0x8A3,
+    SEQ_SE_SW_KEYSYS_03 = 0x8A4,
+    SEQ_SE_SW_KEYSYS_04 = 0x8A5,
+    SEQ_SE_SW_PLAZMASHIP_01 = 0x8A6,
+    SEQ_SE_SW_PLAZMASHIP_02 = 0x8A7,
+    SEQ_SE_SW_PLAZMASHIP_03 = 0x8A8,
+    SEQ_SE_SW_PLAZMASHIP_04 = 0x8A9,
+    SEQ_SE_SW_PLAZMASHIP_05 = 0x8AA,
+    SEQ_SE_SW_PLAZMASHIP_06 = 0x8AB,
+    SEQ_SE_SW_PLAZMASHIP_07 = 0x8AC,
+    SEQ_SE_SW_PLAZMASHIP_08 = 0x8AD,
+    SEQ_SE_SW_PLAZMASHIP_09 = 0x8AE,
+    SEQ_SE_SW_PLAZMASHIP_10 = 0x8AF,
+    SEQ_SE_SW_ZUKANSTUMP_01 = 0x8B0,
+    SEQ_SE_SW_YACONROAD_01 = 0x8B1,
+    SEQ_SE_SW_RELIC_01 = 0x8B2,
+    SEQ_SE_SW_RELIC_02 = 0x8B3,
+    SEQ_SE_SW_RELIC_03 = 0x8B4,
+    SEQ_SE_SW_CHAMPIRIS_01 = 0x8B5,
+    SEQ_SE_SW_CHAMPIRIS_02 = 0x8B6,
+    SEQ_SE_SW_CHAMPIRIS_03 = 0x8B7,
+    SEQ_SE_SW_CHAMPIRIS_04 = 0x8B8,
+    SEQ_SE_SW_CHAMPIRIS_05 = 0x8B9,
+    SEQ_SE_SW_CHAMPIRIS_06 = 0x8BA,
+    SEQ_SE_SW_PKWOOD_01 = 0x8BB,
+    SEQ_SE_SW_PKWOOD_02 = 0x8BC,
+    SEQ_SE_SW_PKWOOD_03 = 0x8BD,
+    SEQ_SE_SW_STARPOKE = 0x8BE,
+    SEQ_SE_SW_PKWOOD_AUD_01 = 0x8BF,
+    SEQ_SE_SW_PKWOOD_AUD_02 = 0x8C0,
+    SEQ_SE_SW_PKWOOD_AUD_03 = 0x8C1,
+    SEQ_SE_SW_PKWOOD_AUD_04 = 0x8C2,
+    SEQ_SE_SW_PKWOOD_AUD_05 = 0x8C3,
+    SEQ_SE_SW_PKWOOD_AUD_06 = 0x8C4,
+    SEQ_SE_SW_PKWOOD_AUD_07 = 0x8C5,
+    SEQ_SE_SW_PKWOOD_AUD_08 = 0x8C6,
+    SEQ_SE_SW_PKWOOD_AUD_09 = 0x8C7,
+    SEQ_SE_SW_PKWOOD_AUD_10 = 0x8C8,
+    SEQ_SE_SW_PKWOOD_AUD_11 = 0x8C9,
+    SEQ_SE_SW_PKWOOD_AUD_12 = 0x8CA,
+    SEQ_SE_SW_PKWOOD_AUD_13 = 0x8CB,
+    SEQ_SE_SW_PKWOOD_AUD_14 = 0x8CC,
+    SEQ_SE_SW_PKWOOD_AUD_15 = 0x8CD,
+    SEQ_SE_SW_PKWOOD_AUD_16 = 0x8CE,
+    SEQ_SE_SW_BELLBOX_01 = 0x8CF,
+    SEQ_SE_SW_BELLBOX_02 = 0x8D0,
+    SEQ_SE_SW_BELLBOX_03 = 0x8D1,
+    SEQ_SE_SW_MEDALGET = 0x8D2,
+    SEQ_SE_SW_MEDALGET_02 = 0x8D3,
+    SEQ_SE_SW_JA_EXP = 0x8D4,
+    SEQ_SE_SW_JA_01 = 0x8D5,
+    SEQ_SE_SW_JA_02 = 0x8D6,
+    SEQ_SE_SW_SHIZUI = 0x8D7,
+    SEQ_SE_SW_KOBALON_01 = 0x8D8,
+    SEQ_SE_SW_KOBALON_02 = 0x8D9,
+    SEQ_SE_SW_SOURYU_RUMBLE = 0x8DA,
+    SEQ_SE_SW_TOROS_FORM = 0x8DB,
+    SEQ_SE_SW_KERTIO_FORM_01 = 0x8DC,
+    SEQ_SE_SW_KERTIO_FORM_02 = 0x8DD,
+    SEQ_SE_SW_KERTIO_FORM_03 = 0x8DE,
+    SEQ_SE_SW_KERTIO_FORM_04 = 0x8DF,
+    SEQ_SE_SW_KERTIO_FORM_05 = 0x8E0,
+    SEQ_SE_SW_KERTIO_FORM_06 = 0x8E1,
+    SEQ_SE_SW_GHETSIS_STICK_01 = 0x8E2,
+    SEQ_SE_SW_GHETSIS_STICK_02 = 0x8E3,
+    SEQ_SE_SW_CI_VSCHAMP_01 = 0x8E4,
+    SEQ_SE_SW_CI_VSCHAMP_02 = 0x8E5,
+    SEQ_SE_SW_CI_VSCHAMP_03 = 0x8E6,
+    SEQ_SE_SW_CI_VSCHAMP_04 = 0x8E7,
+    SEQ_SE_SW_CI_WBT_01 = 0x8E8,
+    SEQ_SE_SW_CI_WBT_02 = 0x8E9,
+    SEQ_SE_SW_CI_WBT_03 = 0x8EA,
+    SEQ_SE_SW_CI_WBT_04 = 0x8EB,
+    SEQ_SE_SW_CI_PKWOOD_01 = 0x8EC,
+    SEQ_SE_SW_CI_PKWOOD_02 = 0x8ED,
+    SEQ_SE_SW_CI_PKWOOD_03 = 0x8EE,
+    SEQ_SE_SW_GIANTHOLE_01 = 0x8EF,
+    SEQ_SE_SW_GIANTHOLE_02 = 0x8F0,
+    SEQ_SE_SW_GIANTHOLE_03 = 0x8F1,
+    SEQ_SE_SW_GIANTHOLE_04 = 0x8F2,
+    SEQ_SE_SW_GIANTHOLE_05 = 0x8F3,
+    SEQ_SE_SW_GIANTHOLE_06 = 0x8F4,
+    SEQ_SE_SW_GIANTHOLE_07_1 = 0x8F5,
+    SEQ_SE_SW_GIANTHOLE_07_2 = 0x8F6,
+    SEQ_SE_SW_GIANTHOLE_07_3 = 0x8F7,
+    SEQ_SE_SW_GIANTHOLE_07_4 = 0x8F8,
+    SEQ_SE_SW_GIANTHOLE_08_1 = 0x8F9,
+    SEQ_SE_SW_GIANTHOLE_08_2 = 0x8FA,
+    SEQ_SE_SW_GIANTHOLE_08_3 = 0x8FB,
+    SEQ_SE_SW_GIANTHOLE_08_4 = 0x8FC,
+    SEQ_SE_SW_GIANTHOLE_09 = 0x8FD,
+    SEQ_SE_SW_GIANTHOLE_10 = 0x8FE,
+    SEQ_SE_SW_KUSABI_IN_01 = 0x8FF,
+    SEQ_SE_SW_KUSABI_IN_02 = 0x900,
+    SEQ_SE_SW_KUSABI_IN_03 = 0x901,
+    SEQ_SE_SW_KUSABI_IN_04 = 0x902,
+    SEQ_SE_SW_KUSABI_IN_05 = 0x903,
+    SEQ_SE_SW_KUSABI_IN_06 = 0x904,
+    SEQ_SE_SW_KUSABI_IN_07 = 0x905,
+    SEQ_SE_SW_KUSABI_IN_08 = 0x906,
+    SEQ_SE_SW_KUSABI_IN_09 = 0x907,
+    SEQ_SE_SW_KUSABI_IN_10 = 0x908,
+    SEQ_SE_SW_KUSABI_IN_11 = 0x909,
+    SEQ_SE_SW_KUSABI_IN_12 = 0x90A,
+    SEQ_SE_SW_KUSABI_IN_13 = 0x90B,
+    SEQ_SE_SW_TACHIWAKI_01 = 0x90C,
+    SEQ_SE_SW_TACHIWAKI_02 = 0x90D,
+    SEQ_SE_SW_TACHIWAKI_03 = 0x90E,
+    SEQ_SE_SW_AIRPLANE_01 = 0x90F,
+    SEQ_SE_SW_AIRPLANE_02_L = 0x910,
+    SEQ_SE_SW_AIRPLANE_02_R = 0x911,
+    SEQ_SE_SW_AIRPLANE_03 = 0x912,
+    SEQ_SE_SW_FRIGATE_01 = 0x913,
+    SEQ_SE_SW_FRIGATE_02 = 0x914,
+    SEQ_SE_SW_FRIGATE_03 = 0x915,
+    SEQ_SE_SW_FRIGATE_04 = 0x916,
+    SEQ_SE_SW_FRIGATE_05 = 0x917,
+    SEQ_SE_SW_FRIGATE_06 = 0x918,
+    SEQ_SE_SW_FRIGATE_07 = 0x919,
+    SEQ_SE_SW_FRIGATE_08 = 0x91A,
+    SEQ_SE_SW_FRIGATE_09 = 0x91B,
+    SEQ_SE_SW_FRIGATE_10 = 0x91C,
+    SEQ_SE_SW_FRIGATE_11 = 0x91D,
+    SEQ_SE_SW_FRIGATE_12 = 0x91E,
+    SEQ_SE_SW_FRIGATE_13 = 0x91F,
+    SEQ_SE_SW_FRIGATE_14 = 0x920,
+    SEQ_SE_SW_FRIGATE_15 = 0x921,
+    SEQ_SE_SW_FRIGATE_16 = 0x922,
+    SEQ_SE_SW_FRIGATE_17 = 0x923,
+    SEQ_SE_SW_FRIGATE_18 = 0x924,
+    SEQ_SE_SW_SOURYUCITY_01 = 0x925,
+    SEQ_SE_SW_SOURYUCITY_02 = 0x926,
+    SEQ_SE_SW_SOURYUCITY_03 = 0x927,
+    SEQ_SE_SW_SOURYUCITY_04 = 0x928,
+    SEQ_SE_SW_SOURYUCITY_05 = 0x929,
+    SEQ_SE_SW_SOURYUCITY_06 = 0x92A,
+    SEQ_SE_SW_SOURYUCITY_07 = 0x92B,
+    SEQ_SE_SW_SOURYUCITY_08 = 0x92C,
+    SEQ_SE_SW_SOURYUCITY_09 = 0x92D,
+    SEQ_SE_SW_SOURYUCITY_10 = 0x92E,
+    SEQ_SE_SW_SOURYUCITY_11 = 0x92F,
+    SEQ_SE_SW_SOURYUCITY_12 = 0x930,
+    SEQ_SE_SW_SOURYUCITY_13 = 0x931,
+    SEQ_SE_SW_SOURYUCITY_14 = 0x932,
+    SEQ_SE_SW_SOURYUCITY_15 = 0x933,
+    SEQ_SE_SW_SOURYUCITY_16 = 0x934,
+    SEQ_SE_SW_SOURYUCITY_17 = 0x935,
+    SEQ_SE_SW_SOURYUCITY_18 = 0x936,
+    SEQ_SE_SW_KYUREON_00_01 = 0x937,
+    SEQ_SE_SW_KYUREON_00_02a = 0x938,
+    SEQ_SE_SW_KYUREON_00_02b = 0x939,
+    SEQ_SE_SW_KYUREON_00_02c = 0x93A,
+    SEQ_SE_SW_KYUREON_00_02d = 0x93B,
+    SEQ_SE_SW_KYUREON_00_03a = 0x93C,
+    SEQ_SE_SW_KYUREON_00_03b = 0x93D,
+    SEQ_SE_SW_KYUREON_01_01 = 0x93E,
+    SEQ_SE_SW_KYUREON_01_01b = 0x93F,
+    SEQ_SE_SW_KYUREON_01_02a = 0x940,
+    SEQ_SE_SW_KYUREON_01_02b = 0x941,
+    SEQ_SE_SW_KYUREON_01_03 = 0x942,
+    SEQ_SE_SW_KYUREON_01_04 = 0x943,
+    SEQ_SE_SW_KYUREON_01_05 = 0x944,
+    SEQ_SE_SW_KYUREON_01_06 = 0x945,
+    SEQ_SE_SW_KYUREON_01_07 = 0x946,
+    SEQ_SE_SW_KYUREON_01_07b = 0x947,
+    SEQ_SE_SW_KYUREON_01_08 = 0x948,
+    SEQ_SE_SW_KYUREON_01_09 = 0x949,
+    SEQ_SE_SW_KYUREON_01_10 = 0x94A,
+    SEQ_SE_SW_KYUREON_01_11 = 0x94B,
+    SEQ_SE_SW_KYUREON_01_12 = 0x94C,
+    SEQ_SE_SW_KYUREON_01_13 = 0x94D,
+    SEQ_SE_SW_KYUREON_01_14b = 0x94E,
+    SEQ_SE_SW_KYUREON_01_14w = 0x94F,
+    SEQ_SE_SW_KYUREON_01_15 = 0x950,
+    SEQ_SE_SW_KYUREON_01_16 = 0x951,
+    SEQ_SE_SW_KYUREON_02_01 = 0x952,
+    SEQ_SE_SW_KYUREON_02_02 = 0x953,
+    SEQ_SE_SW_KYUREON_02_03 = 0x954,
+    SEQ_SE_SW_KYUREON_02_04 = 0x955,
+    SEQ_SE_SW_KYUREON_02_05 = 0x956,
+    SEQ_SE_SW_KYUREON_02_06 = 0x957,
+    SEQ_SE_SW_KYUREON_02_06w = 0x958,
+    SEQ_SE_SW_KYUREON_02_07 = 0x959,
+    SEQ_SE_SW_KYUREON_02_08 = 0x95A,
+    SEQ_SE_SW_KYUREON_02_09 = 0x95B,
+    SEQ_SE_SW_KYUREON_02_10 = 0x95C,
+    SEQ_SE_SW_KYUREON_03_01 = 0x95D,
+    SEQ_SE_SW_KYUREON_03_02 = 0x95E,
+    SEQ_SE_SW_KYUREON_03_03 = 0x95F,
+    SEQ_SE_SW_KYUREON_03_04 = 0x960,
+    SEQ_SE_SW_KYUREON_03_05 = 0x961,
+    SEQ_SE_SW_KYUREON_03_06b = 0x962,
+    SEQ_SE_SW_KYUREON_03_06w = 0x963,
+    SEQ_SE_SW_KYUREON_03_07b = 0x964,
+    SEQ_SE_SW_KYUREON_03_07w = 0x965,
+    SEQ_SE_SW_ENDING_01 = 0x966,
+    SEQ_SE_SW_ENDING_02 = 0x967,
+    SEQ_SE_SW_ENDING_03 = 0x968,
+    SEQ_SE_SW_CYGNUS_01 = 0x969,
+    SEQ_SE_SW_CYGNUS_02 = 0x96A,
+    SEQ_SE_SW_CYGNUS_03 = 0x96B,
+    SEQ_SE_DMY_390 = 0x96C,
+    SEQ_SE_DMY_391 = 0x96D,
+    SEQ_SE_DP_SELECT = 0x96E,
+    SEQ_SE_END = 0x96F,
+    SEQ_INVALID = 0xFFFF,
+};
+struct ListMenuOption
+{
+    StrBuf* strBuf;
+    int UID;
+};
+
+struct FieldScriptEnv;
+struct BmpMenuListSetup
+{
+    ListMenuOption* Options;
+    int field_4;
+    int field_8;
+    u16 OptionCount;
+    u16 BlockIncrement;
+    int field_10;
+    u16 field_14;
+    u16 field_16;
+    FieldScriptEnv* Env;
+    int field_1C;
+    int field_20;
+    void* field_24;
+    int field_28;
+    int field_2C;
+    int field_30;
+};
+
+struct SWAN_ALIGNED(4) BmpMenuList
+{
+    BmpMenuListSetup Setup;
+    _BYTE byte34;
+    _BYTE byte35;
+    _BYTE byte36;
+    SWAN_ALIGNED(2) _BYTE byte38;
+    _DWORD m_BmpCursor;
+    unsigned __int16 FirstVisibleOptionIndex;
+    unsigned __int16 RelativeIndex;
+    _BYTE byte44;
+    _BYTE byte45;
+    _BYTE byte46;
+    _BYTE byte47;
+    _WORD word48;
+    _BYTE ForbidCancel;
+    unsigned __int8 unsigned___int84B;
+};
+
+struct ListMenuUI
+{
+    int dword0;
+    int dword4;
+    BmpWin* m_BmpWin;
+    ListMenuOption* Options;
+    BmpMenuList* m_BmpMenuList;
+};
+
+struct SWAN_ALIGNED(2) ListMenuWork
+{
+    u16 WindowX;
+    u16 WindowY;
+    u16 DefaultOptionIndex;
+    u8 IsCancellable;
+    u8 IsHorizontalAlignmentRight;
+    u16* TargetWkAddr;
+    WordSetSystem* FontInfo;
+    int HasDefaultMessageData;
+    MsgData* MessageData;
+    ListMenuOption* Options;
+    ListMenuUI* UI;
+    StrBuf* Strbufs[32];
+};
+
+struct ElevatorTable
+{
+    u16 FloorNameMsgID;
+    u16 ZoneID;
+    u16 WarpX;
+    u16 WarpY;
+    u16 WarpZ;
+};
+
+struct ActionCmd
+{
+    u16 Action;
+    u16 Amount;
+};
+
+struct FieldAcmdTCB
+{
+    u32 FuncIdx;
+    int IsQueueEnded;
+    int AmountCounter;
+    FieldActor* Actor;
+    ActionCmd* QueuePos;
+    ActionCmd* Queue;
+};
+
+struct SWAN_ALIGNED(4) ActorMsgWinWork
+{
+    u16 ActorUID;
+    u16 WinPosY;
+    VecFx32 MsgAttachmentPosAbs;
+    VecFx32 LastActorPos;
+    VecFx32 MsgAttachmentPosRel;
+};
+
+struct SWAN_ALIGNED(4) AcmdTCBBuffer
+{
+    FieldAcmdTCB* TCBs[8];
+};
+
+struct ScriptWork;
+struct ScriptSubwork
+{
+    ScriptWork* MainWork;
+    GameSystem* m_GameSystem;
+    GameData* m_GameData;
+    FieldActorSystem* m_ActorSystem;
+    TCB* PlayerGridEventTCB;
+    AcmdTCBBuffer ActionTCBs;
+    ListMenuWork m_ListMenuWork;
+    ActorMsgWinWork ActorWork;
+    int MapDisplayInfo;
+    int SpecialMsgIconPtr;
+    u8 ActorMsgWinPosActual;
+    u8 ActorMsgWinPos;
+    u16 PauseFramesCounter;
+    int NowPkmVoice;
+    ElevatorTable* ElevatorTableAddr;
+};
+
+struct StadiumTrainer
+{
+    u16 Group;
+    u16 ID;
+    u16 ObjCode;
+    u16 TrainerID;
+};
+
+struct AnimCurve
+{
+    __int16 m_HeapID;
+    s16 pad_HeapID;
+    ArcTool* Arc;
+    u32 ArcDatID;
+    u32 KeyFrameCount;
+    fx32 CurrentFrame;
+    u32 CurrentPreloadFrame;
+    u32 PreloadFramesCount;
+    VecFx32* Translations;
+    VecFx32* Rotations;
+    VecFx32* Scales;
+    b32 HasTranslation;
+    b32 HasRotation;
+    b32 HasScale;
+    int Loaded;
+};
+
+struct SWAN_ALIGNED(4) FieldActorAnmProc
+{
+    FieldActor* Actor;
+    VecFx32 AnmLoadBuffer[32];
+    AnimCurve* animCurve;
+    FieldAsyncProc* Proc;
+    VecFx32 BaseTranslation;
+    _BYTE gap198;
+    u8 DatID;
+    u8 IsPlaying;
+    HeapID heapID;
+    __int16 field_19E;
+};
+
+enum FieldBattleType
+{
+    FLD_BTLTYPE_SINGLE = 0x0,
+    FLD_BTLTYPE_DOUBLE_SEPARATE = 0x1,
+    FLD_BTLTYPE_DOUBLE_UNIFIED = 0x2,
+    FLD_BTLTYPE_DOUBLE_MULTI = 0x3,
+};
+
+struct FieldScriptTrainerSetup
+{
+    FieldActor* TrainerActor;
+    int ClashDistance;
+    int ClashDirection;
+    int SCRID;
+    int TrainerID;
+    FieldBattleType BattleType;
+};
+
+struct EventTrainerEye;
+struct FieldScriptTrainerWork
+{
+    FieldScriptTrainerSetup m_Setup;
+    EventTrainerEye* m_EventTrainerEye;
+};
+
+struct EventTrainerEye
+{
+    _DWORD State;
+    b32 AllDone;
+    FieldScriptTrainerWork m_ScriptTrainerWork;
+    _DWORD m_TrainerSlot;
+    u32 WaitCounter;
+    FieldTerrainEffectTCB* m_TerrainEffectTCB;
+    Field* m_Field;
+    FieldPlayer* m_FieldPlayer;
+};
+
+struct ScrMapWk
+{
+    int MsgWork;
+    Field* m_Field;
+};
+
+struct ScriptWork
+{
+    int Magic;
+    u16 SCRID;
+    u16 _PaddingSCRID;
+    FieldActor* ExecutorActor;
+    HeapID heapID;
+    u16 _PaddingHeapID;
+    GameSystem* GameSys;
+    GameEvent* ScriptCallEvent;
+    ScrMapWk MapWk;
+    int field_20;
+    int IsReducedFeatureSetVM;
+    int CmdFeatureSetLevel;
+    WordSetSystem* WordSetBuffers;
+    StrBuf* Strbuf1;
+    StrBuf* Strbuf2;
+    int field_38;
+    void* UserHeap;
+    u8 SEBitMask;
+    char field_41;
+    __int16 field_42;
+    FieldScriptTrainerWork TrainerWks[2];
+    u16 ScriptVariables[1][98];
+    FieldActorAnmProc* ActorAnimationWk;
+    StadiumTrainer* StadiumTrainers;
+    ScriptSubwork* SubWork;
+};
+
+struct SWAN_ALIGNED(4) FieldScriptEnv
+{
+    HeapID m_HeapID;
+    u16 Padding1;
+    u16 ZoneID;
+    u16 SCRID;
+    int CommandFeatureSetLevel;
+    b32 IsReducedFeatureSetVM;
+    ScriptWork* WorkEnv;
+    MsgData* m_MsgData;
+    u16 MsgFileNo;
+    u8 VMIndex;
+    char Padding2;
+    u16* BackupVars;
+    ScriptSubwork* SubWorkEnv;
+};
+
 C_DECL_BEGIN
 // BattleHandler_x definitions
 int HEManager_GetUseItemNo(_WORD* a1);
@@ -4169,7 +6166,66 @@ int ActionOrder_SendToLast(ServerFlow* a1, int a2);
 // BattleHandler_InterruptAction definitions
 bool ActionOrder_InterruptReserve(ServerFlow* a1, int a2);
 
-u32* g_GameBeaconSys;
+// sub_219B30C definitions
+void sub_219CF2C(PokeList* a1);
+int sub_219B8F0(PokeList* a1);
+void sub_219CF2C(PokeList* a1);
+void GFL_BGSysLoadScr(G2DBG bg);
+bool PokeList_IsPPRestoringItem(PokeList* a1, unsigned int a2);
+bool PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned int a2, int a3, unsigned __int16 a4);
+ItemRestoreType PokeList_PrintItemRecoverMessage(PokeList* a1, u16 a2);
+int PokeList_ApplyItemEffect(PartyPkm* a1, unsigned int a2, int a3, unsigned __int16 a4, int a5);
+void sub_2038BF4(int a1);
+void sub_219F290(PokeList* a1, PokeList_Plate* a2, PartyPkm* a3, int a4);
+void sub_219F350(PokeList* a1, PokeList_Plate* a2);
+void GFL_SndSEPlay(SoundResID sndId);
+int PokeList_SubItem(PokeList* a1, u16 a2);
+bool PokeList_DoesShayminNeedFormeChange(PokeList* a1);
+int PokeList_ChangeShayminToSkyForme(PokeList* a1, PartyPkm* a2);
+bool PokeList_IsRevealGlassMon(int a1, PartyPkm* a2);
+b32 isOneShotDRObtained(void* pTrainerCard, int idx, void* pTrainerInfo);
+int PokeList_ChangeRevealGlassMonForme(PokeList* a1, PartyPkm* a2);
+int PokeList_GetKyuremUnfuseCase(PokeList* a1);
+void sub_21A03DC(PokeList* a1);
+int PokeList_GetKyuremFuseCase(PokeList* a1);
+void sub_21A03EC(PokeList* a1, int a2);
+int sub_219CE18(PokeList* a1, int a2);
+int sub_219CE74(PokeList* a1, int a2);
+void sub_219F7AC(PokeList* a1, PokeList_Message* a2, unsigned int a3);
+void sub_219F880(PokeList* a1, PokeList_Message* a2, int a3);
+void sub_219BBA8(PokeList* a1);
+int PokeList_GetLearnMoveCase(PokeList* a1, PartyPkm* a2, char a3);
+void PokeListMessage_CreateWordSetSystem(PokeList* a1, PokeList_Message* a2);
+void PokeListMessage_LoadPokemonNicknameToStrBuf(PokeList* a1, PokeList_Message* a2, int a3, PartyPkm* a4);
+int PokeListMessage_LoadMoveNameToStrBuf(PokeList* a1, PokeList_Message* a2, u8 a3, u16 a4);
+void PokeList_PrintMessage(PokeList* a1, int a2, int a3, int a4);
+void PokeListMessage_ClearWordSetSystem(PokeList* a1, PokeList_Message* a2);
+void sub_219E5C8(PokeList* a1, PartyPkm* a2);
+int sub_219E620(PokeList* a1, int a2);
+int sub_219DE50(int result);
+unsigned __int8* sub_219DEC4(PokeList* a1);
+int PML_ItemIsMail(u16 itemId);
+int sub_219FA58(PokeList* a1, PokeList_Message* a2, int a3, int a4);
+unsigned __int8* sub_219E0AC(PokeList* a1);
+void PokeList_ChangeHeldItem(PokeList* a1, PartyPkm* a2, u32 a3);
+int PokeListMessage_LoadItemNameToStrBuf(PokeList* a1, PokeList_Message* a2, int a3, int a4);
+void PokeList_ChangeArceusForme(PokeList* a1, PartyPkm* a2, u16 a3);
+void PokeList_ChangeGenesectForme(PokeList* a1, PartyPkm* a2, int a3);
+bool PokeList_DoesGiratinaNeedFormeChange(PokeList* a1);
+int PokeList_ChangeGiratinaToOriginForme(PokeList* a1, PartyPkm* a2);
+int sub_219E4F8(PokeList* a1);
+MailData* sub_20097F4(int a1, int a2, int a3, HeapID a4);
+MailData* sub_20097D0(int a1, int a2, int a3);
+int PokeList_CheckEvolveSpecies(PokeList* a1, int a2, int a3);
+
+// ShortcutSave_SetKeyItemRegistration definitions
+void ShortcutSave_Condense(ShortcutSave* save);
+
+// s002A_WorkSet definitions
+u16* ScriptReadVar(ScriptVM* vm, FieldScriptEnv* cmd);
+u16 ScriptReadAny(ScriptVM* vm, FieldScriptEnv* cmd);
+
+extern u32 g_GameBeaconSys;
 C_DECL_END
 
 // I dont care, im not organizing this

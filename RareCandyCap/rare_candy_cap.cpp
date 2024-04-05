@@ -1,6 +1,25 @@
 #include "level_cap.h"
 
 C_DECL_BEGIN
+//BagItem* BagSave_AddItemCore(BagSaveData* bag, u16 item_idx, u16 quantity, HeapID heapId);
+//bool THUMB_BRANCH_BagSave_AddItem(BagSaveData* bag, u16 itemId, u16 quantity, HeapID heapId)
+//{
+//    itemId = 622;
+//    return BagSave_AddItemCore(bag, itemId, quantity, heapId) != 0;
+//}
+
+int THUMB_BRANCH_s002A_WorkSet(ScriptVM* vm, FieldScriptEnv* env)
+{
+    u16* Var; // r4
+
+    Var = ScriptReadVar(vm, env);
+    k::Printf("WORK SET VAR PTR: %d\n", Var);
+    k::Printf("WORK SET VAR OLD: %d\n", *Var);
+    *Var = ScriptReadAny(vm, env);
+    k::Printf("WORK SET VAR NEW: %d\n", *Var);
+    return 0;
+}
+
 bool THUMB_BRANCH_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned int a2, int a3, unsigned __int16 a4)
 {
     ItemData* DataFile; // r4
@@ -51,7 +70,8 @@ bool THUMB_BRANCH_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned i
         {
             goto LABEL_102;
         }
-        u32 level_cap = GetCurrentLvlCap();
+
+        u32 level_cap = GetLvlCap();
         u32 level = PokeParty_GetParam(a1, PF_Level, 0);
         if (PML_ItemGetParam(DataFile, ITSTAT_BOOST_RARECANDY) && level < level_cap)
         {
@@ -302,8 +322,7 @@ LABEL_25:
     v50 = PokeParty_GetParam(a1, PF_Level, 0);
     if (PML_ItemGetParam(DataFile, ITSTAT_BOOST_RARECANDY))
     {
-        u32 level_cap = GetCurrentLvlCap();
-        if (v50 < level_cap)
+        if (v50 < 100)
         {
             v11 = PokeParty_GetParam(a1, PF_Species, 0);
             v12 = PokeParty_GetParam(a1, PF_Forme, 0);
@@ -513,3 +532,280 @@ LABEL_51:
     return v6;
 }
 C_DECL_END
+
+/*
+PokeList_Party* THUMB_BRANCH_sub_219B30C(PokeList* a1)
+{
+    k::Print("THUMB_BRANCH_sub_219B30C START\n");
+    PokeList_Party* v2; // r2
+    PokeList_Party* result; // r0
+    unsigned int ItemUseType; // r1
+    ItemRestoreType v5; // r6
+    int v6; // r0
+    int ItemID; // r1
+    int KyuremUnfuseCase; // r0
+    u32 Param; // r0
+    unsigned __int16 v10; // r6
+    MailData* v11; // r6
+
+    v2 = a1->field_28C;
+    if (v2->field_73 == 1)
+    {
+        result = (PokeList_Party*)19;
+        a1->field_C = 19;
+        return result;
+    }
+    ItemUseType = v2->ItemUseType;
+    if (ItemUseType > 0x1B)
+    {
+    LABEL_65:
+        sub_219CF2C(a1);
+        return (PokeList_Party*)sub_219B8F0(a1);
+    }
+    switch (*(u8*)(0x0219B33A + ItemUseType))
+    {
+    case 0:
+    case 1:
+    case 0x12:
+    case 0x15:
+    case 0x16:
+    case 0x17:
+    case 0x19:
+        sub_219CF2C(a1);
+        GFL_BGSysLoadScr(G2D_BG0A);
+        return (PokeList_Party*)sub_219B8F0(a1);
+    case 3:
+    case 0x1B:
+        a1->field_C = 19;
+        v2->SelectedSlot = a1->SelectedSlot;
+        result = a1->field_28C;
+        result->field_50 = 0;
+        return result;
+    case 5:
+        if (PokeList_IsPPRestoringItem(a1, v2->ItemID))
+        {
+            sub_219CF2C(a1);
+            return (PokeList_Party*)sub_219B8F0(a1);
+        }
+        if (PokeList_CanItemWithBattleStatsBeUsed(a1->SelectedPkm, a1->field_28C->ItemID, 0, a1->heapID))
+        {
+            v5 = PokeList_PrintItemRecoverMessage(a1, 0);
+            v6 = PokeList_ApplyItemEffect(a1->SelectedPkm, a1->field_28C->ItemID, 0, a1->field_28C->field_40, a1->heapID);
+            if (v5 == RESTORETYPE_RARE_CANDY)
+            {
+                if (v6)
+                {
+                    sub_2038BF4(9);
+                }
+                sub_219F290(a1, a1->pokeList_Plate[a1->SelectedSlot], a1->SelectedPkm, 0);
+            }
+            else
+            {
+                if (v5 == RESTORETYPE_EV_HP_DECREASE || v5 == RESTORETYPE_EV_HP)
+                {
+                    sub_219F290(a1, a1->pokeList_Plate[a1->SelectedSlot], a1->SelectedPkm, 0);
+                }
+                else
+                {
+                    sub_219F350(a1, a1->pokeList_Plate[a1->SelectedSlot]);
+                }
+                GFL_SndSEPlay(SEQ_SE_RECOVERY);
+            }
+            return (PokeList_Party*)PokeList_SubItem(a1, a1->field_28C->ItemID);
+        }
+        if (a1->field_28C->ItemID == IT0466_GRACIDEA && PokeList_DoesShayminNeedFormeChange(a1))
+        {
+            PokeList_ChangeShayminToSkyForme(a1, a1->SelectedPkm);
+            a1->field_28C->field_50 = 10;
+            a1->field_C = 14;
+            result = (PokeList_Party*)3;
+            a1->field_274 = 3;
+            return result;
+        }
+        if (a1->field_28C->ItemID == IT0638_REVEAL_GLASS
+            && PokeList_IsRevealGlassMon((int)a1, a1->SelectedPkm)
+            && isOneShotDRObtained((void*)a1->field_28C->field_24, 6, (void*)a1->field_28C->field_28))
+        {
+            PokeList_ChangeRevealGlassMonForme(a1, a1->SelectedPkm);
+            a1->field_28C->field_50 = 10;
+            result = (PokeList_Party*)14;
+            a1->field_C = 14;
+            a1->field_274 = 6;
+            return result;
+        }
+        ItemID = a1->field_28C->ItemID;
+        if (ItemID != IT0628_DNA_SPLICERS)
+        {
+            if (ItemID == IT0629_DNA_SPLICERS)
+            {
+                KyuremUnfuseCase = PokeList_GetKyuremUnfuseCase(a1);
+                if (KyuremUnfuseCase == 5)
+                {
+                    sub_21A03EC(a1, 2);
+                    return result;
+                }
+                if (KyuremUnfuseCase != 2 && KyuremUnfuseCase != 4)
+                {
+                    a1->TargetedSlot = a1->SelectedSlot;
+                    a1->field_28C->field_50 = 10;
+                    a1->field_C = 14;
+                    a1->field_274 = 5;
+                    result = (PokeList_Party*)2;
+                    a1->field_27B = 2;
+                    return result;
+                }
+            }
+        LABEL_29:
+            sub_21A03DC(a1);
+            return result;
+        }
+        result = (PokeList_Party*)PokeList_GetKyuremFuseCase(a1);
+        if (result == (PokeList_Party*)2 || result == (PokeList_Party*)4)
+        {
+            goto LABEL_29;
+        }
+        if (result == (PokeList_Party*)3)
+        {
+            sub_21A03EC(a1, 1);
+        }
+        else if (!result)
+        {
+            sub_219CE18(a1, a1->SelectedSlot);
+            sub_219CE74(a1, a1->SelectedSlot);
+            a1->TargetedSlot = a1->SelectedSlot;
+            a1->field_28C->field_50 = 10;
+            a1->field_C = 23;
+            a1->field_14 = 0;
+            sub_219F7AC(a1, a1->pokeList_Message, 0);
+            sub_219F880(a1, a1->pokeList_Message, 18);
+            sub_219BBA8(a1);
+        }
+        return result;
+    case 6:
+        result = (PokeList_Party*)PokeList_GetLearnMoveCase(a1, a1->SelectedPkm, v2->SelectedSlot);
+        if (result <= (PokeList_Party*)3)
+        {
+            result = *(PokeList_Party**)(0x0219B7A6 + result);
+            switch ((unsigned int)result)
+            {
+            case 0u:
+                a1->field_28C->field_50 = 10;
+                PokeListMessage_CreateWordSetSystem(a1, a1->pokeList_Message);
+                PokeListMessage_LoadPokemonNicknameToStrBuf(a1, a1->pokeList_Message, 0, a1->SelectedPkm);
+                PokeListMessage_LoadMoveNameToStrBuf(a1, a1->pokeList_Message, 1u, a1->field_28C->MoveToLearn);
+                PokeList_PrintMessage(a1, 42, 1, (int)sub_219DE50);
+                PokeListMessage_ClearWordSetSystem(a1, a1->pokeList_Message);
+                sub_219E5C8(a1, a1->SelectedPkm);
+                result = (PokeList_Party*)sub_219E620(a1, (int)a1->SelectedPkm);
+                break;
+            case 1u:
+                PokeListMessage_CreateWordSetSystem(a1, a1->pokeList_Message);
+                PokeListMessage_LoadPokemonNicknameToStrBuf(a1, a1->pokeList_Message, 0, a1->SelectedPkm);
+                PokeListMessage_LoadMoveNameToStrBuf(a1, a1->pokeList_Message, 1u, a1->field_28C->MoveToLearn);
+                PokeList_PrintMessage(a1, 33, 0, (int)sub_219DEC4);
+                PokeListMessage_ClearWordSetSystem(a1, a1->pokeList_Message);
+                break;
+            case 2u:
+                a1->field_28C->field_50 = 10;
+                PokeListMessage_CreateWordSetSystem(a1, a1->pokeList_Message);
+                PokeListMessage_LoadPokemonNicknameToStrBuf(a1, a1->pokeList_Message, 0, a1->SelectedPkm);
+                PokeListMessage_LoadMoveNameToStrBuf(a1, a1->pokeList_Message, 1u, a1->field_28C->MoveToLearn);
+                PokeList_PrintMessage(a1, 43, 1, (int)sub_219DE50);
+                PokeListMessage_ClearWordSetSystem(a1, a1->pokeList_Message);
+                break;
+            case 3u:
+                a1->field_28C->field_50 = 10;
+                PokeListMessage_CreateWordSetSystem(a1, a1->pokeList_Message);
+                PokeListMessage_LoadPokemonNicknameToStrBuf(a1, a1->pokeList_Message, 0, a1->SelectedPkm);
+                PokeListMessage_LoadMoveNameToStrBuf(a1, a1->pokeList_Message, 1u, a1->field_28C->MoveToLearn);
+                PokeList_PrintMessage(a1, 44, 1, (int)sub_219DE50);
+                PokeListMessage_ClearWordSetSystem(a1, a1->pokeList_Message);
+                break;
+            default:
+                return result;
+            }
+        }
+        return result;
+    case 9:
+        Param = PokeParty_GetParam(a1->SelectedPkm, PF_Item, 0);
+        v10 = Param;
+        if (Param)
+        {
+            if (PML_ItemIsMail(Param) == 1)
+            {
+                a1->field_28C->field_50 = 10;
+                PokeList_PrintMessage(a1, 58, 1, (int)sub_219DE50);
+            }
+            else
+            {
+                PokeListMessage_CreateWordSetSystem(a1, a1->pokeList_Message);
+                PokeListMessage_LoadPokemonNicknameToStrBuf(a1, a1->pokeList_Message, 0, a1->SelectedPkm);
+                sub_219FA58(a1, a1->pokeList_Message, 1, v10);
+                PokeList_PrintMessage(a1, 59, 0, (int)sub_219E0AC);
+                PokeListMessage_ClearWordSetSystem(a1, a1->pokeList_Message);
+            }
+        }
+        else if (PML_ItemIsMail(a1->field_28C->ItemID) == 1)
+        {
+            a1->field_C = 19;
+            a1->field_28C->SelectedSlot = a1->SelectedSlot;
+            result = a1->field_28C;
+            result->field_50 = 6;
+        }
+        else
+        {
+            a1->field_28C->field_50 = 10;
+            PokeList_ChangeHeldItem(a1, a1->SelectedPkm, a1->field_28C->ItemID);
+            sub_219F350(a1, a1->pokeList_Plate[a1->SelectedSlot]);
+            PokeListMessage_CreateWordSetSystem(a1, a1->pokeList_Message);
+            PokeListMessage_LoadPokemonNicknameToStrBuf(a1, a1->pokeList_Message, 0, a1->SelectedPkm);
+            PokeListMessage_LoadItemNameToStrBuf(a1, a1->pokeList_Message, 1, a1->field_28C->ItemID);
+            PokeList_ChangeArceusForme(a1, a1->SelectedPkm, a1->field_28C->ItemID);
+            PokeList_ChangeGenesectForme(a1, a1->SelectedPkm, a1->field_28C->ItemID);
+            if (PokeList_DoesGiratinaNeedFormeChange(a1))
+            {
+                PokeList_ChangeGiratinaToOriginForme(a1, a1->SelectedPkm);
+                PokeList_PrintMessage(a1, 92, 1, (int)sub_219E4F8);
+                a1->field_274 = 1;
+            }
+            else
+            {
+                PokeList_PrintMessage(a1, 92, 1, (int)sub_219DE50);
+            }
+            PokeListMessage_ClearWordSetSystem(a1, a1->pokeList_Message);
+        }
+        return result;
+    case 0xE:
+        if (PokeParty_GetParam(a1->SelectedPkm, PF_Item, 0))
+        {
+            PokeList_PrintMessage(a1, 109, 1, (int)sub_219DE50);
+        }
+        else
+        {
+            v11 = sub_20097F4(a1->field_28C->field_8, 0, a1->field_28C->field_6C, a1->heapID);
+            PokeParty_SetParam(a1->SelectedPkm, PF_Mail, (u32)v11);
+            GFL_HeapFree(v11);
+            PokeParty_SetParam(a1->SelectedPkm, PF_Item, a1->field_28C->ItemID);
+            sub_20097D0(a1->field_28C->field_8, 0, a1->field_28C->field_6C);
+            PokeList_PrintMessage(a1, 108, 1, (int)sub_219DE50);
+        }
+        return result;
+    case 0x10:
+        if (PokeList_CheckEvolveSpecies(a1, (int)a1->SelectedPkm, v2->ItemID))
+        {
+            PokeList_SubItem(a1, a1->field_28C->ItemID);
+            a1->field_C = 19;
+            a1->field_28C->SelectedSlot = a1->SelectedSlot;
+            result = a1->field_28C;
+            result->field_50 = 8;
+        }
+        else
+        {
+            PokeList_PrintMessage(a1, 82, 1, (int)sub_219DE50);
+        }
+        return result;
+    default:
+        goto LABEL_65;
+    }
+}
+*/

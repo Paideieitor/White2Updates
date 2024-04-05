@@ -158,7 +158,7 @@ void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int D
         }
     }
 
-    u32 lvl_cap = GetCurrentLvlCap();
+    u32 lvl_cap = GetLvlCap();
     for (unsigned int n = 0; n < NumMonsInParty; ++n)
     {
         BattleMon* battle_pokemon = BattleParty_GetMonData(party, n);
