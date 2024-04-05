@@ -10,7 +10,7 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - Adds the infinite Rare Candy item, this item can't level Pokemon over the level cap
   - By default Rare Candy ignore the level cap (like in Run&Bun)
   - Change the definition of ```RARE_CANDY_IGNORE_CAP``` to ```false``` and complile to make Rare Candy respect the level cap
-  - To add the infinite Rare Candy item paste the 622 file in the vfs/a/0/2/4 folder in your CTRMAP project
+  - To add the infinite Rare Candy item paste the 622 file in the *vfs/data/a/0/2/4* folder in your CTRMAP project
   - This patch doesn't change the name, description and icon of the new item, so you will need to edit that to whatever you want
   - If you are already using the item 622 you will need to change the definition of ```INFINITE_CANDY_ID``` to the item ID you are repacing and also change the name of the 622 file to the new item ID
   - The level cap is shared by default with the Hard Level Caps patch
