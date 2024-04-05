@@ -4,8 +4,8 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
 ## Patches
 ### Hard Level Caps
   - Limits the maximum level a pokemon can be (doesn't affect Rare Candy, use the Rare Candy Level Caps patch to add this feature)
-  - Set the game variable 16415 to the level cap you want using CTRMap or some other editor, use the command WorkSet from a script to acomplish that
-  - If you are already using the variable 16415 you can change it modifying the LEVEL_CAP_VAR definition to the value you want, and compiling and installing the new patch
+  - Set the game variable 16462 to the level cap you want using CTRMap or some other editor, use the command WorkSet (```EventWorks.Set(16462, levelcap)```) from a script to acomplish that
+  - If you are already using the variable 16462 you can change it modifying the LEVEL_CAP_VAR definition to the value you want, and compiling and installing the new patch
 ### Rare Candy Level Caps
   - Limits the maximum level a pokemon can be using Rare Candy
   - The level cap is shared by default with the Hard Level Caps patch
