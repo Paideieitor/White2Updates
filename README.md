@@ -35,7 +35,7 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - If the patch requires any other modification like changing a narc or text editing it will be covered in the notes of the patch
 
 ## Compatibility
-For now all patches are compatible with each other
+For now all patches are independent and compatible with each other
 
 ## Compiling the code
 If you want to change some numbers or just mess around with the code, follow this steps:
