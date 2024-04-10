@@ -1,9 +1,14 @@
 #ifndef __INCLUDE_ALL_H
 #define __INCLUDE_ALL_H
 
-#define DEBUG_PRINT
-#ifdef DEBUG_PRINT
-#include "kPrint.h"
+#define DEBUG_PRINT true
+#if DEBUG_PRINT
+#include "kernel/kPrint.h"
+#define DPRINT(format) k::Print(format)
+#define DPRINTF(format, ...) k::Printf(format, __VA_ARGS__)
+#elif !DEBUG_PRINT
+#define DPRINT(format)
+#define DPRINTF(format, ...)
 #endif
 
 #include "swantypes.h"
@@ -6167,6 +6172,13 @@ enum ItemType
     ITEMTYPE_MAX = 0x6,
 };
 
+enum FieldmapCtrlType
+{
+    FLD_MAPCTRL_GRID = 0x0,
+    FLD_MAPCTRL_RAIL = 0x1,
+    FLD_MAPCTRL_HYBRID = 0x2,
+};
+
 C_DECL_BEGIN
 // BattleHandler_x definitions
 int HEManager_GetUseItemNo(_WORD* a1);
@@ -6711,7 +6723,7 @@ BagItem* BagSave_GetItemHandleIfAmount(BagSaveData* bag, u16 itemId, u16 quantit
 ItemType BagSave_GetPocketPtrByItem(BagSaveData* bag, u16 itemId, BagItem** pPocket, u32* pPocketLimit);
 void BagSave_Defragment(BagItem* pocket, int pocketLimit);
 
-// Repel flag functions definitions
+// Flag functions definitions
 b32 EventWork_FlagGet(EventWorkSave* eventWork, u32 flagID);
 void EventWork_FlagSet(EventWorkSave* eventWork, u32 flagID);
 void EventWork_FlagReset(EventWorkSave* eventWork, u32 flagID);
@@ -6722,6 +6734,26 @@ void GFL_MsgDataLoadStrbuf(MsgData* msgdata, int msgID, StrBuf* strbuf);
 void copyVarForText(WordSetSystem* wordSet, int wsBufNo, void* a3);
 int GFL_WordSetFormatStrbuf(WordSetSystem* wordSet, StrBuf* dest, StrBuf* source);
 void playSeqFullVol(int a1);
+
+// UpdatePhenomenon functions definitions
+EncountState* GameData_GetEncountState(GameData* a1);
+signed int EncSys_IsActive(EncountSystem* encsys);
+MapMtxSys* GetMapMatrixSystem(GameData* pBaseBlk);
+u16 Field_GetPlayerStateZoneID(Field* field);
+FieldPlayer* Field_GetPlayer(Field* field);
+FieldActor* FieldPlayer_GetActor(FieldPlayer* player);
+void CopyActorWPos(FieldActor* mmdl, VecFx32* dest);
+bool RangeCheckChunkCoordinateWorld(MapMtxSys* a1, int a2, int a3);
+int GetZoneIDAtMatrixXZWorld(MapMtxSys* a1, fx32 x, fx32 z);
+void* getTrainerCardDataBlkAddress(void* pBaseBlk);
+bool isBadgeObtained(void* pTrainerCardData, int badgeNum);
+FieldmapCtrlType Field_GetResolvedControllerTypeID(Field* a1);
+bool sub_21A24AC(EncountState* a1, int a2);
+u32 PassPower_ApplyExploringChance(u32 basePhenomenonChance);
+u32 GFL_RandomLCAlt(u32 max);
+int positionShakingSpot(EncountSystem* encSys, int a2, u8 type);
+void sub_21A272C(void** a1, int a2);
+void setShakingSpotOff(EncountState* result);
 
 extern u32 g_GameBeaconSys;
 extern SystemUI* g_SystemUI;

@@ -11,9 +11,7 @@ void SetLvlCap(u16 lvl_cap)
     EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
     u16* lvl_cap_ptr = EventWork_GetWkPtr(eventWork, LVL_CAP_VAR);
 
-#ifdef DEBUG_PRINT
-    k::Printf("CHANGED LEVEL CAP: %d\n", lvl_cap);
-#endif
+    DPRINT("CHANGED LEVEL CAP: %d\n", lvl_cap);
 
     *lvl_cap_ptr = lvl_cap;
 }
@@ -23,9 +21,7 @@ u32 GetLvlCap()
     EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
     u16* lvl_cap_ptr = EventWork_GetWkPtr(eventWork, LVL_CAP_VAR);
 
-#ifdef DEBUG_PRINT
-    k::Printf("CURRENT LEVEL CAP: %d\n", *lvl_cap_ptr);
-#endif
+    DPRINTF("CURRENT LEVEL CAP: %d\n", *lvl_cap_ptr);
 
     return *lvl_cap_ptr;
 }

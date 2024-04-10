@@ -1,4 +1,4 @@
-#include "custom/include_all.h"
+#include "include_all.h"
 
 // DONE: speed stat boost mid turn update
 // DONE: take into account trick room
@@ -27,10 +27,10 @@ u16 GetOrderAlteringMoveVar()
     switch (order_altering_move)
     {
     case OAM_AFTER_YOU:
-        k::Print("USED AFTER YOU\n");
+        DPRINT("USED AFTER YOU\n");
         break;
     case OAM_QUASH:
-        k::Print("USED QUASH\n");
+        DPRINT("USED QUASH\n");
         break;
     }
 #endif
@@ -209,21 +209,19 @@ u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action
                     if (BattleMon_IsFainted(action_order[j].battleMon))
                         SwapPokemonOrder(action_order, speed_stats, priority, j, j + 1);
 
-#ifdef DEBUG_PRINT
-        k::Print("DYNAMIC SPEED:\n");
+        DPRINT("DYNAMIC SPEED:\n");
         for (u32 i = first_idx; i < first_idx + poke_amount; ++i)
         {
             if (!BattleMon_IsFainted(action_order[i].battleMon))
             {
-                k::Printf("[ ID: %d | SPECIES: %d | PRIORITY: %d | SPEED: %d ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species, priority[i], speed_stats[i]);
+                DPRINTF("[ ID: %d | SPECIES: %d | PRIORITY: %d | SPEED: %d ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species, priority[i], speed_stats[i]);
             }
             else
             {
-                k::Printf("[ ID:% d | SPECIES : % d | IS FAINTED ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species);
+                DPRINTF("[ ID:% d | SPECIES : % d | IS FAINTED ]\n", action_order[i].battleMon->ID, action_order[i].battleMon->Species);
             }
         }
-        k::Print("---\n");
-#endif
+        DPRINT("---\n");
     }
 
     return poke_amount;
@@ -324,21 +322,19 @@ unsigned int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* a1, unsigned i
                     Dynamic_PokeSet_SortBySpeed(a1, action_order_work, a2, current_idx, quash_order, false); // re-calc speed
                 else
                 {
-#ifdef DEBUG_PRINT
-                    k::Print("AFTER YOU ORDER:\n");
+                    DPRINT("AFTER YOU ORDER:\n");
                     for (u32 i = 0; i < *p_numActOrder; ++i)
                     {
                         if (!BattleMon_IsFainted(action_order_work[i].battleMon))
                         {
-                            k::Printf("[ ID: %d | SPECIES: %d | PRIORITY: %d ]\n", action_order_work[i].battleMon->ID, action_order_work[i].battleMon->Species);
+                            DPRINTF("[ ID: %d | SPECIES: %d ]\n", action_order_work[i].battleMon->ID, action_order_work[i].battleMon->Species);
                         }
                         else
                         {
-                            k::Printf("[ ID:% d | SPECIES : % d | IS FAINTED ]\n", action_order_work[i].battleMon->ID, action_order_work[i].battleMon->Species);
+                            DPRINTF("[ ID:% d | SPECIES : % d | IS FAINTED ]\n", action_order_work[i].battleMon->ID, action_order_work[i].battleMon->Species);
                         }
                     }
-                    k::Print("---\n");
-#endif
+                    DPRINT("---\n");
                 }
 
                 SetOrderAlteringMoveVar(0);
