@@ -5768,6 +5768,405 @@ struct SWAN_ALIGNED(4) FieldScriptEnv
     ScriptSubwork* SubWorkEnv;
 };
 
+enum PlayerSpecialState
+{
+    FLD_PLAYER_SPSTATE_NONE = 0x0,
+    FLD_PLAYER_SPSTATE_CYCLING = 0x1,
+    FLD_PLAYER_SPSTATE_SURF = 0x2,
+    FLD_PLAYER_SPSTATE_DIVE = 0x3,
+};
+
+struct SWAN_ALIGNED(4) PlayerActionPerms
+{
+    char char0;
+    _BYTE gap1[3];
+    PlayerSpecialState playerSpecialState;
+    u16 FollowFlagState;
+    int field_C;
+    int field_10;
+    u8 ActionsBlocked[12];
+};
+
+struct NPCMdlInfo
+{
+    u16 UID;
+    char EntityType;
+    u8 SceneNodeType;
+    char EnableShadow;
+    char FootprintType;
+    char EnableReflections;
+    u8 BillboardSize;
+    char SpriteAtlasSize;
+    u8 SpriteControllerType;
+    char Gender;
+    u8 CollWidth;
+    u8 CollHeight;
+    char WPosOffsetX;
+    char WPosOffsetY;
+    char WPosOffsetZ;
+    u16 RscIndices[5];
+    u16 Padding;
+};
+
+#pragma pack(push, 1)
+struct MMdlInfoCache
+{
+    u16 EntryCount;
+    u16 EntryUIDs[26];
+    u16 _Padding;
+    NPCMdlInfo Cache[26];
+};
+#pragma pack(pop)
+
+struct MoveModel;
+struct SWAN_ALIGNED(4) MModelSystem
+{
+    u32 dword0;
+    u16 ActorLimit;
+    u16 ActorCount;
+    s16 heapID;
+    HeapID FieldHeapID;
+    u16 wordC;
+    u16 field_E;
+    u32 dword10;
+    ArcTool* DataArc;
+    ArcTool* NPCSpriteIndexHandle;
+    MoveModel* ActorHeap;
+    void* TCBMgrHeap;
+    TCBManager* TCBMgr;
+    u32 field_28;
+    u32 field_2C;
+    void* MModelSave;
+    GameData* gameData;
+    FieldG3DMapper* G3DMapper;
+    int NoGridMapper;
+    Field* Fieldmap;
+    void* field_44;
+    void* field_48;
+    MMdlInfoCache* mdlInfoCache;
+};
+
+struct MoveModel
+{
+    int Flags;
+    int MovementFlags;
+    u16 ActorUID;
+    u16 ZoneID;
+    u16 ModelID;
+    u16 MoveCode;
+    u16 EvType;
+    u16 SpawnFlag;
+    u16 SCRID;
+    u16 DefaultDir;
+    u16 FaceDir;
+    u16 MotionDir;
+    u16 LastFaceDir;
+    u16 LastMotionDir;
+    u16 Param0;
+    u16 Param1;
+    u16 Param2;
+    u16 NextAcmd;
+    s16 field_28;
+    s16 field_2A;
+    s16 AreaW;
+    s16 AreaH;
+    GPosXYZ DefaultGPos;
+    GPosXYZ InitGPos;
+    GPosXYZ GPos;
+    s16 field_42;
+    VecFx32 WPos;
+    VecFx32 WPosOffset;
+    int field_5C;
+    int field_60;
+    int field_64;
+    int field_68;
+    int field_6C;
+    int field_70;
+    int CurrentTileUnder;
+    int field_78;
+    u8 CollisionWidth;
+    u8 CollisionHeight;
+    char ModelPosOffsetX;
+    char ModelPosOffsetY;
+    char ModelPosOffsetZ;
+    char field_81;
+    char field_82;
+    char field_83;
+    TCB* tCB;
+    MModelSystem* mModelSystem;
+    int MoveCodeExecutorFunction;
+    int field_90;
+    ActorPositionRail RailPosition;
+    char gapA0[68];
+    NPCMdlInfo MdlInfo;
+};
+
+struct SWAN_ALIGNED(4) PlayerActionPossibilities
+{
+    u16 ZoneID;
+    u16 Flags;
+    PlayerSpecialState playerSpecialState;
+    GameSystem* GameSys;
+    MoveModel* ActorInFront;
+    Field* field;
+};
+
+enum FieldCommonEventID
+{
+    FLD_CMNEVENT_CYCLING = 0x0,
+    FLD_CMNEVENT_ENTRALINK_WARP = 0x1,
+    FLD_CMNEVENT_ESCAPE_ROPE = 0x2,
+    FLD_CMNEVENT_SWEET_SCENT = 0x3,
+    FLD_CMNEVENT_FISHING = 0x4,
+    FLD_CMNEVENT_5 = 0x5,
+};
+
+enum FieldItemBlockReason : __int16
+{
+    FLD_ITEMBLOCK_GENERIC = 0x0,
+    FLD_ITEMBLOCK_NO_BIKE_EXIT = 0x1,
+    FLD_ITEMBLOCK_NO_RIBBON_POKE = 0x2,
+    FLD_ITEMBLOCK_PAIR = 0x3,
+};
+
+enum ItemUseEventType
+{
+    ITEMUSE_EVENT_CHECKAGAIN = 0x0,
+    ITEMUSE_EVENT_CANCEL = 0x1,
+    ITEMUSE_EVENT_HIDEN = 0x2,
+    ITEMUSE_EVENT_FIELD = 0x3,
+};
+
+struct AppCallFramework;
+struct SWAN_ALIGNED(2) EventShortcutMenu
+{
+    GameEvent* ThisEvent;
+    GameSystem* gameSystem;
+    Field* field;
+    int field_C;
+    AppCallFramework* MenuWork;
+    HeapID heapID;
+    __int16 field_16;
+    int field_18;
+    int field_1C;
+    int IsActionBlocked;
+};
+
+
+struct ShortcutMenuWork
+{
+    GameSystem* gameSystem;
+    Field* field;
+    GameEvent* ShortcutMenuEvent;
+    int field_C;
+    int field_10;
+    int ItemID;
+    int MenuRoutine1;
+    int MenuRoutine2;
+    int field_20;
+    EventShortcutMenu* ShortcutMenuEventData;
+    ItemUseEventType EventType;
+    u32 EventID;
+    int field_30;
+    int field_34;
+    int field_38;
+    int field_3C;
+    int field_40;
+};
+
+struct AppCallFramework
+{
+    GameSystem* gameSystem;
+    Field* field;
+    GameEvent* ParentEvent;
+    int field_C;
+    int SubprocAppID;
+    u32 SubprocParam;
+    int MenuRoutine1;
+    int MenuRoutine2;
+    int field_20;
+    void* ParentEventData;
+    ItemUseEventType EventType;
+    int EventID;
+    int field_30;
+    int field_34;
+    int field_38;
+    int field_3C;
+    int field_40;
+};
+
+enum InputButton
+{
+    KEY_A = 0x1,
+    KEY_B = 0x2,
+    KEY_SELECT = 0x4,
+    KEY_START = 0x8,
+    KEY_RIGHT = 0x10,
+    KEY_LEFT = 0x20,
+    KEY_UP = 0x40,
+    KEY_DOWN = 0x80,
+    KEY_R = 0x100,
+    KEY_L = 0x200,
+    KEY_X = 0x400,
+    KEY_Y = 0x800,
+    KEY_TOUCH = 0x1000,
+    KEY_LID = 0x2000,
+};
+
+struct SWAN_ALIGNED(4) KeypadMgr
+{
+    int char0;
+    int field_4;
+    int field_8;
+    InputButton LastHeldKeys;
+    InputButton LastNewKeys;
+    InputButton LastTypedKeys;
+    InputButton HeldKeys60;
+    InputButton NewKeys60;
+    InputButton TypedKeys60;
+    InputButton HeldKeys30;
+    InputButton NewKeys30;
+    InputButton TypedKeys30;
+    InputButton HeldKeys2Frame;
+    InputButton NewKeys2Frame;
+    InputButton TypedKeys2Frame;
+    int KeyRetypeCountdown;
+    _DWORD KeyRetypeIntervalRepeated;
+    _DWORD KeyRetypeIntervalFirst;
+    int field_48;
+};
+
+struct SystemUI
+{
+    KeypadMgr* m_KeypadMgr;
+    _DWORD Touchpad;
+    void(* SoftResetCallback)(void*);
+    void* SoftResetCallbackData;
+    int field_10;
+    int field_14;
+    int field_18;
+    int field_1C;
+    int Callback;
+    int field_24;
+    int field_28;
+    int field_2C;
+    void* CallbackData;
+    int field_34;
+    char field_38;
+    u8 SoftResetDisabled;
+    char field_3A;
+    u8 Backlight;
+    _BYTE byte3C;
+    u8 UpdateRate;
+    u8 FrameCounter;
+    _BYTE BatteryLevel;
+    _BYTE byte40;
+    char field_41;
+    char field_42;
+    char field_43;
+};
+
+enum FieldSubAppResult
+{
+    SUBAPP_RESULT_RETRY = 0x0,
+    SUBAPP_RESULT_CANCEL = 0x1,
+    SUBAPP_RESULT_USE_HIDEN = 0x2,
+    SUBAPP_RESULT_USE_ITEM = 0x3,
+    SUBAPP_RESULT_CALL_CHILD_APP = 0x4,
+    SUBAPP_RESULT_5 = 0x5,
+};
+
+struct FieldAppCallParam
+{
+    b32(*field_0)(AppCallFramework*, EventShortcutMenu*);
+    int field_4;
+    int field_8;
+    EventShortcutMenu* ParentEventData;
+    AppCallFramework* FrameworkData;
+};
+
+struct SWAN_ALIGNED(4) EventFieldAppCall
+{
+    HeapID m_HeapID;
+    __int16 field_2;
+    u32 AppID;
+    _DWORD LastAppID;
+    _DWORD ChildAppID;
+    FieldSubAppResult SubprocResult;
+    GameEvent* ParentEvent;
+    AppCallFramework* m_AppCallFramework;
+    void* SubprocData;
+    FieldAppCallParam m_Param;
+    PlayerActionPerms m_ActionPerms;
+    PlayerActionPossibilities m_ActionPossibilities;
+    u8 field_68;
+    char field_69;
+    __int16 field_6A;
+    int field_6C;
+    int field_70;
+    int field_74;
+    int field_78;
+};
+
+struct SWAN_ALIGNED(4) RoamingPokemon
+{
+    u16 NowZoneID;
+    unsigned __int8 Nature;
+    _DWORD IVs;
+    _DWORD PID;
+    u16 Species;
+    u16 CurrentHP;
+    unsigned __int8 Level;
+    unsigned __int8 unsigned___int811;
+    unsigned __int8 Status;
+    unsigned __int8 unsigned___int813;
+};
+
+struct SWAN_ALIGNED(2) EncountSave
+{
+    RoamingPokemon roamingPokemon[2];
+    u8 RoamingPokemonZoneClock[2];
+    u8 field_2A[2];
+    _BYTE CurrentSwarmLocation;
+    _BYTE RepelSteps;
+    _WORD NowRepelItemID;
+    int field_30;
+};
+
+struct FieldScriptSupervisor
+{
+    HeapID m_HeapID;
+    char VMCount;
+    char field_3;
+    ScriptVM* VMs[3];
+    int TerminatorRoutine;
+    int TerminatorParam;
+};
+
+struct EventScriptCall
+{
+    ScriptWork* scriptWork;
+    FieldScriptSupervisor* State;
+};
+
+enum FieldScriptFeatureLevel
+{
+    FLD_SCRIPT_FEATURE_EVENT = 0x0,
+    FLD_SCRIPT_FEATURE_LOAD = 0x1,
+    FLD_SCRIPT_FEATURE_INIT = 0x2,
+};
+
+enum ItemType
+{
+    ITEMTYPE_STD = 0x0,
+    ITEMTYPE_EFFECT = 0x1,
+    ITEMTYPE_TM = 0x2,
+    ITEMTYPE_BERRY = 0x3,
+    ITEMTYPE_KEY = 0x4,
+    ITEMTYPE_FREE_SPACE = 0x5,
+    ITEMTYPE_MAX = 0x6,
+};
+
 C_DECL_BEGIN
 // BattleHandler_x definitions
 int HEManager_GetUseItemNo(_WORD* a1);
@@ -6225,7 +6624,108 @@ void ShortcutSave_Condense(ShortcutSave* save);
 u16* ScriptReadVar(ScriptVM* vm, FieldScriptEnv* cmd);
 u16 ScriptReadAny(ScriptVM* vm, FieldScriptEnv* cmd);
 
+// PokeList_SubItem definitions
+int BagSave_SubItem(BagSaveData* bag, u16 itemId, u16 quantity, HeapID heapId);
+
+// CreateBagItemUseEvent definitions
+int sub_215B54C(GameEvent* a1, int* a2, int a3);
+void memsetx(void* ptr, u8 value, u32 size);
+int sub_215B7AC(_DWORD* a1, int a2, int a3, int a4, int a5, int a6);
+void PlayerActionPerms_Create(PlayerActionPerms* perms, GameSystem* gsys, Field* field);
+void CalcPlayerActionPossibilities(Field* field, PlayerActionPossibilities* dest);
+
+// EventFieldItemUseBlock_Call definitions
+PlayerState* GameData_GetPlayerState(GameData* gameData);
+PlayerSpecialState GetPlayerSpecialState(PlayerState* playerState);
+GameEvent* EventFieldItemUseBlock_Create(GameSystem* a1, FieldItemBlockReason reason, u16 itemId);
+
+// CallYButtonShortcutMenu definitions
+SaveControl* GameData_GetSaveControl(GameData* gameData);
+ShortcutSave* SaveControl_GetShortcutSave(SaveControl* saveCtrl);
+int ShortcutSave_GetShortcutCount(ShortcutSave* shortcuts);
+int EventShortcutCallDirect_Callback(GameEvent* event, int* pState, EventShortcutMenu* data);
+int EventShortcutChoicePopup_Callback(GameEvent* a1, int* a2, EventShortcutMenu* data);
+int sub_215B36C(int a1, EventShortcutMenu* a2);
+int sub_215B3DC(int a1, int a2);
+FieldActorSystem* Field_GetActorSystem(Field* a1);
+void DisableAllActorsMovement(FieldActorSystem* a1);
+void sub_203D590(char result);
+
+// GameData_SetKeyItemRegistration definitions
+ShortcutSave* SaveControl_GetShortcutSaveCore(SaveControl* saveCtrl);
+void ShortcutSave_SetKeyItemRegistration(ShortcutSave* result, int keyItemID, b32 isRegistered);
+
+// sub_21BF3E0 definitions
+int sub_2025B20(int a1, _WORD* a2);
+int sub_2025B84(int a1, unsigned int a2);
+InputButton GCTX_HIDGetTypedKeys();
+int sub_21BF2DC(int a1, int a2, __int16 a3, _DWORD* a4);
+int sub_21BF36C(int a1, int a2, int a3, _DWORD* a4);
+int BmpMenuList_Update(BmpMenuList* menuList);
+InputButton GCTX_HIDGetPressedKeys();
+int sub_2025B78(_DWORD* a1, int a2);
+int ShortcutSave_MoveItemToIndex(ShortcutSave* shortcuts, u8 keyItemId, signed int destIndex);
+int sub_21BF848(int a1, _WORD* a2, _WORD* a3);
+void sub_21BF770(ListMenuOption** a1, int a2, int a3, int a4);
+int sub_2025B30(int result, _WORD* a2, _WORD* a3);
+void sub_204C150(int result, int a2);
+int sub_21BF620(int a1, int a2, int a3, int a4);
+
+// sub_215BA0C definitions
+void GameData_SetKeyItemRegistration(GameData* gameData, int keyItemId, b32 isRegistered);
+
+// s02C2_RepelRearm definitions
+HeapID FieldScriptEnv_GetHeapID(FieldScriptEnv* env);
+GameData* FieldScriptEnv_GetGameData(FieldScriptEnv* cmd);
+EncountSave* SaveControl_GetEncountSave(SaveControl* saveCtrl);
+BagSaveData* GameData_GetBag(GameData* gameData);
+u16 EncountSave_GetUsedRepelItemID(EncountSave* encountSave);
+b32 EncountSave_IsRepelDepleted(EncountSave* encountSave);
+int GetItemParam(u16 itemId, ItemField itemField, HeapID heapId);
+void EncountSave_SetRepelSteps(EncountSave* encountSave, u8 steps);
+void sub_202D3B0(unsigned int itemId);
+
+// CheckRepelEvent definitions
+bool EncountSave_DecrementRepelSteps(EncountSave* encountSave);
+HeapID Field_GetHeapID(Field* field);
+bool BagSave_GetItemCountByID(BagSaveData* bag, u16 itemId);
+GameEvent* EventScriptCall_Create(GameSystem* gsys, u16 scrId, FieldActor* actor, HeapID heapId);
+
+// EventScriptCall_CreateCore definitions
+b32 EventScriptCall_Callback(GameEvent* event, int* state, EventScriptCall* evData);
+FieldScriptSupervisor* FieldScriptSupervisor_Create(HeapID heapId);
+ScriptWork* ScriptWork_Create(u32 heapId, GameSystem* gameSys, GameEvent* event, u16 scrId, int a5, FieldScriptFeatureLevel featureLevel);
+void ScriptWork_SetParentActor(ScriptWork* work, FieldActor* mmdl);
+int FieldScript_GetZoneIDFromGSys(GameSystem* gsys);
+int ScriptWork_AddVM(ScriptWork* swk, u16 zoneId, u16 SCRID);
+
+// EventFieldItemUseBlock_Create definitions
+ScriptWork* EventScriptCall_GetWork(GameEvent* eventMainBlock);
+void ScriptWork_SetParams(ScriptWork* work, u16 param1, u16 param2, u16 param3, u16 param4);
+
+// EventFieldItemUseBlock_Call definitions
+PlayerExState FieldPlayerState_GetExState(PlayerState* playerState);
+
+// BagSave_SubItem definitions
+BagItem* BagSave_GetItemHandleIfAmount(BagSaveData* bag, u16 itemId, u16 quantity);
+ItemType BagSave_GetPocketPtrByItem(BagSaveData* bag, u16 itemId, BagItem** pPocket, u32* pPocketLimit);
+void BagSave_Defragment(BagItem* pocket, int pocketLimit);
+
+// Repel flag functions definitions
+b32 EventWork_FlagGet(EventWorkSave* eventWork, u32 flagID);
+void EventWork_FlagSet(EventWorkSave* eventWork, u32 flagID);
+void EventWork_FlagReset(EventWorkSave* eventWork, u32 flagID);
+
+// RepelEffect definitions
+bool IsItemRepel(__int16 a1);
+void GFL_MsgDataLoadStrbuf(MsgData* msgdata, int msgID, StrBuf* strbuf);
+void copyVarForText(WordSetSystem* wordSet, int wsBufNo, void* a3);
+int GFL_WordSetFormatStrbuf(WordSetSystem* wordSet, StrBuf* dest, StrBuf* source);
+void playSeqFullVol(int a1);
+
 extern u32 g_GameBeaconSys;
+extern SystemUI* g_SystemUI;
+#define GAME_DATA *(GameData**)(g_GameBeaconSys + 4)
 C_DECL_END
 
 // I dont care, im not organizing this

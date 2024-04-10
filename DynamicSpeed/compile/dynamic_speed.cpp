@@ -1,4 +1,4 @@
-#include "include_all.h"
+#include "custom/include_all.h"
 
 // DONE: speed stat boost mid turn update
 // DONE: take into account trick room
@@ -20,7 +20,7 @@ enum OrderAlteringMoves
 };
 u16 GetOrderAlteringMoveVar()
 {
-    EventWorkSave* eventWork = GameData_GetEventWork(*(GameData**)(g_GameBeaconSys + 4));
+    EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
     u16 order_altering_move = *EventWork_GetWkPtr(eventWork, ORDER_ALTERING_MOVE_VAR);
 
 #ifdef DEBUG_PRINT
@@ -39,7 +39,7 @@ u16 GetOrderAlteringMoveVar()
 }
 void SetOrderAlteringMoveVar(u16 order_altering_move_var)
 {
-    EventWorkSave* eventWork = GameData_GetEventWork(*(GameData**)(g_GameBeaconSys + 4));
+    EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
     u16* order_altering_move = EventWork_GetWkPtr(eventWork, ORDER_ALTERING_MOVE_VAR);
 
     *order_altering_move = order_altering_move_var;
