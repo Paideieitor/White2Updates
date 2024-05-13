@@ -21,9 +21,9 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - To detect when After You and Quash are used (without using move ID) I use the game variable 16400, if you are already using it change it at the ```ORDER_ALTERING_MOVE_VAR``` definition, and compile and install the new patch
   - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
 ### Work In Progress
-  - Infinite Repel
-  - Registered item expansion (can't belive this is a thing)
-  - Item expansion
+  - Infinite Repel (source comming soon)
+  - Registered item expansion (source comming soon)
+  - Item expansion (source comming soon)
 
 ## How to Install
   - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin
