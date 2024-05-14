@@ -11,6 +11,8 @@
 #define DPRINTF(format, ...)
 #endif
 
+#define ARRAY_COUNT(arr) sizeof(arr) / sizeof(arr[0])
+
 #include "swantypes.h"
 
 #include "battle/btl_result.h"
@@ -23,6 +25,8 @@
 #include "save/save_control.h"
 #include "data/heapid_def.h"
 
+
+C_DECL_BEGIN
 enum BattleStyle
 {
     BTL_STYLE_SINGLE = 0x0,
@@ -184,11 +188,13 @@ struct SWAN_ALIGNED(4) BtlSetup
 
 struct ConditionData
 {
-    u8 unk0;
-    u8 unk1;
-    u8 unk2;
-    u8 unk3;
+    u32 status : 3;
+    u32 turncount : 3;
+    u32 field7 : 3;
+    u32 param : 3;
+    u32 rest : 20;
 };
+
 
 struct StatStageParam
 {
@@ -227,6 +233,35 @@ struct MoveDamageRec
     u8 pokePos;
 };
 
+enum BattlePartySlot : u8
+{
+    PLAYER_SLOT_0 = 0,
+    PLAYER_SLOT_1 = 1,
+    PLAYER_SLOT_2 = 2,
+    PLAYER_SLOT_3 = 3,
+    PLAYER_SLOT_4 = 4,
+    PLAYER_SLOT_5 = 5,
+    ALLY_TAG_SLOT_0 = 6,
+    ALLY_TAG_SLOT_1 = 7,
+    ALLY_TAG_SLOT_2 = 8,
+    ALLY_TAG_SLOT_3 = 9,
+    ALLY_TAG_SLOT_4 = 10,
+    ALLY_TAG_SLOT_5 = 11,
+    ENEMY_SLOT_0 = 12,
+    ENEMY_SLOT_1 = 13,
+    ENEMY_SLOT_2 = 14,
+    ENEMY_SLOT_3 = 15,
+    ENEMY_SLOT_4 = 16,
+    ENEMY_SLOT_5 = 17,
+    ENEMY_TAG_SLOT_0 = 18,
+    ENEMY_TAG_SLOT_1 = 19,
+    ENEMY_TAG_SLOT_2 = 20,
+    ENEMY_TAG_SLOT_3 = 21,
+    ENEMY_TAG_SLOT_4 = 22,
+    ENEMY_TAG_SLOT_5 = 23,
+    BATTLE_MAX_SLOTS = 24,
+};
+
 struct SWAN_ALIGNED(4) BattleMon
 {
     PartyPkm* partySrc;
@@ -239,8 +274,8 @@ struct SWAN_ALIGNED(4) BattleMon
     __int16 UsedItem;
     __int16 Ability;
     char Level;
-    char ID;
-    char field_1A;
+    BattlePartySlot battleSlot;
+    char BaseAttack;
     char flags;
     ConditionData Conditions[36];
     u8 MoveConditionCounter[36];
@@ -258,7 +293,7 @@ struct SWAN_ALIGNED(4) BattleMon
     char field_FB;
     StatStageParam statStageParam;
     char field_103;
-    MoveSet moveSet[4];
+    MoveSet Moves[4];
     __int16 CurrentAbility;
     __int16 Weight;
     char MoveCount; // 0 to 4, amount of move slots that are not empty
@@ -277,10 +312,10 @@ struct SWAN_ALIGNED(4) BattleMon
     u8 TurnFlag[2];
     u8 ConditionFlag[2];
     u8 Counters[5];
-    MoveDamageRec moveDamageRec[3][6];
+    MoveDamageRec DamageRec[3][6];
     unsigned __int8 DamageRecCount[3];
     char DamageRecTurn;
-    char DamageRec;
+    char DamageRecPtr;
     char field_1F1;
     __int16 SubstituteHP;
     __int16 comboMoveID;
@@ -301,7 +336,7 @@ struct PokeCon
     MainModule* mainModule;
     BattleParty party[4];
     PokeParty* srcParty[4];
-    BattleMon* activePokeParam[24];
+    BattleMon* ActiveBattleMon[24];
     int fForServer;
 };
 
@@ -1091,6 +1126,19 @@ struct PokeSelectResult
     char fCancel;
 };
 
+struct RecPlayerControl
+{
+    char field_0;
+    char field_1;
+    char field_2;
+    char field_3;
+    __int16 field_4;
+    u16 field_6;
+    u16 field_8;
+    u16 field_A;
+    u16 field_C;
+};
+
 struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
 {
     MainModule* mainModule;
@@ -1099,13 +1147,10 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     BattleActionParam* procAction;
     BtlRecWk* recData;
     int battleRecReader;
-    int recPlayer;
-    _BYTE gap1C[6];
-    __int16 field_22;
-    _BYTE gap24[4];
-    _DWORD dword28;
+    RecPlayerControl recPlayer;
+    SWAN_ALIGNED(4) _DWORD dword28;
     EscapeInfo escapeInfo;
-    BattleField* fieldSim;
+    BattleField* battleField;
     _BYTE gap38[24];
     Adapter* adapter;
     BtlvCore* btlvCore;
@@ -1114,15 +1159,14 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     Btlv_StringParam field_80;
     _BYTE gapA4[4];
     _DWORD cmdCheckServer;
-    BattleMon* field_AC[6];
+    BattleMon* Party[6];
     int field_C4;
     int field_C8;
-    _BYTE byteCC;
-    char field_CD;
-    SWAN_ALIGNED(4) int field_D0;
+    char field_CC;
+    int(*field_D0)(BtlClientWk*, int*) SWAN_ALIGNED(4);
     int field_D4;
-    u32* subProcFunction; // int(*subProcFunction)(BtlClientWk * a1, unsigned int* a2);
-    int field_DC;
+    int(*actionSelectProc)(BtlClientWk * a1, unsigned int* a2);
+    unsigned int ActionSelectSeq;
     BattleActionParam* returnDataActionSelect;
     int returnDataActionSelectCount;
     int field_E8;
@@ -1134,12 +1178,12 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     _QWORD rand2;
     _QWORD rand3;
     u8 field_114[6];
-    _BYTE gap11A[6];
-    BattleParty* actPokeParty;
+    u8 field_11A[4];
+    SWAN_ALIGNED(4) BattleParty* actPokeParty;
     unsigned __int8 myCoverPosNum;
     unsigned __int8 procPokeIdx;
     char prevPokeIdx;
-    char firstPokeIdx;
+    u8 firstPokeIdx;
     char fStdMsgChanged;
     char field_129;
     char field_12A;
@@ -1154,19 +1198,18 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     PokeSelectParam pokeSelectParam;
     PokeSelectResult pokeSelectResult;
     char field_1A1;
-    __int16 field_1A2;
+    HeapID TrainerMsgHeapID;
     char field_1A4;
-    SWAN_ALIGNED(2) char field_1A6;
-    char field_1A7;
-    _WORD field_1A8[3];
-    char myID;
+    SWAN_ALIGNED(2) u16 field_1A6;
+    _WORD SelItemWork[3];
+    u8 myID;
     char field_1AF;
     _BYTE gap1B0;
     char commWaitInfoOn;
     char field_1B2;
     char field_1B3;
     _BYTE field_1B4;
-    _BYTE forceQuitActionSelect;
+    u8 forceQuitActionSelect;
     _BYTE cmdCheckTimingCode;
     char currentActionCount;
     char moveInfoPokeIdx;
@@ -1174,7 +1217,7 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     char actSelectFlags;
     char myChangePokeCount;
     char field_1BC;
-    _BYTE field_1BD;
+    u8 field_1BD;
     unsigned __int8 myChangePokePos[6];
     char field_1C4;
     char field_1C5;
@@ -1183,12 +1226,12 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     char field_1C8;
     char field_1C9;
     char field_1CA;
-    _BYTE gap1CB[5];
+    SWAN_ALIGNED(2) int field_1CC;
     int field_1D0;
     _BYTE gap1D4[20];
     __int16 field_1E8;
     __int16 field_1EA;
-    _BYTE gap1EC[4];
+    int field_1EC;
     int field_1F0;
     _BYTE gap1F4[16];
     int field_204;
@@ -1197,17 +1240,7 @@ struct SWAN_PACKED SWAN_ALIGNED(4) BtlClientWk
     _BYTE gap218[4];
     _WORD word21C;
     SWAN_ALIGNED(4) int dword220;
-    int field_224;
-    int field_228;
-    int field_22C;
-    int field_230;
-    int field_234;
-    int field_238;
-    int field_23C;
-    int field_240;
-    int field_244;
-    int field_248;
-    int field_24C;
+    u16 field_224[22];
     char field_250;
 };
 
@@ -1531,6 +1564,33 @@ struct SWAN_ALIGNED(4) ActionOrderWork
     char field_F;
 };
 
+struct HandlerParam_StrParams
+{
+    u16 ID;
+    int type;
+    int args[8];
+};
+
+enum ActionIgnoreReason
+{
+    REASON_NONE = 0x0,
+    REASON_OTHER_MOVE = 0x1,
+    REASON_FALL_ASLEEP = 0x2,
+    REASON_CONFUSION = 0x3,
+    REASON_OVERLEVELED = 0x4,
+    REASON_ASLEEP = 0x5,
+};
+
+struct HitCheckParam
+{
+    char countMax;
+    char count;
+    char fCheckEveryTime;
+    char fMultiHitMove;
+    char fPutAnimCmd;
+    char MultiHitEffectiveness;
+};
+
 struct SWAN_ALIGNED(8) ServerFlow
 {
     BtlServerWk* server;
@@ -1542,27 +1602,29 @@ struct SWAN_ALIGNED(8) ServerFlow
     int heapHandle;
     MoveRecord moveRecord;
     FaintRecord faintRecord;
-    int evolutionDataPtr;
+    ArcTool* evolutionDataPtr;
     MoveAnimCtrl* moveAnimCtrl;
     MoveStealParam* moveStealParam;
     MoveStealParam* magicCoatParam;
-    HITCHECK_PARAM* hitCheckParam;
+    HitCheckParam* hitCheckParam;
     EscapeInfo escapeInfo;
     int field_4C0;
-    char field_4C4;
-    _BYTE gap4C5[9];
-    SWAN_PACKED SWAN_ALIGNED(1) int field_4CE;
-    SWAN_ALIGNED(4) u8 field_4D4[672];
+    int field_4C4;
+    int field_4C8;
+    __int16 field_4CC;
+    __int16 field_4CE;
+    int field_4D0;
+    u8 field_4D4[672];
     int SimulationCounter;
     int moveSerial;
     char cmdBuildStep;
     char field_77D;
-    char field_77E;
+    char TurnCheckSeq;
     char defaultTargetPos;
     __int16 heapID;
     char numActOrder;
     char numEndActOrder;
-    _BYTE gap784;
+    _BYTE field_784;
     char revivedPokeCount;
     char field_786;
     char field_787;
@@ -1571,36 +1633,39 @@ struct SWAN_ALIGNED(8) ServerFlow
     char field_78A;
     char gap78B;
     char field_78C;
-    SWAN_ALIGNED(4) char field_790;
+    char field_78D;
+    char field_78E;
+    char field_78F;
+    char field_790;
     u8 revivePokeID[24];
     char pokeInFlag[24];
     char field_7C1[24];
     char switchCount[4];
     char field_7DD;
+    char field_7DE;
+    char field_7DF;
     ActionOrderWork actionOrderWork[6];
-    ActionOrderWork tmpActionOrderWork;
+    ActionOrderWork tempActionOrderWork;
     PokeSet* setTargetOriginal;
     PokeSet* setTarget;
     PokeSet* setAlly;
     PokeSet* setEnemy;
-    PokeSet* setDamaged;
+    PokeSet* PokeSetDamaged;
     PokeSet* setStealTarget;
-    PokeSet* setTemp;
+    PokeSet* PokeSetTemp;
     CALC_DAMAGE_REC* calcDamageAlly;
     CALC_DAMAGE_REC* calcDamageEnemy;
     POKESET_STACK_UNIT pokesetUnit[7];
     int pokesetStackPtr;
-    char field_1A68;
-    _BYTE gap1A69[71];
+    PokeSet pokeSet_1A68;
     MoveParam* moveParam;
     MoveParam* moveParamOriginal;
     PosPoke posPoke;
     char field_1AE2;
-    _BYTE gap1AE3[37];
-    char gap1B08;
-    char gap1B09;
-    char gap1B0A;
-    CalcExpWork levelUpInfo[6];
+    char field_1AE3;
+    HandlerParam_StrParams strParam;
+    CalcExpWork* levelUpInfo;
+    _BYTE gap1B10[68];
     int field_1B54;
     _BYTE gap1B58[316];
     char field_1C88;
@@ -1608,25 +1673,29 @@ struct SWAN_ALIGNED(8) ServerFlow
     char field_1C8A;
     char field_1C97;
     _BYTE gap1C98[224];
-    int HEManager; // *HEManager -> 504 bytes
+    int HEManager;
     _BYTE gap1D7C[8];
     char field_1D84;
-    SWAN_ALIGNED(4) char field_1D88;
+    char field_1D85;
+    char field_1D86;
+    char field_1D87;
+    char field_1D88;
     char field_1D89;
     char field_1D8A;
     _BYTE gap1D8B[481];
     char field_1F6C;
     _BYTE gap1F6D[11];
     __int16 PrevUsedMove;
-    char gap1F7A;
-    SWAN_ALIGNED(8) EffectivenessCounter effectivenessCounter;
+    char field_1F7A;
+    char field_1F7B;
+    ActionIgnoreReason actionIgnoreReason;
+    EffectivenessCounter effectivenessCounter;
     int dmgAffRec;
     _BYTE gap1F90[8];
     char field_1F98;
     _BYTE gap1F99[83];
-    char field_1FEC;
-    char field_1FED;
-    SWAN_ALIGNED(4) u8 TempWork;
+    u8 field_1FEC[4];
+    u8 TempWork;
     char field_1FF1;
     _BYTE gap1FF2[318];
     int field_2130;
@@ -2415,6 +2484,244 @@ enum ItemID
     IT0773_KEY_STONE = 0x305,
     IT0774_METEORITE_SHARD = 0x306,
     IT0775_EON_FLUTE = 0x307,
+    IT0776_NORMALIUM_Z = 0x308,
+    IT0777_FIRIUM_Z = 0x309,
+    IT0778_WATERIUM_Z = 0x30A,
+    IT0779_ELECTRIUM_Z = 0x30B,
+    IT0780_GRASSIUM_Z = 0x30C,
+    IT0781_ICIUM_Z = 0x30D,
+    IT0782_FIGHTINIUM_Z = 0x30E,
+    IT0783_POISONIUM_Z = 0x30F,
+    IT0784_GROUNDIUM_Z = 0x310,
+    IT0785_FLYINIUM_Z = 0x311,
+    IT0786_PSYCHIUM_Z = 0x312,
+    IT0787_BUGINIUM_Z = 0x313,
+    IT0788_ROCKIUM_Z = 0x314,
+    IT0789_GHOSTIUM_Z = 0x315,
+    IT0790_DRAGONIUM_Z = 0x316,
+    IT0791_DARKINIUM_Z = 0x317,
+    IT0792_STEELIUM_Z = 0x318,
+    IT0793_FAIRIUM_Z = 0x319,
+    IT0794_PIKANIUM_Z = 0x31A,
+    IT0795_BOTTLE_CAP = 0x31B,
+    IT0796_GOLD_BOTTLE_CAP = 0x31C,
+    IT0797_Z_RING = 0x31D,
+    IT0798_DECIDIUM_Z = 0x31E,
+    IT0799_INCINIUM_Z = 0x31F,
+    IT0800_PRIMARIUM_Z = 0x320,
+    IT0801_TAPUNIUM_Z = 0x321,
+    IT0802_MARSHADIUM_Z = 0x322,
+    IT0803_ALORAICHIUM_Z = 0x323,
+    IT0804_SNORLIUM_Z = 0x324,
+    IT0805_EEVIUM_Z = 0x325,
+    IT0806_MEWNIUM_Z = 0x326,
+    IT0807_NORMALIUM_Z = 0x327,
+    IT0808_FIRIUM_Z = 0x328,
+    IT0809_WATERIUM_Z = 0x329,
+    IT0810_ELECTRIUM_Z = 0x32A,
+    IT0811_GRASSIUM_Z = 0x32B,
+    IT0812_ICIUM_Z = 0x32C,
+    IT0813_FIGHTINIUM_Z = 0x32D,
+    IT0814_POISONIUM_Z = 0x32E,
+    IT0815_GROUNDIUM_Z = 0x32F,
+    IT0816_FLYINIUM_Z = 0x330,
+    IT0817_PSYCHIUM_Z = 0x331,
+    IT0818_BUGINIUM_Z = 0x332,
+    IT0819_ROCKIUM_Z = 0x333,
+    IT0820_GHOSTIUM_Z = 0x334,
+    IT0821_DRAGONIUM_Z = 0x335,
+    IT0822_DARKINIUM_Z = 0x336,
+    IT0823_STEELIUM_Z = 0x337,
+    IT0824_FAIRIUM_Z = 0x338,
+    IT0825_PIKANIUM_Z = 0x339,
+    IT0826_DECIDIUM_Z = 0x33A,
+    IT0827_INCINIUM_Z = 0x33B,
+    IT0828_PRIMARIUM_Z = 0x33C,
+    IT0829_TAPUNIUM_Z = 0x33D,
+    IT0830_MARSHADIUM_Z = 0x33E,
+    IT0831_ALORAICHIUM_Z = 0x33F,
+    IT0832_SNORLIUM_Z = 0x340,
+    IT0833_EEVIUM_Z = 0x341,
+    IT0834_MEWNIUM_Z = 0x342,
+    IT0835_PIKASHUNIUM_Z = 0x343,
+    IT0836_PIKASHUNIUM_Z = 0x344,
+    // 837 - 845
+    IT0846_ADRENALINE_ORB = 0x34E,
+    // 847 - 848
+    IT0849_ICE_STONE = 0x351,
+    // 850
+    IT0851_BEAST_BALL = 0x353,
+    IT0852_BIG_MALASADA = 0x354,
+    IT0853_RED_NECTAR = 0x355,
+    IT0854_YELLOW_NECTAR = 0x356,
+    IT0855_PINK_NECTAR = 0x357,
+    IT0856_PURPLE_NECTAR = 0x358,
+    // 857 - 878
+    IT0879_TERRAIN_EXTENDER = 0x36F,
+    IT0880_PROTECTIVE_PADS = 0x370,
+    IT0881_ELECTRIC_SEED = 0x371,
+    IT0882_PSYCHIC_SEED = 0x372,
+    IT0883_MISTY_SEED = 0x373,
+    IT0884_GRASSY_SEED = 0x374,
+    // 885 - 902
+    IT0903_PEWTER_CRUNCHIES = 0x387,
+    IT0904_FIGHTING_MEMORY = 0x388,
+    IT0905_FLYING_MEMORY = 0x389,
+    IT0906_POISON_MEMORY = 0x38A,
+    IT0907_GROUND_MEMORY = 0x38B,
+    IT0908_ROCK_MEMORY = 0x38C,
+    IT0909_BUG_MEMORY = 0x38D,
+    IT0910_GHOST_MEMORY = 0x38E,
+    IT0911_STEEL_MEMORY = 0x38F,
+    IT0912_FIRE_MEMORY = 0x390,
+    IT0913_WATER_MEMORY = 0x391,
+    IT0914_GRASS_MEMORY = 0x392,
+    IT0915_ELECTRIC_MEMORY = 0x393,
+    IT0916_PSYCHIC_MEMORY = 0x394,
+    IT0917_ICE_MEMORY = 0x395,
+    IT0918_DRAGON_MEMORY = 0x396,
+    IT0919_DARK_MEMORY = 0x397,
+    IT0920_FAIRY_MEMORY = 0x398,
+    IT0921_SOLGANIUM_Z = 0x399,
+    IT0922_LUNALIUM_Z = 0x39A,
+    IT0923_ULTRANECROZIUM_Z = 0x39B,
+    IT0924_MIMIKIUM_Z = 0x39C,
+    IT0925_LYCANIUM_Z = 0x39D,
+    IT0926_KOMMONIUM_Z = 0x39E,
+    IT0927_SOLGANIUM_Z = 0x39F,
+    IT0928_LUNALIUM_Z = 0x3A0,
+    IT0929_ULTRANECROZIUM_Z = 0x3A1,
+    IT0930_MIMIKIUM_Z = 0x3A2,
+    IT0931_LYCANIUM_Z = 0x3A3,
+    IT0932_KOMMONIUM_Z = 0x3A4,
+    IT0933_Z_POWER_RING = 0x3A5,
+    // 934 - 1076
+    IT1077_DYNAMAX_BAND = 0x435,
+    // 1078 - 1102
+    IT1103_RUSTED_SWORD = 0x44F,
+    IT1104_RUSTED_SHIELD = 0x450,
+    IT1105_FOSSILIZED_BIRD = 0x451,
+    IT1106_FOSSILIZED_ISH = 0x452,
+    IT1107_FOSSILIZED_DRAKE = 0x453,
+    IT1108_FOSSILIZED_DINO = 0x454,
+    IT1109_STRAWBERRY_SWEET = 0x455,
+    IT1110_LOVE_SWEET = 0x456,
+    IT1111_BERRY_SWEET = 0x457,
+    IT1112_CLOVER_SWEET = 0x458,
+    IT1113_FLOWER_SWEET = 0x459,
+    IT1114_STAR_SWEET = 0x45A,
+    IT1115_RIBBON_SWEET = 0x45B,
+    IT1116_SWEET_APPLE = 0x45C,
+    IT1117_TART_APPLE = 0x45D,
+    IT1118_THROAT_SPRAY = 0x45E,
+    IT1119_EJECT_PACK = 0x45F,
+    IT1120_HEAVY_DUTY_BOOTS = 0x460,
+    IT1121_BLUNDER_POLICY = 0x461,
+    IT1122_ROOM_SERVICE = 0x462,
+    IT1123_UTILITY_UMBRELLA = 0x463,
+    IT1124_EXP_CANDY_XS = 0x464,
+    IT1125_EXP_CANDY_S = 0x465,
+    IT1126_EXP_CANDY_M = 0x466,
+    IT1127_EXP_CANDY_L = 0x467,
+    IT1128_EXP_CANDY_XL = 0x468,
+    // 1128 - 1230
+    IT1231_MINT_ATTACK = 0x4CF,
+    IT1232_MINT_ATTACK = 0x4D0,
+    IT1233_MINT_ATTACK = 0x4D1,
+    IT1234_MINT_ATTACK = 0x4D2,
+    IT1235_MINT_DEFENSE = 0x4D3,
+    IT1236_MINT_DEFENSE = 0x4D4,
+    IT1237_MINT_DEFENSE = 0x4D5,
+    IT1238_MINT_DEFENSE = 0x4D6,
+    IT1239_MINT_SP_ATK = 0x4D7,
+    IT1240_MINT_SP_ATK = 0x4D8,
+    IT1241_MINT_SP_ATK = 0x4D9,
+    IT1242_MINT_SP_ATK = 0x4DA,
+    IT1243_MINT_SP_DEF = 0x4DB,
+    IT1244_MINT_SP_DEF = 0x4DC,
+    IT1245_MINT_SP_DEF = 0x4DD,
+    IT1246_MINT_SP_DEF = 0x4DE,
+    IT1247_MINT_SPEED = 0x4DF,
+    IT1248_MINT_SPEED = 0x4E0,
+    IT1249_MINT_SPEED = 0x4E1,
+    IT1250_MINT_SPEED = 0x4E2,
+    IT1251_SERIOUS_MINT = 0x4E3,
+    IT1252_WISHING_PIECE = 0x4E4,
+    IT1253_CRACKED_POT = 0x4E5,
+    IT1254_CHIPPED_POT = 0x4E6,
+    // 1255 - 1266
+    IT1267_CATCHING_CHARM = 0x4F3,
+    // 1268 - 1580
+    IT1581_GALARICA_TWIG = 0x62D,
+    IT1582_GALARICA_CUFF = 0x62E,
+    // 1583 - 1586
+    IT1587_EXP_CHARM = 0x633,
+    // 1588 - 1588
+    IT1589_MARK_CHARM = 0x635,
+    IT1590_REINS_OF_UNITY = 0x636,
+    IT1591_REINS_OF_UNITY = 0x637,
+    IT1592_GALARICA_WREATH = 0x638,
+    // 1593 - 1605
+    IT1606_ABILITY_PATCH = 0x646,
+    // 1607 - 1690
+    IT1691_BLACK_AUGURITE = 0x69B,
+    IT1692_PEAT_BLOCK = 0x69C,
+    // 1693 - 1776
+    IT1777_ADAMANT_CRYSTAL = 0x6F1,
+    IT1778_LUSTROUS_GLOBE = 0x6F2,
+    IT1779_GRISEOUS_CORE = 0x6F3,
+    IT1780_BLANK_PLATE = 0x6F4,
+    // 1781 - 1784
+    IT1785_STRANGE_BALL = 0x6F9,
+    // 1786 - 1827
+    IT1828_LEGEND_PLATE = 0x724,
+    // 1829 - 1856
+    IT1857_SCROLL_OF_DARKNESS = 0x741,
+    IT1858_SCROLL_OF_WATERS = 0x742,
+    // 1859 - 1860
+    IT1861_MALICIOUS_ARMOR = 0x745,
+    IT1862_NORMAL_TERA_SHARD = 0x746,
+    IT1863_FIRE_TERA_SHARD = 0x747,
+    IT1864_WATER_TERA_SHARD = 0x748,
+    IT1865_ELECTRIC_TERA_SHARD = 0x749,
+    IT1866_GRASS_TERA_SHARD = 0x74A,
+    IT1867_ICE_TERA_SHARD = 0x74B,
+    IT1868_FIGHTING_TERA_SHARD = 0x74C,
+    IT1869_POISON_TERA_SHARD = 0x74D,
+    IT1870_GROUND_TERA_SHARD = 0x74E,
+    IT1871_FLYING_TERA_SHARD = 0x74F,
+    IT1872_PSYCHIC_TERA_SHARD = 0x750,
+    IT1873_BUG_TERA_SHARD = 0x751,
+    IT1874_ROCK_TERA_SHARD = 0x752,
+    IT1875_GHOST_TERA_SHARD = 0x753,
+    IT1876_DRAGON_TERA_SHARD = 0x754,
+    IT1877_DARK_TERA_SHARD = 0x755,
+    IT1878_STEEL_TERA_SHARD = 0x756,
+    IT1879_FAIRY_TERA_SHARD = 0x757,
+    IT1880_BOOSTER_ENERGY = 0x758,
+    IT1881_ABILITY_SHIELD = 0x759,
+    IT1882_CLEAR_AMULET = 0x75A,
+    IT1883_MIRROR_HERB = 0x75B,
+    IT1884_PUNCHING_GLOVE = 0x75C,
+    IT1885_COVERT_CLOAK = 0x75D,
+    IT1886_LOADED_DICE = 0x75E,
+    // 1887 - 2344
+    IT2345_LEADERS_CREST = 0x929,
+    // 2346 - 2400
+    IT2401_FAIRY_FEATHER = 0x961,
+    IT2402_SYRUPY_APPLE = 0x962,
+    IT2403_UNREMARKABLE_TEACUP = 0x963,
+    IT2404_MASTERPIECE_TEACUP = 0x964,
+    IT2405_TEAL_MASK = 0x965,
+    IT2406_CORNERSTONE_MASK = 0x966,
+    IT2407_WELLSPRING_MASK = 0x967,
+    IT2408_HEARTHFLAME_MASK = 0x968,
+    // 2409 - 2480
+    IT2481_GLIMMERING_CHARM = 0x9B1,
+    IT2482_METAL_ALLOY = 0x9B2,
+    // 2483 - 2548
+    IT2549_STELLAR_TERA_SHARD = 0x9F5,
+    IT_ITEM_AMOUNT
 };
 
 enum BattleMonValue
@@ -2445,170 +2752,171 @@ enum BattleMonValue
 
 enum BattleEventType
 {
-    BattleEvent_Null = 0,
-    BattleEvent_ActionProcessingStart = 1,
-    BattleEvent_ActionProcessingEnd = 2,
-    BattleEvent_MoveSequenceStart = 3,
-    BattleEvent_MoveSequenceEnd = 4,
-    BattleEvent_BypassSubstitute = 5,
-    BattleEvent_CheckDelayedMove = 6,
-    BattleEvent_DecideDelayedMove = 7,
-    BattleEvent_MoveSequenceSteal = 8,
-    BattleEvent_MoveSequenceReflect = 9,
-    BattleEvent_A = 0xA,
-    BattleEvent_SkipRunCalc = 0xB,
-    BattleEvent_PreventRun = 0xC,
-    BattleEvent_RunExitMessage = 0xD,
-    BattleEvent_CheckSleep = 0xE,
-    BattleEvent_CheckSpecialPriority = 0xF,
-    BattleEvent_GetMovePriority = 0x11,
-    BattleEvent_CheckFloating = 0x12,
-    BattleEvent_CalcSpeed = 0x13,
-    BattleEvent_14 = 0x14,
-    BattleEvent_BeforeAttacks = 0x15,
-    BattleEvent_MoveRequestForActionOrder = 0x16,
-    BattleEvent_MoveRequestCheckFail = 0x17,
-    BattleEvent_MoveRequestParam = 0x18,
-    BattleEvent_MoveRequestMessage = 0x19,
-    BattleEvent_CheckMoveSteal = 0x1A,
-    BattleEvent_FloatingImmuneToMove = 0x1B,
-    BattleEvent_SkipAvoidCheck = 0x1C,
-    BattleEvent_CheckMoveFail = 0x1D,
-    BattleEvent_MoveExecuteCheck1 = 0x1E,
-    BattleEvent_MoveExecuteCheck2 = 0x1F,
-    BattleEvent_MoveExecuteCheck3 = 0x20,
-    BattleEvent_MoveExecuteFail = 0x21,
-    BattleEvent_ChooseMove = 0x22,
-    BattleEvent_BreakOpponentGuard = 0x23,
-    BattleEvent_MoveExecuteStart = 0x24,
-    BattleEvent_MoveExecuteEffective = 0x25,
-    BattleEvent_MoveExecuteNoEffect = 0x26,
-    BattleEvent_MoveExecuteEnd = 0x27,
-    BattleEvent_MoveParam = 0x28,
-    BattleEvent_DecideTarget = 0x29,
-    BattleEvent_RedirectTarget = 0x2A,
-    BattleEvent_RedirectTargetEnd = 0x2B,
-    BattleEvent_NoEffectCheck = 0x2C,
-    BattleEvent_AbilityCheckNoEffect = 0x2D,
-    BattleEvent_CheckProtectBreak = 0x2E,
-    BattleEvent_AvoidMove = 0x2F,
-    BattleEvent_CheckDamageToRecover = 0x30,
-    BattleEvent_ApplyDamageToRecover = 0x31,
-    BattleEvent_BypassAccuracyCheck = 0x32,
-    BattleEvent_MoveAccuracyStage = 0x33,
-    BattleEvent_MoveAccuracy = 0x34,
-    BattleEvent_MoveHitCount = 0x35,
-    BattleEvent_CriticalCheck = 0x36,
-    BattleEvent_MoveBasePower = 0x37,
-    BattleEvent_MovePower = 0x38,
-    BattleEvent_BeforeAttackerPower = 0x39,
-    BattleEvent_BeforeDefenderGuard = 0x3A,
-    BattleEvent_AttackerPower = 0x3B,
-    BattleEvent_DefenderGuard = 0x3C,
-    BattleEvent_CheckTypeEffectivenessEnable = 0x3D,
-    BattleEvent_CheckTypeEffectiveness = 0x3E,
-    BattleEvent_RewriteTypeEffectiveness = 0x3F,
-    BattleEvent_TypeMatchCheck = 0x40,
-    BattleEvent_SameTypeAttackBonus = 0x41,
-    BattleEvent_AttackerType = 0x42,
-    BattleEvent_DefenderType = 0x43,
-    BattleEvent_AfterDamageReaction = 0x44,
-    BattleEvent_DetermineMoveDamage = 0x45,
-    BattleEvent_MoveDamageProcessing1 = 0x46,
-    BattleEvent_MoveDamageProcessing2 = 0x47,
-    BattleEvent_MoveDamageProcessingEnd = 0x48,
-    BattleEvent_MoveDamageProcessingFinal = 0x49,
-    BattleEvent_PreviousMoveReaction = 0x4A,
-    BattleEvent_MoveDamageReaction1 = 0x4B,
-    BattleEvent_MoveDamageReaction2 = 0x4C,
-    BattleEvent_MoveDamageSideAfter = 0x4D,
-    BattleEvent_DecrementPP = 0x4E,
-    BattleEvent_DecrementPPDone = 0x4F,
-    BattleEvent_CalcRecoil = 0x50,
-    BattleEvent_AddStatStageChangeTarget = 0x51,
-    BattleEvent_AddStatStageChangeUser = 0x52,
-    BattleEvent_SwitchOutInterrupt = 0x53,
-    BattleEvent_SwitchOutEnd = 0x54,
-    BattleEvent_SwitchIn = 0x55,
-    BattleEvent_SwitchInPrevious = 0x56,
-    BattleEvent_AfterLastSwitchIn = 0x57,
-    BattleEvent_CheckActivation = 0x58,
-    BattleEvent_GetStatStageChangeValue = 0x59,
-    BattleEvent_StatStageChange = 0x5A,
-    BattleEvent_StatStageChangeLastCheck = 0x5B,
-    BattleEvent_StatStageChangeFail = 0x5C,
-    BattleEvent_StatStageChangeApplied = 0x5D,
-    BattleEvent_MoveStatStageChangeApplied = 0x5E,
-    BattleEvent_MoveConditionTurnCount = 0x5F,
-    BattleEvent_MoveConditionSpecial = 0x60,
-    BattleEvent_MoveConditionMessage = 0x61,
-    BattleEvent_MoveConditionParam = 0x62,
-    BattleEvent_AddConditionType = 0x63,
-    BattleEvent_AddCondition = 0x64,
-    BattleEvent_AddConditionCheckFail = 0x65,
-    BattleEvent_AddConditionApplied = 0x66,
-    BattleEvent_AddConditionFail = 0x67,
-    BattleEvent_AddBasicStatus = 0x68,
-    BattleEvent_MoveConditionApplied = 0x69,
-    BattleEvent_AbilityNullified = 0x6A,
-    BattleEvent_ConditionDamage = 0x6B,
-    BattleEvent_MoveFlinchChance = 0x6C,
-    BattleEvent_FlinchCheck = 0x6D,
-    BattleEvent_FlinchFail = 0x6E,
-    BattleEvent_FlinchApplied = 0x6F,
-    BattleEvent_OHKOCheck = 0x70,
-    BattleEvent_OHKOPrevent = 0x71,
-    BattleEvent_UseItem = 0x72,
-    BattleEvent_UseItemTemp = 0x73,
-    BattleEvent_EndureCheck = 0x74,
-    BattleEvent_Endure = 0x75,
-    BattleEvent_TurnCheckBegin = 0x76,
-    BattleEvent_TurnCheckEnd = 0x77,
-    BattleEvent_TurnCheckDone = 0x78,
-    BattleEvent_NotifyAirLock = 0x79,
-    BattleEvent_WeatherCheck = 0x7A,
-    BattleEvent_WeightRatio = 0x7B,
-    BattleEvent_MoveWeatherTurnCount = 0x7C,
-    BattleEvent_WeatherChange = 0x7D,
-    BattleEvent_AfterWeatherChange = 0x7E,
-    BattleEvent_WeatherReaction = 0x7F,
-    BattleEvent_EnableSimpleDamage = 0x80,
-    BattleEvent_DamageProcessingStart = 0x81,
-    BattleEvent_DamageProcessingEndPreviousHit = 0x82,
-    BattleEvent_DamageProcessingEndHitReal = 0x83,
-    BattleEvent_DamageProcessingEndHit1 = 0x84,
-    BattleEvent_DamageProcessingEndHit2 = 0x85,
-    BattleEvent_DamageProcessingEndHit3 = 0x86,
-    BattleEvent_DamageProcessingEndHit4 = 0x87,
-    BattleEvent_DamageProcessingEnd = 0x88,
-    BattleEvent_BeforeAbilityChange = 0x89,
-    BattleEvent_AfterAbilityChange = 0x8A,
-    BattleEvent_CheckForceSwitch = 0x8B,
-    BattleEvent_CalcDrain = 0x8C,
-    BattleEvent_CalcDrainEnd = 0x8D,
-    BattleEvent_RecoverHP = 0x8F,
-    BattleEvent_AfterItemEquip = 0x90,
-    BattleEvent_CheckItemReaction = 0x91,
-    BattleEvent_ItemConsumed = 0x92,
-    BattleEvent_CheckChargeUpFail = 0x93,
-    BattleEvent_CheckChargeUpSkip = 0x94,
-    BattleEvent_ChargeUpStart = 0x95,
-    BattleEvent_ChargeUpStartDone = 0x96,
-    BattleEvent_ChargeUpSkip = 0x97,
-    BattleEvent_ChargeUpEnd = 0x98,
-    BattleEvent_CheckSemiInvuln = 0x99,
-    BattleEvent_HeldItemCheck = 0x9A,
-    BattleEvent_HeldItemFail = 0x9B,
-    BattleEvent_HeldItemDecide = 0x9C,
-    BattleEvent_ItemRewriteDone = 0x9D,
-    BattleEvent_CallFieldEffect = 0x9E,
-    BattleEvent_CheckSideEffectParam = 0x9F,
-    BattleEvent_UncategorizedMove = 0xA0,
-    BattleEvent_UncategorizedMoveNoTarget = 0xA1,
-    BattleEvent_CombinedMoveCheck = 0xA2,
-    BattleEvent_NotifyFainted = 0xA3,
-    BattleEvent_AfterMove = 0xA4
+    EVENT_NULL = 0x0,
+    EVENT_ACTION_PROCESSING_START = 0x1,
+    EVENT_ACTION_PROCESSING_END = 0x2,
+    EVENT_MOVE_SEQUENCE_START = 0x3,
+    EVENT_MOVE_SEQUENCE_END = 0x4,
+    EVENT_BYPASS_SUBSTITUTE = 0x5,
+    EVENT_CHECK_DELAYED_MOVE = 0x6,
+    EVENT_DECIDE_DELAYED_MOVE = 0x7,
+    EVENT_MOVE_SEQUENCE_STEAL = 0x8,
+    EVENT_MOVE_SEQUENCE_REFLECT = 0x9,
+    EVENT_A = 0xA,
+    EVENT_SKIP_RUN_CALC = 0xB,
+    EVENT_PREVENT_RUN = 0xC,
+    EVENT_RUN_EXIT_MESSAGE = 0xD,
+    EVENT_CHECK_SLEEP = 0xE,
+    EVENT_CHECK_SPECIAL_PRIORITY = 0xF,
+    EVENT_GET_MOVE_PRIORITY = 0x11,
+    EVENT_CHECK_FLOATING = 0x12,
+    EVENT_CALC_SPEED = 0x13,
+    EVENT_14 = 0x14,
+    EVENT_BEFORE_ATTACKS = 0x15,
+    EVENT_MOVE_REQUEST_FOR_ACTION_ORDER = 0x16,
+    EVENT_MOVE_REQUEST_CHECK_FAIL = 0x17,
+    EVENT_MOVE_REQUEST_PARAM = 0x18,
+    EVENT_MOVE_REQUEST_MESSAGE = 0x19,
+    EVENT_CHECK_MOVE_STEAL = 0x1A,
+    EVENT_FLOATING_IMMUNE_TO_MOVE = 0x1B,
+    EVENT_SKIP_AVOID_CHECK = 0x1C,
+    EVENT_CHECK_MOVE_FAIL = 0x1D,
+    EVENT_MOVE_EXECUTE_CHECK1 = 0x1E,
+    EVENT_MOVE_EXECUTE_CHECK2 = 0x1F,
+    EVENT_MOVE_EXECUTE_CHECK3 = 0x20,
+    EVENT_MOVE_EXECUTE_FAIL = 0x21,
+    EVENT_CHOOSE_MOVE = 0x22,
+    EVENT_BREAK_OPPONENT_GUARD = 0x23,
+    EVENT_MOVE_EXECUTE_START = 0x24,
+    EVENT_MOVE_EXECUTE_EFFECTIVE = 0x25,
+    EVENT_MOVE_EXECUTE_NOEFFECT = 0x26,
+    EVENT_MOVE_EXECUTE_END = 0x27,
+    EVENT_MOVE_PARAM = 0x28,
+    EVENT_DECIDE_TARGET = 0x29,
+    EVENT_REDIRECT_TARGET = 0x2A,
+    EVENT_REDIRECT_TARGETEND = 0x2B,
+    EVENT_NOEFFECT_CHECK = 0x2C,
+    EVENT_ABILITY_CHECK_NO_EFFECT = 0x2D,
+    EVENT_CHECK_PROTECT_BREAK = 0x2E,
+    EVENT_AVOID_MOVE = 0x2F,
+    EVENT_CHECK_DAMAGE_TO_RECOVER = 0x30,
+    EVENT_APPLY_DAMAGE_TO_RECOVER = 0x31,
+    EVENT_BYPASS_ACCURACY_CHECK = 0x32,
+    EVENT_MOVE_ACCURACY_STAGE = 0x33,
+    EVENT_MOVE_ACCURACY = 0x34,
+    EVENT_MOVE_HIT_COUNT = 0x35,
+    EVENT_CRITICAL_CHECK = 0x36,
+    EVENT_MOVE_BASE_POWER = 0x37,
+    EVENT_MOVE_POWER = 0x38,
+    EVENT_BEFORE_ATTACKER_POWER = 0x39,
+    EVENT_BEFORE_DEFENDER_GUARD = 0x3A,
+    EVENT_ATTACKER_POWER = 0x3B,
+    EVENT_DEFENDER_GUARD = 0x3C,
+    EVENT_CHECK_TYPE_EFFECTIVENESS_ENABLE = 0x3D,
+    EVENT_CHECK_TYPE_EFFECTIVENESS = 0x3E,
+    EVENT_REWRITE_TYPE_EFFECTIVENESS = 0x3F,
+    EVENT_TYPE_MATCH_CHECK = 0x40,
+    EVENT_SAME_TYPE_ATTACK_BONUS = 0x41,
+    EVENT_ATTACKER_TYPE = 0x42,
+    EVENT_DEFENDER_TYPE = 0x43,
+    EVENT_AFTER_DAMAGE_REACTION = 0x44,
+    EVENT_DETERMINE_MOVE_DAMAGE = 0x45,
+    EVENT_MOVE_DAMAGE_PROCESSING_1 = 0x46,
+    EVENT_MOVE_DAMAGE_PROCESSING_2 = 0x47,
+    EVENT_MOVE_DAMAGE_PROCESSING_END = 0x48,
+    EVENT_MOVE_DAMAGE_PROCESSING_FINAL = 0x49,
+    EVENT_PREVIOUS_MOVE_REACTION = 0x4A,
+    EVENT_MOVE_DAMAGE_REACTION_1 = 0x4B,
+    EVENT_MOVE_DAMAGE_REACTION_2 = 0x4C,
+    EVENT_MOVE_DAMAGE_SIDE_AFTER = 0x4D,
+    EVENT_DECREMENT_PP = 0x4E,
+    EVENT_DECREMENT_PP_DONE = 0x4F,
+    EVENT_CALC_RECOIL = 0x50,
+    EVENT_ADD_STAT_STAGE_CHANGE_TARGET = 0x51,
+    EVENT_ADD_STAT_STAGE_CHANGE_USER = 0x52,
+    EVENT_SWITCH_OUT_INTERRUPT = 0x53,
+    EVENT_SWITCH_OUT_END = 0x54,
+    EVENT_SWITCH_IN = 0x55,
+    EVENT_SWITCH_IN_PREVIOUS = 0x56,
+    EVENT_AFTER_LAST_SWITCHIN = 0x57,
+    EVENT_CHECK_ACTIVATION = 0x58,
+    EVENT_GET_STAT_STAGE_CHANGE_VALUE = 0x59,
+    EVENT_STAT_STAGE_CHANGE = 0x5A,
+    EVENT_STAT_STAGE_CHANGE_LAST_CHECK = 0x5B,
+    EVENT_STAT_STAGE_CHANGE_FAIL = 0x5C,
+    EVENT_STAT_STAGE_CHANGE_APPLIED = 0x5D,
+    EVENT_MOVE_STAT_STAGE_CHANGE_APPLIED = 0x5E,
+    EVENT_MOVE_CONDITION_TURN_COUNT = 0x5F,
+    EVENT_MOVE_CONDITION_SPECIAL = 0x60,
+    EVENT_MOVE_CONDITION_MESSAGE = 0x61,
+    EVENT_MOVE_CONDITION_PARAM = 0x62,
+    EVENT_ADD_CONDITION_TYPE = 0x63,
+    EVENT_ADD_CONDITION = 0x64,
+    EVENT_ADD_CONDITION_CHECK_FAIL = 0x65,
+    EVENT_ADD_CONDITION_APPLIED = 0x66,
+    EVENT_ADD_CONDITION_FAIL = 0x67,
+    EVENT_ADD_BASIC_STATUS = 0x68,
+    EVENT_MOVE_CONDITION_APPLIED = 0x69,
+    EVENT_ABILITY_NULLIFIED = 0x6A,
+    EVENT_CONDITION_DAMAGE = 0x6B,
+    EVENT_MOVE_FLINCH_CHANCE = 0x6C,
+    EVENT_FLINCH_CHECK = 0x6D,
+    EVENT_FLINCH_FAIL = 0x6E,
+    EVENT_FLINCH_APPLIED = 0x6F,
+    EVENT_OHKO_CHECK = 0x70,
+    EVENT_OHKO_PREVENT = 0x71,
+    EVENT_USE_ITEM = 0x72,
+    EVENT_USE_ITEM_TEMP = 0x73,
+    EVENT_ENDURE_CHECK = 0x74,
+    EVENT_ENDURE = 0x75,
+    EVENT_TURN_CHECK_BEGIN = 0x76,
+    EVENT_TURN_CHECK_END = 0x77,
+    EVENT_TURN_CHECK_DONE = 0x78,
+    EVENT_NOTIFY_AIR_LOCK = 0x79,
+    EVENT_WEATHER_CHECK = 0x7A,
+    EVENT_WEIGHT_RATIO = 0x7B,
+    EVENT_MOVE_WEATHER_TURN_COUNT = 0x7C,
+    EVENT_WEATHER_CHANGE = 0x7D,
+    EVENT_AFTER_WEATHER_CHANGE = 0x7E,
+    EVENT_WEATHER_REACTION = 0x7F,
+    EVENT_ENABLE_SIMPLE_DAMAGE = 0x80,
+    EVENT_DAMAGE_PROCESSING_START = 0x81,
+    EVENT_DAMAGE_PROCESSING_END_PREVIOUSHIT = 0x82,
+    EVENT_DAMAGE_PROCESSING_END_HIT_REAL = 0x83,
+    EVENT_DAMAGE_PROCESSING_END_HIT_1 = 0x84,
+    EVENT_DAMAGE_PROCESSING_END_HIT_2 = 0x85,
+    EVENT_DAMAGE_PROCESSING_END_HIT_3 = 0x86,
+    EVENT_DAMAGE_PROCESSING_END_HIT_4 = 0x87,
+    EVENT_DAMAGE_PROCESSING_END = 0x88,
+    EVENT_BEFORE_ABILITY_CHANGE = 0x89,
+    EVENT_AFTER_ABILITY_CHANGE = 0x8A,
+    EVENT_CHECK_FORCE_SWITCH = 0x8B,
+    EVENT_CALC_DRAIN = 0x8C,
+    EVENT_CALC_DRAIN_END = 0x8D,
+    EVENT_RECOVER_HP = 0x8F,
+    EVENT_AFTER_ITEM_EQUIP = 0x90,
+    EVENT_CHECK_ITEM_REACTION = 0x91,
+    EVENT_ITEM_CONSUMED = 0x92,
+    EVENT_CHECK_CHARGE_UP_FAIL = 0x93,
+    EVENT_CHECK_CHARGE_UP_SKIP = 0x94,
+    EVENT_CHARGE_UP_START = 0x95,
+    EVENT_CHARGE_UP_START_DONE = 0x96,
+    EVENT_CHARGE_UP_SKIP = 0x97,
+    EVENT_CHARGE_UP_END = 0x98,
+    EVENT_CHECK_HIDING = 0x99,
+    EVENT_HELD_ITEM_CHECK = 0x9A,
+    EVENT_HELD_ITEM_FAIL = 0x9B,
+    EVENT_HELD_ITEM_DECIDE = 0x9C,
+    EVENT_ITEM_REWRITE_DONE = 0x9D,
+    EVENT_CALL_FIELD_EFFECT = 0x9E,
+    EVENT_CHECK_SIDE_EFFECT_PARAM = 0x9F,
+    EVENT_UNCATEGORIZED_MOVE = 0xA0,
+    EVENT_UNCATEGORIZED_MOVE_NO_TARGET = 0xA1,
+    EVENT_COMBINED_MOVE_CHECK = 0xA2,
+    EVENT_NOTIFY_FAINTED = 0xA3,
+    EVENT_AFTER_MOVE = 0xA4,
 };
+
 
 enum MoveCondition
 {
@@ -2653,11 +2961,18 @@ enum MoveCondition
 
 enum BattleEventVar
 {
+    VAR_NULL = 0x0,
+    VAR_1 = 0x1,
     VAR_MON_ID = 0x2,
     VAR_ATTACKING_MON = 0x3,
     VAR_DEFENDING_MON = 0x4,
-    VAR_POKE_COUNT = 0x5,
+    VAR_TARGET_COUNT = 0x5,
     VAR_TARGET_MON_ID = 0x6,
+    VAR_7 = 0x7,
+    VAR_8 = 0x8,
+    VAR_9 = 0x9,
+    VAR_A = 0xA,
+    VAR_B = 0xB,
     VAR_ACTION = 0xC,
     VAR_POKE_POS = 0xD,
     VAR_ORIGINAL_TARGET = 0xE,
@@ -2678,13 +2993,16 @@ enum BattleEventVar
     VAR_CONDITION_ID = 0x1D,
     VAR_CONDITION_ADDRESS = 0x1E,
     VAR_MOVE_EFFECT = 0x1F,
-    VAR_STAT_BOOST_AMOUNT = 0x20,
-    VAR_FLOATING = 0x21,
+    VAR_VOLUME = 0x20,
+    VAR_SEMI_INVULN_TYPE = 0x21,
     VAR_FAIL_CAUSE = 0x22,
+    VAR_23 = 0x23,
     VAR_EFFECT_TURN_COUNT = 0x24,
     VAR_DEFAULT_EFFECT_CHANCE = 0x25,
     VAR_EFFECT_CHANCE = 0x26,
-    VAR_EVASION_STAGE = 0x27,
+    VAR_ACCURACY_STAGE = 0x27,
+    VAR_EVASION_STAGE = 0x28,
+    VAR_MAX_HIT_COUNT = 0x29,
     VAR_HIT_COUNT = 0x2A,
     VAR_ACCURACY = 0x2B,
     VAR_CRIT_STAGE = 0x2C,
@@ -2695,7 +3013,9 @@ enum BattleEventVar
     VAR_MOVE_POWER_RATIO = 0x31,
     VAR_DAMAGE = 0x32,
     VAR_POWER = 0x33,
+    VAR_GUARD = 0x34,
     VAR_RATIO = 0x35,
+    VAR_36 = 0x36,
     VAR_FIXED_DAMAGE = 0x37,
     VAR_TYPE_EFFECTIVENESS = 0x38,
     VAR_WEATHER = 0x39,
@@ -2707,20 +3027,25 @@ enum BattleEventVar
     VAR_WORK_ADDRESS = 0x3F,
     VAR_NO_EFFECT_FLAG = 0x40,
     VAR_MOVE_FAIL_FLAG = 0x41,
-    VAR_SEMI_INVULNERABLE = 0x42,
+    VAR_AVOID_FLAG = 0x42,
+    VAR_43 = 0x43,
+    VAR_TYPE_MATCH_FLAG = 0x44,
     VAR_CRITICAL_FLAG = 0x45,
-    VAR_SUBSTITUTE = 0x46,
-    VAR_EFFECT_BLOCKED = 0x47,
-    VAR_SHEER_FORCE = 0x48,
+    VAR_SUBSTITUTE_FLAG = 0x46,
+    VAR_SHIELD_DUST_FLAG = 0x47,
+    VAR_SHEER_FORCE_FLAG = 0x48,
+    VAR_49 = 0x49,
     VAR_TRICK_ROOM_FLAG = 0x4A,
     VAR_NO_TYPE_EFFECTIVENESS = 0x4B,
     VAR_SET_TYPE_EFFECTIVENESS = 0x4C,
     VAR_DELAY_ATTACK_FLAG = 0x4D,
-    VAR_MAGIC_COAT = 0x4E,
+    VAR_MAGIC_COAT_FLAG = 0x4E,
     VAR_MESSAGE_FLAG = 0x4F,
     VAR_GENERAL_USE_FLAG = 0x51,
+    VAR_SIDE = 0x52,
     VAR_SIDE_EFFECT = 0x53,
 };
+
 
 struct FRONT_POKE_SEEK_WORK
 {
@@ -2854,13 +3179,6 @@ struct ReqMoveWork
     u8 targetPos;
 };
 
-struct HandlerParam_StrParams
-{
-    u16 ID;
-    int type;
-    int args[8];
-};
-
 enum BattleFieldEffect
 {
     EFFECT_WEATHER = 0x0,
@@ -2990,69 +3308,69 @@ struct SWAN_ALIGNED(4) ItemData
 
 enum ItemField
 {
-    ITSTAT_PRICE = 0x0,
-    ITSTAT_USE_EFFECT = 0x1,
-    ITSTAT_USE_PARAM = 0x2,
-    ITSTAT_FLAG1 = 0x3,
-    ITSTAT_FLAG2 = 0x4,
-    ITSTAT_POCKET_FIELD = 0x5,
-    ITSTAT_EFFECT_FIELD = 0x6,
-    ITSTAT_EFFECT_BATTLE = 0x7,
-    ITSTAT_NATURAL_GIFT_EFFECT = 0x8,
-    ITSTAT_FLING_EFFECT = 0x9,
-    ITSTAT_FLING_POWER = 0xA,
-    ITSTAT_NATURAL_GIFT_POWER = 0xB,
-    ITSTAT_NATURAL_GIFT_TYPE = 0xC,
-    ITSTAT_POCKET_BATTLE = 0xD,
-    ITSTAT_HAS_BATTLE_STATS = 0xE,
-    ITSTAT_CLASS = 0xF,
-    ITSTAT_CONSUMABLE = 0x10,
-    ITSTAT_SORT_IDX = 0x11,
-    ITSTAT_AILMENT_SLP = 0x12,
-    ITSTAT_AILMENT_PSN = 0x13,
-    ITSTAT_AILMENT_BRN = 0x14,
-    ITSTAT_AILMENT_FRZ = 0x15,
-    ITSTAT_AILMENT_PAR = 0x16,
-    ITSTAT_AILMENT_CFZ = 0x17,
-    ITSTAT_AILMENT_INF = 0x18,
-    ITSTAT_AILMENT_GSP = 0x19,
-    ITSTAT_BOOST_REVIVE = 0x1A,
-    ITSTAT_BOOST_SACRED_ASH = 0x1B,
-    ITSTAT_BOOST_RARECANDY = 0x1C,
-    ITSTAT_BOOST_EVOSTONE = 0x1D,
-    ITSTAT_BOOST_ATK = 0x1E,
-    ITSTAT_BOOST_DEF = 0x1F,
-    ITSTAT_BOOST_SPA = 0x20,
-    ITSTAT_BOOST_SPD = 0x21,
-    ITSTAT_BOOST_SPE = 0x22,
-    ITSTAT_BOOST_ACC = 0x23,
-    ITSTAT_BOOST_CRIT = 0x24,
-    ITSTAT_BOOST_PP1 = 0x25,
-    ITSTAT_BOOST_PPMAX = 0x26,
-    ITSTAT_FLAG_PPREPLENISH = 0x27,
-    ITSTAT_FLAG_PPREPLENISH_FULL = 0x28,
-    ITSTAT_FLAG_HPREPLENISH = 0x29,
-    ITSTAT_FLAG_EVADD_HP = 0x2A,
-    ITSTAT_FLAG_EVADD_ATK = 0x2B,
-    ITSTAT_FLAG_EVADD_DEF = 0x2C,
-    ITSTAT_FLAG_EVADD_SPE = 0x2D,
-    ITSTAT_FLAG_EVADD_SPA = 0x2E,
-    ITSTAT_FLAG_EVADD_SPD = 0x2F,
-    ITSTAT_FLAG_EVADD_ABOVE100 = 0x30,
-    ITSTAT_FLAG_FRIENDSHIP_ADD1 = 0x31,
-    ITSTAT_FLAG_FRIENDSHIP_ADD2 = 0x32,
-    ITSTAT_FLAG_FRIENDSHIP_ADD3 = 0x33,
-    ITSTAT_EV_HP = 0x34,
-    ITSTAT_EV_ATK = 0x35,
-    ITSTAT_EV_DEF = 0x36,
-    ITSTAT_EV_SPE = 0x37,
-    ITSTAT_EV_SPA = 0x38,
-    ITSTAT_EV_SPD = 0x39,
-    ITSTAT_HEAL_AMOUNT = 0x3A,
-    ITSTAT_PP_GAIN = 0x3B,
-    ITSTAT_FRIENDSHIP1 = 0x3C,
-    ITSTAT_FRIENDSHIP2 = 0x3D,
-    ITSTAT_FRIENDSHIP3 = 0x3E,
+    ITSTAT_PRICE = 0,
+    ITSTAT_USE_EFFECT = 1,
+    ITSTAT_USE_PARAM = 2,
+    ITSTAT_FLAG1 = 3,
+    ITSTAT_FLAG2 = 4,
+    ITSTAT_POCKET_FIELD = 5,
+    ITSTAT_EFFECT_FIELD = 6,
+    ITSTAT_EFFECT_BATTLE = 7,
+    ITSTAT_NATURAL_GIFT_EFFECT = 8,
+    ITSTAT_FLING_EFFECT = 9,
+    ITSTAT_FLING_POWER = 10,
+    ITSTAT_NATURAL_GIFT_POWER = 11,
+    ITSTAT_NATURAL_GIFT_TYPE = 12,
+    ITSTAT_POCKET_BATTLE = 13,
+    ITSTAT_HAS_BATTLE_STATS = 14,
+    ITSTAT_CLASS = 15,
+    ITSTAT_CONSUMABLE = 16,
+    ITSTAT_SORT_IDX = 17,
+    ITSTAT_AILMENT_SLP = 18,
+    ITSTAT_AILMENT_PSN = 19,
+    ITSTAT_AILMENT_BRN = 20,
+    ITSTAT_AILMENT_FRZ = 21,
+    ITSTAT_AILMENT_PAR = 22,
+    ITSTAT_AILMENT_CFZ = 23,
+    ITSTAT_AILMENT_INF = 24,
+    ITSTAT_AILMENT_GSP = 25,
+    ITSTAT_BOOST_REVIVE = 26,
+    ITSTAT_BOOST_SACRED_ASH = 27,
+    ITSTAT_BOOST_RARECANDY = 28,
+    ITSTAT_BOOST_EVOSTONE = 29,
+    ITSTAT_BOOST_ATK = 30,
+    ITSTAT_BOOST_DEF = 31,
+    ITSTAT_BOOST_SPA = 32,
+    ITSTAT_BOOST_SPD = 33,
+    ITSTAT_BOOST_SPE = 34,
+    ITSTAT_BOOST_ACC = 35,
+    ITSTAT_BOOST_CRIT = 36,
+    ITSTAT_BOOST_PP1 = 37,
+    ITSTAT_BOOST_PPMAX = 38,
+    ITSTAT_FLAG_PPREPLENISH = 39,
+    ITSTAT_FLAG_PPREPLENISH_FULL = 40,
+    ITSTAT_FLAG_HPREPLENISH = 41,
+    ITSTAT_FLAG_EVADD_HP = 42,
+    ITSTAT_FLAG_EVADD_ATK = 43,
+    ITSTAT_FLAG_EVADD_DEF = 44,
+    ITSTAT_FLAG_EVADD_SPE = 45,
+    ITSTAT_FLAG_EVADD_SPA = 46,
+    ITSTAT_FLAG_EVADD_SPD = 47,
+    ITSTAT_FLAG_EVADD_ABOVE100 = 48,
+    ITSTAT_FLAG_FRIENDSHIP_ADD1 = 49,
+    ITSTAT_FLAG_FRIENDSHIP_ADD2 = 50,
+    ITSTAT_FLAG_FRIENDSHIP_ADD3 = 51,
+    ITSTAT_EV_HP = 52,
+    ITSTAT_EV_ATK = 53,
+    ITSTAT_EV_DEF = 54,
+    ITSTAT_EV_SPE = 55,
+    ITSTAT_EV_SPA = 56,
+    ITSTAT_EV_SPD = 57,
+    ITSTAT_HEAL_AMOUNT = 58,
+    ITSTAT_PP_GAIN = 59,
+    ITSTAT_FRIENDSHIP1 = 60,
+    ITSTAT_FRIENDSHIP2 = 61,
+    ITSTAT_FRIENDSHIP3 = 62,
 };
 
 enum MonsNo
@@ -3802,7 +4120,7 @@ struct PokeList_Party
     int field_3C;
     __int16 field_40;
     __int16 field_42;
-    int ItemUseType;
+    int itemUseType;
     int field_48;
     int SelectedSlot;
     int field_50;
@@ -3910,14 +4228,7 @@ struct PokeList_Message
 
 struct PokeList_Menu
 {
-    char field_0;
-    char field_1;
-    u16 field_2[3];
-    int field_8;
-    int field_C;
-    int field_10;
-    int field_14;
-    _BYTE gap18[88];
+    u32 array_0[28];
     int field_70;
     int field_74;
     int field_78;
@@ -3947,7 +4258,7 @@ struct PokeList
     int TargetedSlot;
     int field_38;
     PartyPkm* SelectedPkm;
-    int field_40;
+    u32 field_40;
     int field_44;
     int field_48;
     int field_4C;
@@ -4017,8 +4328,8 @@ struct PokeList
     char field_123;
     int field_124;
     u16 field_128[6];
-    BmpWin* bmpWin;
-    MsgData* msgData;
+    BmpWin* BmpWin;
+    MsgData* MsgData;
     GFLFont* Font1;
     GFLFont* Font2;
     int PrintSys;
@@ -4070,7 +4381,7 @@ struct PokeList
     __int16 field_256;
     int field_258;
     int field_25C;
-    G3DCamera* g3DCamera;
+    G3DCamera* G3DCamera;
     int field_264[2];
     int field_26C[2];
     int field_274;
@@ -4083,40 +4394,42 @@ struct PokeList
     int field_280;
     int field_284;
     int field_288;
-    PokeList_Party* field_28C;
+    PokeList_Party* pokeListParty;
 };
+
 
 enum ItemRestoreType
 {
-    RESTORETYPE_X_ITEM = 0x0,
-    RESTORETYPE_SACRED_ASH = 0x1,
-    RESTORETYPE_RARE_CANDY = 0x2,
-    RESTORETYPE_SLEEP = 0x3,
-    RESTORETYPE_POISON = 0x4,
-    RESTORETYPE_BURN = 0x5,
-    RESTORETYPE_FREEZE = 0x6,
-    RESTORETYPE_PARALYSIS = 0x7,
-    RESTORETYPE_CONFUSE = 0x8,
-    RESTORETYPE_FULL_HEAL = 0x9,
-    RESTORETYPE_A = 0xA,
-    RESTORETYPE_FULL_RESTORE = 0xB,
-    RESTORETYPE_REVIVE = 0xC,
-    RESTORETYPE_EV_HP = 0xD,
-    RESTORETYPE_EV_ATK = 0xE,
-    RESTORETYPE_EV_DEF = 0xF,
-    RESTORETYPE_EV_SPE = 0x10,
-    RESTORETYPE_EV_SPA = 0x11,
-    RESTORETYPE_EV_SPD = 0x12,
-    RESTORETYPE_EV_HP_DECREASE = 0x13,
-    RESTORETYPE_EV_ATK_DECREASE = 0x14,
-    RESTORETYPE_EV_DEF_DECREASE = 0x15,
-    RESTORETYPE_EV_SPE_DECREASE = 0x16,
-    RESTORETYPE_EV_SPA_DECREASE = 0x17,
-    RESTORETYPE_EV_SPD_DECREASE = 0x18,
-    RESTORETYPE_EVO_STONE = 0x19,
-    RESTORETYPE_BOOST_PP_1 = 0x1A,
-    RESTORETYPE_BOOST_PP_MAX = 0x1B,
-    RESTORETYPE_PP_REPLENISH = 0x1C,
+    RESTORETYPE_X_ITEM = 0,
+    RESTORETYPE_SACRED_ASH = 1,
+    RESTORETYPE_RARE_CANDY = 2,
+    RESTORETYPE_SLEEP = 3,
+    RESTORETYPE_POISON = 4,
+    RESTORETYPE_BURN = 5,
+    RESTORETYPE_FREEZE = 6,
+    RESTORETYPE_PARALYSIS = 7,
+    RESTORETYPE_CONFUSE = 8,
+    RESTORETYPE_FULL_HEAL = 9,
+    RESTORETYPE_A = 10,
+    RESTORETYPE_FULL_RESTORE = 11,
+    RESTORETYPE_REVIVE = 12,
+    RESTORETYPE_EV_HP = 13,
+    RESTORETYPE_EV_ATK = 14,
+    RESTORETYPE_EV_DEF = 15,
+    RESTORETYPE_EV_SPE = 16,
+    RESTORETYPE_EV_SPA = 17,
+    RESTORETYPE_EV_SPD = 18,
+    RESTORETYPE_EV_HP_DECREASE = 19,
+    RESTORETYPE_EV_ATK_DECREASE = 20,
+    RESTORETYPE_EV_DEF_DECREASE = 21,
+    RESTORETYPE_EV_SPE_DECREASE = 22,
+    RESTORETYPE_EV_SPA_DECREASE = 23,
+    RESTORETYPE_EV_SPD_DECREASE = 24,
+    RESTORETYPE_EVO_STONE = 25,
+    RESTORETYPE_BOOST_PP_1 = 26,
+    RESTORETYPE_BOOST_PP_MAX = 27,
+    RESTORETYPE_PP_REPLENISH = 28,
+    RESTORETYPE_NULL = 29,
 };
 
 enum SoundResID
@@ -6179,7 +6492,1369 @@ enum FieldmapCtrlType
     FLD_MAPCTRL_HYBRID = 0x2,
 };
 
-C_DECL_BEGIN
+enum ItemDataType
+{
+    ITEMDATA_PARAMS = 0x0,
+    ITEMDATA_SPR1 = 0x1,
+    ITEMDATA_SPR2 = 0x2,
+    ITEMDATA_MAX = 0x3,
+};
+
+enum HidenEventID
+{
+    HIDENEVENT_CUT = 0x0,
+    HIDENEVENT_SURF = 0x1,
+    HIDENEVENT_WATERFALL = 0x2,
+    HIDENEVENT_STRENGTH = 0x3,
+    HIDENEVENT_FLY = 0x4,
+    HIDENEVENT_FLASH = 0x5,
+    HIDENEVENT_TELEPORT = 0x6,
+    HIDENEVENT_8 = 0x7,
+    HIDENEVENT_DIG = 0x7,
+    HIDENEVENT_CHATOT = 0x9,
+    HIDENEVENT_DIVING = 0xA,
+    HIDENEVENT_MAX = 0xB,
+};
+
+enum FieldPlayerAction
+{
+    FLD_ACTION_CYCLING = 0x0,
+    FLD_ACTION_ESCAPE_ROPE = 0x3,
+    FLD_ACTION_SURF = 0x5,
+};
+
+enum RegistrableID
+{
+    REGIT_BIKE = 0,
+    REGIT_TOWN_MAP = 1,
+    REGIT_VS_RECORDER = 2,
+    REGIT_PAL_PAD = 3,
+    REGIT_SUPER_ROD = 4,
+    REGIT_DOWSING_MCHN = 5,
+    REGIT_GRACIDEA = 6,
+    REGIT_DNA_SPLICERS_1 = 7,
+    REGIT_DNA_SPLICERS_2 = 8,
+    REGIT_POKEINFO_STATUS = 9,
+    REGIT_POKEINFO_SKILLS = 10,
+    REGIT_POKEINFO_RIBBONS = 11,
+    REGIT_BAG_ITEMS = 12,
+    REGIT_BAG_MEDICINE = 13,
+    REGIT_BAG_TMS_HMS = 14,
+    REGIT_BAG_BERRIES = 15,
+    REGIT_BAG_KEYITEMS = 16,
+    REGIT_BAG_FREESPACE = 17,
+    REGIT_POKEDEX_LIST = 18,
+    REGIT_POKEDEX_SEARCH = 19,
+    REGIT_POKEDEX_INFO = 20,
+    REGIT_POKEDEX_AREA = 21,
+    REGIT_POKEDEX_CRY = 22,
+    REGIT_POKEDEX_FORMS = 23,
+    REGIT_TRAINERCARD_FRONT = 24,
+    REGIT_TRAINERCARD_BACK = 25,
+    REGIT_TRAINERCARD_BADGES = 26,
+    REGIT_OPTIONS = 27,
+    REGIT_XTRANSCEIVER = 28,
+    REGIT_MEDAL_BOX = 29,
+    REGIT_POKEMON_LIST = 30,
+    REGIT_POKEDEXHABITAT_LIST = 31,
+    REGIT_POKEDEXHABITAT_INFO = 32,
+    REGIT_REVEAL_GLASS = 33,
+    REGIT_UNUSED_34 = 34,
+    REGIT_UNUSED_35 = 35,
+    REGIT_UNUSED_36 = 36,
+    REGIT_UNUSED_37 = 37,
+    REGIT_UNUSED_38 = 38,
+    REGIT_UNUSED_39 = 39,
+    REGIT_UNUSED_40 = 40,
+    REGIT_UNUSED_41 = 41,
+    REGIT_UNUSED_42 = 42,
+    REGIT_UNUSED_43 = 43,
+    REGIT_UNUSED_44 = 44,
+    REGIT_UNUSED_45 = 45,
+    REGIT_UNUSED_46 = 46,
+    REGIT_UNUSED_47 = 47,
+    REGIT_UNUSED_48 = 48,
+    REGIT_UNUSED_49 = 49,
+    REGIT_UNUSED_50 = 50,
+    REGIT_UNUSED_51 = 51,
+    REGIT_UNUSED_52 = 52,
+    REGIT_UNUSED_53 = 53,
+    REGIT_UNUSED_54 = 54,
+    REGIT_UNUSED_55 = 55,
+    REGIT_UNUSED_56 = 56,
+    REGIT_UNUSED_57 = 57,
+    REGIT_UNUSED_58 = 58,
+    REGIT_UNUSED_59 = 59,
+    REGIT_UNUSED_60 = 60,
+    REGIT_UNUSED_61 = 61,
+    REGIT_UNUSED_62 = 62,
+    REGIT_UNUSED_63 = 63,
+    REGIT_NOT_REGISTRABLE
+};
+
+struct SWAN_ALIGNED(4) FieldCommonEvent
+{
+    GameEvent* (*function)(Field*, GameSystem*);
+    int Param;
+};
+
+enum PocketType
+{
+    POCKETTYPE_ITEMS = 0x0,
+    POCKETTYPE_MEDICINE = 0x1,
+    POCKETTYPE_TM_HM = 0x2,
+    POCKETTYPE_BERRIES = 0x3,
+    POCKETTYPE_KEY_ITEMS = 0x4,
+    POCKETTYPE_FREE_SPACE = 0x5,
+    POCKETTYPE_MAX = 0x6,
+};
+
+enum ItemActionType
+{
+    ITEMACTION_MISC = 0x0,
+    ITEMACTION_REPEL = 0x1,
+    ITEMACTION_GENERIC = 0x2,
+};
+
+struct SWAN_ALIGNED(1) BigBagStructTemp
+{
+    GameData* gameData;
+    char field_4[4];
+    void* void_ptr_8;
+    PlayerActionPerms* playerActionPerms;
+    char gap_10[8];
+    BagSaveData* bagSaveData;
+    SWAN_PACKED SWAN_ALIGNED(1) __int64 field_1C;
+    BagItem bagitem_ptrs_24[3];
+    char field_30[1228];
+    int(*function_4FC)(int);
+    _BYTE* u8_ptr_500;
+    __int16 field_504;
+    char field_506[14];
+    _DWORD* u32_ptr_514;
+    char field_518[8];
+    MsgData* msgData;
+    WordSetSystem* wordSetSystem;
+    StrBuf* strBuf1;
+    StrBuf* strBuf2;
+    char field_530[4];
+    int int_534;
+    char field_538[20];
+    HeapID heapID;
+    char field_54E[362];
+    u32 u32_6B8;
+    char field_6BC[24];
+    int array_6D4[3];
+    int array_6E0[17];
+    char field_724[16];
+    int int_734;
+    char field_738[16];
+    TCBManagerEx* tCBManagerEx;
+    unsigned __int8* u8_ptr_74C;
+    char field_750[76];
+    u32* buttonClickRelated;
+    char field_7A0[140];
+    PocketType pocketType_82C;
+    u32 u32_830;
+    u32 u32_834;
+    unsigned int* ptr_838;
+    char field_83C[12];
+    int BIAArraySizeUnkn[20];
+    u32 u32_898;
+    int bagItemActions;
+    ItemID itemID_8A0;
+    char field_8A4[8];
+    bool bool_8AC;
+    char field_8B0[24];
+    int field_8C8;
+    char field_8CC[456];
+    int itemID_A94;
+};
+
+struct ItemUseFunction {
+    short itemID;
+    short unkn; //always 1
+    int(*function)(int a1);
+};
+
+enum ActionID
+{
+    ACTID_BIKE = 0x0,
+    ACTID_TOWN_MAP = 0x1,
+    ACTID_PAL_PAD = 0x2,
+    ACTID_ESCAPE_ROPE = 0x3,
+    ACTID_UKN_4 = 0x4,
+    ACTID_FISHING = 0x5,
+    ACTID_VS_RECORDER = 0x6,
+    ACTID_UKN_7 = 0x4,
+    ACTID_UKN_8 = 0x4,
+    ACTID_DOWSING_MCHN = 0x9,
+    ACTID_XTRANSCEIVER = 0x10,
+    ACTID_MEDAL_BOX = 0x11,
+    ACTID_WARP_SWEETSCENT = 0xFF,
+};
+
+struct SWAN_ALIGNED(4) EventFieldToggle
+{
+    GameSystem* m_GameSystem;
+    Field* m_Field;
+};
+
+enum GenderSet
+{
+    GENDER_MALE = 0x0,
+    GENDER_FEMALE = 0x1,
+    GENDER_EITHER = 0x2,
+    GENDER_MAX = 0x3,
+};
+
+enum PokeType
+{
+    TYPE_NORMAL = 0x0,
+    TYPE_FIGHT = 0x1,
+    TYPE_FLY = 0x2,
+    TYPE_POISON = 0x3,
+    TYPE_GROUND = 0x4,
+    TYPE_ROCK = 0x5,
+    TYPE_BUG = 0x6,
+    TYPE_GHOST = 0x7,
+    TYPE_STEEL = 0x8,
+    TYPE_FIRE = 0x9,
+    TYPE_WATER = 0xA,
+    TYPE_GRASS = 0xB,
+    TYPE_ELEC = 0xC,
+    TYPE_PSY = 0xD,
+    TYPE_ICE = 0xE,
+    TYPE_DRAGON = 0xF,
+    TYPE_DARK = 0x10,
+    TYPE_NULL = 0x11
+};
+
+enum PersonalField
+{
+    Personal_HP = 0x0,
+    Personal_ATK = 0x1,
+    Personal_DEF = 0x2,
+    Personal_SPE = 0x3,
+    Personal_SPA = 0x4,
+    Personal_SPD = 0x5,
+    Personal_Type1 = 0x6,
+    Personal_Type2 = 0x7,
+    Personal_CaptureRate = 0x8,
+    Personal_BaseEXP = 0x9,
+    Personal_EvHP = 0xA,
+    Personal_EvATK = 0xB,
+    Personal_EvDEF = 0xC,
+    Personal_EvSPE = 0xD,
+    Personal_EvSPA = 0xE,
+    Personal_EvSPD = 0xF,
+    Personal_Telekinesis = 0x10,
+    Personal_WildItem50 = 0x11,
+    Personal_WildItem5 = 0x12,
+    Personal_WildItem1 = 0x13,
+    Personal_GenderProb = 0x14,
+    Personal_EggHappiness = 0x15,
+    Personal_BaseHappiness = 0x16,
+    Personal_GrowthRate = 0x17,
+    Personal_EggGroup1 = 0x18,
+    Personal_EggGroup2 = 0x19,
+    Personal_Abil1 = 0x1A,
+    Personal_Abil2 = 0x1B,
+    Personal_AbilH = 0x1C,
+    Personal_EscapeRate = 0x1D,
+    Personal_FormeDataOffs = 0x1E,
+    Personal_FormeSpritesOffset = 0x1F,
+    Personal_FormeCount = 0x20,
+    Personal_Color = 0x21,
+    Personal_SpriteFlip = 0x22,
+    Personal_SpriteForme = 0x23,
+    Personal_EvoStage = 0x24,
+    Personal_Height = 0x25,
+    Personal_Weight = 0x26,
+    Personal_TMHM1 = 0x27,
+    Personal_TMHM2 = 0x28,
+    Personal_TMHM3 = 0x29,
+    Personal_TMHM4 = 0x2A,
+    Personal_TypeTutor = 0x2B,
+    Personal_SpecialTutor1 = 0x2C,
+    Personal_SpecialTutor2 = 0x2D,
+    Personal_SpecialTutor3 = 0x2E,
+    Personal_SpecialTutor4 = 0x2F,
+};
+
+struct BGSysLCDConfig
+{
+    G2DDisplayMode DisplayModeA;
+    G2DBGMode BGModeA;
+    G2DBGMode BGModeB;
+    b32 IsBG03D;
+};
+
+struct PersonalData
+{
+    u8 BaseHP;
+    u8 BaseATK;
+    u8 BaseDEF;
+    u8 BaseSPE;
+    u8 BaseSPA;
+    u8 BaseSPD;
+    u8 Type1;
+    u8 Type2;
+    u8 CaptureRate;
+    u8 EvoStage;
+    u16 EVYield;
+    u16 WildItem50;
+    u16 WildItem5;
+    u16 WildItem1;
+    u8 GenderProb;
+    u8 EggHappiness;
+    u8 BaseHappiness;
+    u8 ExpGroup;
+    u8 EggGroup1;
+    u8 EggGroup2;
+    u8 Abil1;
+    u8 Abil2;
+    u8 AbilHidden;
+    u8 EscapeRate;
+    u16 FormeDataOffs;
+    u16 FormeSpriteOffs;
+    u8 FormeCount;
+    u8 Color;
+    u16 BaseEXP;
+    u16 HeightCm;
+    u16 WeightCg;
+    int TMHM1;
+    int TMHM2;
+    int TMHM3;
+    int TMHM4;
+    int TypeTutors;
+    int SpecialTutors[4];
+};
+
+enum AbilID
+{
+    ABIL_NULL = 0x0,
+    ABIL001_STENCH = 0x1,
+    ABIL002_DRIZZLE = 0x2,
+    ABIL003_SPEED_BOOST = 0x3,
+    ABIL004_BATTLE_ARMOR = 0x4,
+    ABIL005_STURDY = 0x5,
+    ABIL006_DAMP = 0x6,
+    ABIL007_LIMBER = 0x7,
+    ABIL008_SAND_VEIL = 0x8,
+    ABIL009_STATIC = 0x9,
+    ABIL010_VOLT_ABSORB = 0xA,
+    ABIL011_WATER_ABSORB = 0xB,
+    ABIL012_OBLIVIOUS = 0xC,
+    ABIL013_CLOUD_NINE = 0xD,
+    ABIL014_COMPOUND_EYES = 0xE,
+    ABIL015_INSOMNIA = 0xF,
+    ABIL016_COLOR_CHANGE = 0x10,
+    ABIL017_IMMUNITY = 0x11,
+    ABIL018_FLASH_FIRE = 0x12,
+    ABIL019_SHIELD_DUST = 0x13,
+    ABIL020_OWN_TEMPO = 0x14,
+    ABIL021_SUCTION_CUPS = 0x15,
+    ABIL022_INTIMIDATE = 0x16,
+    ABIL023_SHADOW_TAG = 0x17,
+    ABIL024_ROUGH_SKIN = 0x18,
+    ABIL025_WONDER_GUARD = 0x19,
+    ABIL026_LEVITATE = 0x1A,
+    ABIL027_EFFECT_SPORE = 0x1B,
+    ABIL028_SYNCHRONIZE = 0x1C,
+    ABIL029_CLEAR_BODY = 0x1D,
+    ABIL030_NATURAL_CURE = 0x1E,
+    ABIL031_LIGHTNING_ROD = 0x1F,
+    ABIL032_SERENE_GRACE = 0x20,
+    ABIL033_SWIFT_SWIM = 0x21,
+    ABIL034_CHLOROPHYLL = 0x22,
+    ABIL035_ILLUMINATE = 0x23,
+    ABIL036_TRACE = 0x24,
+    ABIL037_HUGE_POWER = 0x25,
+    ABIL038_POISON_POINT = 0x26,
+    ABIL039_INNER_FOCUS = 0x27,
+    ABIL040_MAGMA_ARMOR = 0x28,
+    ABIL041_WATER_VEIL = 0x29,
+    ABIL042_MAGNET_PULL = 0x2A,
+    ABIL043_SOUNDPROOF = 0x2B,
+    ABIL044_RAIN_DISH = 0x2C,
+    ABIL045_SAND_STREAM = 0x2D,
+    ABIL046_PRESSURE = 0x2E,
+    ABIL047_THICK_FAT = 0x2F,
+    ABIL048_EARLY_BIRD = 0x30,
+    ABIL049_FLAME_BODY = 0x31,
+    ABIL050_RUN_AWAY = 0x32,
+    ABIL051_KEEN_EYE = 0x33,
+    ABIL052_HYPER_CUTTER = 0x34,
+    ABIL053_PICKUP = 0x35,
+    ABIL054_TRUANT = 0x36,
+    ABIL055_HUSTLE = 0x37,
+    ABIL056_CUTE_CHARM = 0x38,
+    ABIL057_PLUS = 0x39,
+    ABIL058_MINUS = 0x3A,
+    ABIL059_FORECAST = 0x3B,
+    ABIL060_STICKY_HOLD = 0x3C,
+    ABIL061_SHED_SKIN = 0x3D,
+    ABIL062_GUTS = 0x3E,
+    ABIL063_MARVEL_SCALE = 0x3F,
+    ABIL064_LIQUID_OOZE = 0x40,
+    ABIL065_OVERGROW = 0x41,
+    ABIL066_BLAZE = 0x42,
+    ABIL067_TORRENT = 0x43,
+    ABIL068_SWARM = 0x44,
+    ABIL069_ROCK_HEAD = 0x45,
+    ABIL070_DROUGHT = 0x46,
+    ABIL071_ARENA_TRAP = 0x47,
+    ABIL072_VITAL_SPIRIT = 0x48,
+    ABIL073_WHITE_SMOKE = 0x49,
+    ABIL074_PURE_POWER = 0x4A,
+    ABIL075_SHELL_ARMOR = 0x4B,
+    ABIL076_AIR_LOCK = 0x4C,
+    ABIL077_TANGLED_FEET = 0x4D,
+    ABIL078_MOTOR_DRIVE = 0x4E,
+    ABIL079_RIVALRY = 0x4F,
+    ABIL080_STEADFAST = 0x50,
+    ABIL081_SNOW_CLOAK = 0x51,
+    ABIL082_GLUTTONY = 0x52,
+    ABIL083_ANGER_POINT = 0x53,
+    ABIL084_UNBURDEN = 0x54,
+    ABIL085_HEATPROOF = 0x55,
+    ABIL086_SIMPLE = 0x56,
+    ABIL087_DRY_SKIN = 0x57,
+    ABIL088_DOWNLOAD = 0x58,
+    ABIL089_IRON_FIST = 0x59,
+    ABIL090_POISON_HEAL = 0x5A,
+    ABIL091_ADAPTABILITY = 0x5B,
+    ABIL092_SKILL_LINK = 0x5C,
+    ABIL093_HYDRATION = 0x5D,
+    ABIL094_SOLAR_POWER = 0x5E,
+    ABIL095_QUICK_FEET = 0x5F,
+    ABIL096_NORMALIZE = 0x60,
+    ABIL097_SNIPER = 0x61,
+    ABIL098_MAGIC_GUARD = 0x62,
+    ABIL099_NO_GUARD = 0x63,
+    ABIL100_STALL = 0x64,
+    ABIL101_TECHNICIAN = 0x65,
+    ABIL102_LEAF_GUARD = 0x66,
+    ABIL103_KLUTZ = 0x67,
+    ABIL104_MOLD_BREAKER = 0x68,
+    ABIL105_SUPER_LUCK = 0x69,
+    ABIL106_AFTERMATH = 0x6A,
+    ABIL107_ANTICIPATION = 0x6B,
+    ABIL108_FOREWARN = 0x6C,
+    ABIL109_UNAWARE = 0x6D,
+    ABIL110_TINTED_LENS = 0x6E,
+    ABIL111_FILTER = 0x6F,
+    ABIL112_SLOW_START = 0x70,
+    ABIL113_SCRAPPY = 0x71,
+    ABIL114_STORM_DRAIN = 0x72,
+    ABIL115_ICE_BODY = 0x73,
+    ABIL116_SOLID_ROCK = 0x74,
+    ABIL117_SNOW_WARNING = 0x75,
+    ABIL118_HONEY_GATHER = 0x76,
+    ABIL119_FRISK = 0x77,
+    ABIL120_RECKLESS = 0x78,
+    ABIL121_MULTITYPE = 0x79,
+    ABIL122_FLOWER_GIFT = 0x7A,
+    ABIL123_BAD_DREAMS = 0x7B,
+    ABIL124_PICKPOCKET = 0x7C,
+    ABIL125_SHEER_FORCE = 0x7D,
+    ABIL126_CONTRARY = 0x7E,
+    ABIL127_UNNERVE = 0x7F,
+    ABIL128_DEFIANT = 0x80,
+    ABIL129_DEFEATIST = 0x81,
+    ABIL130_CURSED_BODY = 0x82,
+    ABIL131_HEALER = 0x83,
+    ABIL132_FRIEND_GUARD = 0x84,
+    ABIL133_WEAK_ARMOR = 0x85,
+    ABIL134_HEAVY_METAL = 0x86,
+    ABIL135_LIGHT_METAL = 0x87,
+    ABIL136_MULTISCALE = 0x88,
+    ABIL137_TOXIC_BOOST = 0x89,
+    ABIL138_FLARE_BOOST = 0x8A,
+    ABIL139_HARVEST = 0x8B,
+    ABIL140_TELEPATHY = 0x8C,
+    ABIL141_MOODY = 0x8D,
+    ABIL142_OVERCOAT = 0x8E,
+    ABIL143_POISON_TOUCH = 0x8F,
+    ABIL144_REGENERATOR = 0x90,
+    ABIL145_BIG_PECKS = 0x91,
+    ABIL146_SAND_RUSH = 0x92,
+    ABIL147_WONDER_SKIN = 0x93,
+    ABIL148_ANALYTIC = 0x94,
+    ABIL149_ILLUSION = 0x95,
+    ABIL150_IMPOSTER = 0x96,
+    ABIL151_INFILTRATOR = 0x97,
+    ABIL152_MUMMY = 0x98,
+    ABIL153_MOXIE = 0x99,
+    ABIL154_JUSTIFIED = 0x9A,
+    ABIL155_RATTLED = 0x9B,
+    ABIL156_MAGIC_BOUNCE = 0x9C,
+    ABIL157_SAP_SIPPER = 0x9D,
+    ABIL158_PRANKSTER = 0x9E,
+    ABIL159_SAND_FORCE = 0x9F,
+    ABIL160_IRON_BARBS = 0xA0,
+    ABIL161_ZEN_MODE = 0xA1,
+    ABIL162_VICTORY_STAR = 0xA2,
+    ABIL163_TURBOBLAZE = 0xA3,
+    ABIL164_TERAVOLT = 0xA4,
+    ABIL165_AROMA_VEIL = 0xA5,
+    ABIL166_FLOWER_VEIL = 0xA6,
+    ABIL167_CHEEK_POUCH = 0xA7,
+    ABIL168_PROTEAN = 0xA8,
+    ABIL169_FUR_COAT = 0xA9,
+    ABIL170_MAGICIAN = 0xAA,
+    ABIL171_BULLETPROOF = 0xAB,
+    ABIL172_COMPETITIVE = 0xAC,
+    ABIL173_STRONG_JAW = 0xAD,
+    ABIL174_REFRIGERATE = 0xAE,
+    ABIL175_SWEET_VEIL = 0xAF,
+    ABIL176_STANCE_CHANGE = 0xB0,
+    ABIL177_GALE_WINGS = 0xB1,
+    ABIL178_MEGA_LAUNCHER = 0xB2,
+    ABIL179_GRASS_PELT = 0xB3,
+    ABIL180_SYMBIOSIS = 0xB4,
+    ABIL181_TOUGH_CLAWS = 0xB5,
+    ABIL182_PIXILATE = 0xB6,
+    ABIL183_GOOEY = 0xB7,
+    ABIL184_AERILATE = 0xB8,
+    ABIL185_PARENTAL_BOND = 0xB9,
+    ABIL186_DARK_AURA = 0xBA,
+    ABIL187_FAIRY_AURA = 0xBB,
+    ABIL188_AURA_BREAK = 0xBC,
+    ABIL189_PRIMORDIAL_SEA = 0xBD,
+    ABIL190_DESOLATE_LAND = 0xBE,
+    ABIL191_DELTA_STREAM = 0xBF,
+};
+   
+typedef void(*BattleEventHandler)(BattleEventItem* item, ServerFlow* ServerFlow, int pokemonID, int* work);
+
+struct BattleEventHandlerTableEntry
+{
+    BattleEventType EventType;
+    BattleEventHandler Handler;
+};
+
+typedef BattleEventHandlerTableEntry* (*ItemEventAddFunc)(int*);
+struct ItemEventAddTable
+{
+    ItemID item;
+    ItemEventAddFunc func;
+};
+
+enum BattleEventItemType
+{
+    EVENTITEM_MOVE = 0x0,
+    EVENTITEM_POS = 0x1,
+    EVENTITEM_SIDE = 0x2,
+    EVENTITEM_FIELD = 0x3,
+    EVENTITEM_ABILITY = 0x4,
+    EVENTITEM_ITEM = 0x5,
+    EVENTITEM_ISOLATED = 0x6,
+    EVENTITEM_MAX = 0x7,
+};
+
+enum BattleEventPriority
+{
+    EVENTPRI_MOVE_DEFAULT = 0x0,
+    EVENTPRI_POS_DEFAULT = 0x1,
+    EVENTPRI_SIDE_DEFAULT = 0x2,
+    EVENTPRI_FIELD_DEFAULT = 0x3,
+    EVENTPRI_ABILITY_POISON_TOUCH = 0x4,
+    EVENTPRI_ABILITY_DEFAULT = 0x5,
+    EVENTPRI_ITEM_DEFAULT = 0x6,
+    EVENTPRI_ABILITY_STALL = 0x7,
+    EVENTPRI_MAX = 0x8,
+};
+
+enum StatStage
+{
+    STATSTAGE_NULL = 0x0,
+    STATSTAGE_ATTACK = 0x1,
+    STATSTAGE_DEFENSE = 0x2,
+    STATSTAGE_SPECIAL_ATTACK = 0x3,
+    STATSTAGE_SPECIAL_DEFENSE = 0x4,
+    STATSTAGE_SPEED = 0x5,
+    STATSTAGE_ACCURACY = 0x6,
+    STATSTAGE_EVASION = 0x7,
+};
+
+struct HandlerParam_ChangeStatStage
+{
+    HandlerParam_Header header;
+    StatStage rankType;
+    u32 pad;
+    s8 rankVolume;
+    u8 pad2;
+    u8 fMoveAnimation;
+    u8 poke_cnt;
+    u8 pokeID[6];
+    HandlerParam_StrParams exStr;
+};
+
+enum TypeEffectiveness
+{
+    EFFECTIVENESS_IMMUNE = 0x0,
+    EFFECTIVENESS_1_4 = 0x1,
+    EFFECTIVENESS_1_2 = 0x2,
+    EFFECTIVENESS_1 = 0x3,
+    EFFECTIVENESS_2 = 0x4,
+    EFFECTIVENESS_4 = 0x5,
+};
+
+enum MoveID
+{
+    MOVE_NULL = 0x0,
+    MOVE001_POUND = 0x1,
+    MOVE002_KARATE_CHOP = 0x2,
+    MOVE003_DOUBLE_SLAP = 0x3,
+    MOVE004_COMET_PUNCH = 0x4,
+    MOVE005_MEGA_PUNCH = 0x5,
+    MOVE006_PAY_DAY = 0x6,
+    MOVE007_FIRE_PUNCH = 0x7,
+    MOVE008_ICE_PUNCH = 0x8,
+    MOVE009_THUNDER_PUNCH = 0x9,
+    MOVE010_SCRATCH = 0xA,
+    MOVE011_VICE_GRIP = 0xB,
+    MOVE012_GUILLOTINE = 0xC,
+    MOVE013_RAZOR_WIND = 0xD,
+    MOVE014_SWORDS_DANCE = 0xE,
+    MOVE015_CUT = 0xF,
+    MOVE016_GUST = 0x10,
+    MOVE017_WING_ATTACK = 0x11,
+    MOVE018_WHIRLWIND = 0x12,
+    MOVE019_FLY = 0x13,
+    MOVE020_BIND = 0x14,
+    MOVE021_SLAM = 0x15,
+    MOVE022_VINE_WHIP = 0x16,
+    MOVE023_STOMP = 0x17,
+    MOVE024_DOUBLE_KICK = 0x18,
+    MOVE025_MEGA_KICK = 0x19,
+    MOVE026_JUMP_KICK = 0x1A,
+    MOVE027_ROLLING_KICK = 0x1B,
+    MOVE028_SAND_ATTACK = 0x1C,
+    MOVE029_HEADBUTT = 0x1D,
+    MOVE030_HORN_ATTACK = 0x1E,
+    MOVE031_FURY_ATTACK = 0x1F,
+    MOVE032_HORN_DRILL = 0x20,
+    MOVE033_TACKLE = 0x21,
+    MOVE034_BODY_SLAM = 0x22,
+    MOVE035_WRAP = 0x23,
+    MOVE036_TAKE_DOWN = 0x24,
+    MOVE037_THRASH = 0x25,
+    MOVE038_DOUBLE_EDGE = 0x26,
+    MOVE039_TAIL_WHIP = 0x27,
+    MOVE040_POISON_STING = 0x28,
+    MOVE041_TWINEEDLE = 0x29,
+    MOVE042_PIN_MISSILE = 0x2A,
+    MOVE043_LEER = 0x2B,
+    MOVE044_BITE = 0x2C,
+    MOVE045_GROWL = 0x2D,
+    MOVE046_ROAR = 0x2E,
+    MOVE047_SING = 0x2F,
+    MOVE048_SUPERSONIC = 0x30,
+    MOVE049_SONIC_BOOM = 0x31,
+    MOVE050_DISABLE = 0x32,
+    MOVE051_ACID = 0x33,
+    MOVE052_EMBER = 0x34,
+    MOVE053_FLAMETHROWER = 0x35,
+    MOVE054_MIST = 0x36,
+    MOVE055_WATER_GUN = 0x37,
+    MOVE056_HYDRO_PUMP = 0x38,
+    MOVE057_SURF = 0x39,
+    MOVE058_ICE_BEAM = 0x3A,
+    MOVE059_BLIZZARD = 0x3B,
+    MOVE060_PSYBEAM = 0x3C,
+    MOVE061_BUBBLE_BEAM = 0x3D,
+    MOVE062_AURORA_BEAM = 0x3E,
+    MOVE063_HYPER_BEAM = 0x3F,
+    MOVE064_PECK = 0x40,
+    MOVE065_DRILL_PECK = 0x41,
+    MOVE066_SUBMISSION = 0x42,
+    MOVE067_LOW_KICK = 0x43,
+    MOVE068_COUNTER = 0x44,
+    MOVE069_SEISMIC_TOSS = 0x45,
+    MOVE070_STRENGTH = 0x46,
+    MOVE071_ABSORB = 0x47,
+    MOVE072_MEGA_DRAIN = 0x48,
+    MOVE073_LEECH_SEED = 0x49,
+    MOVE074_GROWTH = 0x4A,
+    MOVE075_RAZOR_LEAF = 0x4B,
+    MOVE076_SOLAR_BEAM = 0x4C,
+    MOVE077_POISON_POWDER = 0x4D,
+    MOVE078_STUN_SPORE = 0x4E,
+    MOVE079_SLEEP_POWDER = 0x4F,
+    MOVE080_PETAL_DANCE = 0x50,
+    MOVE081_STRING_SHOT = 0x51,
+    MOVE082_DRAGON_RAGE = 0x52,
+    MOVE083_FIRE_SPIN = 0x53,
+    MOVE084_THUNDER_SHOCK = 0x54,
+    MOVE085_THUNDERBOLT = 0x55,
+    MOVE086_THUNDER_WAVE = 0x56,
+    MOVE087_THUNDER = 0x57,
+    MOVE088_ROCK_THROW = 0x58,
+    MOVE089_EARTHQUAKE = 0x59,
+    MOVE090_FISSURE = 0x5A,
+    MOVE091_DIG = 0x5B,
+    MOVE092_TOXIC = 0x5C,
+    MOVE093_CONFUSION = 0x5D,
+    MOVE094_PSYCHIC = 0x5E,
+    MOVE095_HYPNOSIS = 0x5F,
+    MOVE096_MEDITATE = 0x60,
+    MOVE097_AGILITY = 0x61,
+    MOVE098_QUICK_ATTACK = 0x62,
+    MOVE099_RAGE = 0x63,
+    MOVE100_TELEPORT = 0x64,
+    MOVE101_NIGHT_SHADE = 0x65,
+    MOVE102_MIMIC = 0x66,
+    MOVE103_SCREECH = 0x67,
+    MOVE104_DOUBLE_TEAM = 0x68,
+    MOVE105_RECOVER = 0x69,
+    MOVE106_HARDEN = 0x6A,
+    MOVE107_MINIMIZE = 0x6B,
+    MOVE108_SMOKESCREEN = 0x6C,
+    MOVE109_CONFUSE_RAY = 0x6D,
+    MOVE110_WITHDRAW = 0x6E,
+    MOVE111_DEFENSE_CURL = 0x6F,
+    MOVE112_BARRIER = 0x70,
+    MOVE113_LIGHT_SCREEN = 0x71,
+    MOVE114_HAZE = 0x72,
+    MOVE115_REFLECT = 0x73,
+    MOVE116_FOCUS_ENERGY = 0x74,
+    MOVE117_BIDE = 0x75,
+    MOVE118_METRONOME = 0x76,
+    MOVE119_MIRROR_MOVE = 0x77,
+    MOVE120_SELF_DESTRUCT = 0x78,
+    MOVE121_EGG_BOMB = 0x79,
+    MOVE122_LICK = 0x7A,
+    MOVE123_SMOG = 0x7B,
+    MOVE124_SLUDGE = 0x7C,
+    MOVE125_BONE_CLUB = 0x7D,
+    MOVE126_FIRE_BLAST = 0x7E,
+    MOVE127_WATERFALL = 0x7F,
+    MOVE128_CLAMP = 0x80,
+    MOVE129_SWIFT = 0x81,
+    MOVE130_SKULL_BASH = 0x82,
+    MOVE131_SPIKE_CANNON = 0x83,
+    MOVE132_CONSTRICT = 0x84,
+    MOVE133_AMNESIA = 0x85,
+    MOVE134_KINESIS = 0x86,
+    MOVE135_SOFT_BOILED = 0x87,
+    MOVE136_HIGH_JUMP_KICK = 0x88,
+    MOVE137_GLARE = 0x89,
+    MOVE138_DREAM_EATER = 0x8A,
+    MOVE139_POISON_GAS = 0x8B,
+    MOVE140_BARRAGE = 0x8C,
+    MOVE141_LEECH_LIFE = 0x8D,
+    MOVE142_LOVELY_KISS = 0x8E,
+    MOVE143_SKY_ATTACK = 0x8F,
+    MOVE144_TRANSFORM = 0x90,
+    MOVE145_BUBBLE = 0x91,
+    MOVE146_DIZZY_PUNCH = 0x92,
+    MOVE147_SPORE = 0x93,
+    MOVE148_FLASH = 0x94,
+    MOVE149_PSYWAVE = 0x95,
+    MOVE150_SPLASH = 0x96,
+    MOVE151_ACID_ARMOR = 0x97,
+    MOVE152_CRABHAMMER = 0x98,
+    MOVE153_EXPLOSION = 0x99,
+    MOVE154_FURY_SWIPES = 0x9A,
+    MOVE155_BONEMERANG = 0x9B,
+    MOVE156_REST = 0x9C,
+    MOVE157_ROCK_SLIDE = 0x9D,
+    MOVE158_HYPER_FANG = 0x9E,
+    MOVE159_SHARPEN = 0x9F,
+    MOVE160_CONVERSION = 0xA0,
+    MOVE161_TRI_ATTACK = 0xA1,
+    MOVE162_SUPER_FANG = 0xA2,
+    MOVE163_SLASH = 0xA3,
+    MOVE164_SUBSTITUTE = 0xA4,
+    MOVE165_STRUGGLE = 0xA5,
+    MOVE166_SKETCH = 0xA6,
+    MOVE167_TRIPLE_KICK = 0xA7,
+    MOVE168_THIEF = 0xA8,
+    MOVE169_SPIDER_WEB = 0xA9,
+    MOVE170_MIND_READER = 0xAA,
+    MOVE171_NIGHTMARE = 0xAB,
+    MOVE172_FLAME_WHEEL = 0xAC,
+    MOVE173_SNORE = 0xAD,
+    MOVE174_CURSE = 0xAE,
+    MOVE175_FLAIL = 0xAF,
+    MOVE176_CONVERSION_2 = 0xB0,
+    MOVE177_AEROBLAST = 0xB1,
+    MOVE178_COTTON_SPORE = 0xB2,
+    MOVE179_REVERSAL = 0xB3,
+    MOVE180_SPITE = 0xB4,
+    MOVE181_POWDER_SNOW = 0xB5,
+    MOVE182_PROTECT = 0xB6,
+    MOVE183_MACH_PUNCH = 0xB7,
+    MOVE184_SCARY_FACE = 0xB8,
+    MOVE185_FEINT_ATTACK = 0xB9,
+    MOVE186_SWEET_KISS = 0xBA,
+    MOVE187_BELLY_DRUM = 0xBB,
+    MOVE188_SLUDGE_BOMB = 0xBC,
+    MOVE189_MUD_SLAP = 0xBD,
+    MOVE190_OCTAZOOKA = 0xBE,
+    MOVE191_SPIKES = 0xBF,
+    MOVE192_ZAP_CANNON = 0xC0,
+    MOVE193_FORESIGHT = 0xC1,
+    MOVE194_DESTINY_BOND = 0xC2,
+    MOVE195_PERISH_SONG = 0xC3,
+    MOVE196_ICY_WIND = 0xC4,
+    MOVE197_DETECT = 0xC5,
+    MOVE198_BONE_RUSH = 0xC6,
+    MOVE199_LOCK_ON = 0xC7,
+    MOVE200_OUTRAGE = 0xC8,
+    MOVE201_SANDSTORM = 0xC9,
+    MOVE202_GIGA_DRAIN = 0xCA,
+    MOVE203_ENDURE = 0xCB,
+    MOVE204_CHARM = 0xCC,
+    MOVE205_ROLLOUT = 0xCD,
+    MOVE206_FALSE_SWIPE = 0xCE,
+    MOVE207_SWAGGER = 0xCF,
+    MOVE208_MILK_DRINK = 0xD0,
+    MOVE209_SPARK = 0xD1,
+    MOVE210_FURY_CUTTER = 0xD2,
+    MOVE211_STEEL_WING = 0xD3,
+    MOVE212_MEAN_LOOK = 0xD4,
+    MOVE213_ATTRACT = 0xD5,
+    MOVE214_SLEEP_TALK = 0xD6,
+    MOVE215_HEAL_BELL = 0xD7,
+    MOVE216_RETURN = 0xD8,
+    MOVE217_PRESENT = 0xD9,
+    MOVE218_FRUSTRATION = 0xDA,
+    MOVE219_SAFEGUARD = 0xDB,
+    MOVE220_PAIN_SPLIT = 0xDC,
+    MOVE221_SACRED_FIRE = 0xDD,
+    MOVE222_MAGNITUDE = 0xDE,
+    MOVE223_DYNAMIC_PUNCH = 0xDF,
+    MOVE224_MEGAHORN = 0xE0,
+    MOVE225_DRAGON_BREATH = 0xE1,
+    MOVE226_BATON_PASS = 0xE2,
+    MOVE227_ENCORE = 0xE3,
+    MOVE228_PURSUIT = 0xE4,
+    MOVE229_RAPID_SPIN = 0xE5,
+    MOVE230_SWEET_SCENT = 0xE6,
+    MOVE231_IRON_TAIL = 0xE7,
+    MOVE232_METAL_CLAW = 0xE8,
+    MOVE233_VITAL_THROW = 0xE9,
+    MOVE234_MORNING_SUN = 0xEA,
+    MOVE235_SYNTHESIS = 0xEB,
+    MOVE236_MOONLIGHT = 0xEC,
+    MOVE237_HIDDEN_POWER = 0xED,
+    MOVE238_CROSS_CHOP = 0xEE,
+    MOVE239_TWISTER = 0xEF,
+    MOVE240_RAIN_DANCE = 0xF0,
+    MOVE241_SUNNY_DAY = 0xF1,
+    MOVE242_CRUNCH = 0xF2,
+    MOVE243_MIRROR_COAT = 0xF3,
+    MOVE244_PSYCH_UP = 0xF4,
+    MOVE245_EXTREME_SPEED = 0xF5,
+    MOVE246_ANCIENT_POWER = 0xF6,
+    MOVE247_SHADOW_BALL = 0xF7,
+    MOVE248_FUTURE_SIGHT = 0xF8,
+    MOVE249_ROCK_SMASH = 0xF9,
+    MOVE250_WHIRLPOOL = 0xFA,
+    MOVE251_BEAT_UP = 0xFB,
+    MOVE252_FAKE_OUT = 0xFC,
+    MOVE253_UPROAR = 0xFD,
+    MOVE254_STOCKPILE = 0xFE,
+    MOVE255_SPIT_UP = 0xFF,
+    MOVE256_SWALLOW = 0x100,
+    MOVE257_HEAT_WAVE = 0x101,
+    MOVE258_HAIL = 0x102,
+    MOVE259_TORMENT = 0x103,
+    MOVE260_FLATTER = 0x104,
+    MOVE261_WILL_O_WISP = 0x105,
+    MOVE262_MEMENTO = 0x106,
+    MOVE263_FACADE = 0x107,
+    MOVE264_FOCUS_PUNCH = 0x108,
+    MOVE265_SMELLING_SALTS = 0x109,
+    MOVE266_FOLLOW_ME = 0x10A,
+    MOVE267_NATURE_POWER = 0x10B,
+    MOVE268_CHARGE = 0x10C,
+    MOVE269_TAUNT = 0x10D,
+    MOVE270_HELPING_HAND = 0x10E,
+    MOVE271_TRICK = 0x10F,
+    MOVE272_ROLE_PLAY = 0x110,
+    MOVE273_WISH = 0x111,
+    MOVE274_ASSIST = 0x112,
+    MOVE275_INGRAIN = 0x113,
+    MOVE276_SUPERPOWER = 0x114,
+    MOVE277_MAGIC_COAT = 0x115,
+    MOVE278_RECYCLE = 0x116,
+    MOVE279_REVENGE = 0x117,
+    MOVE280_BRICK_BREAK = 0x118,
+    MOVE281_YAWN = 0x119,
+    MOVE282_KNOCK_OFF = 0x11A,
+    MOVE283_ENDEAVOR = 0x11B,
+    MOVE284_ERUPTION = 0x11C,
+    MOVE285_SKILL_SWAP = 0x11D,
+    MOVE286_IMPRISON = 0x11E,
+    MOVE287_REFRESH = 0x11F,
+    MOVE288_GRUDGE = 0x120,
+    MOVE289_SNATCH = 0x121,
+    MOVE290_SECRET_POWER = 0x122,
+    MOVE291_DIVE = 0x123,
+    MOVE292_ARM_THRUST = 0x124,
+    MOVE293_CAMOUFLAGE = 0x125,
+    MOVE294_TAIL_GLOW = 0x126,
+    MOVE295_LUSTER_PURGE = 0x127,
+    MOVE296_MIST_BALL = 0x128,
+    MOVE297_FEATHER_DANCE = 0x129,
+    MOVE298_TEETER_DANCE = 0x12A,
+    MOVE299_BLAZE_KICK = 0x12B,
+    MOVE300_MUD_SPORT = 0x12C,
+    MOVE301_ICE_BALL = 0x12D,
+    MOVE302_NEEDLE_ARM = 0x12E,
+    MOVE303_SLACK_OFF = 0x12F,
+    MOVE304_HYPER_VOICE = 0x130,
+    MOVE305_POISON_FANG = 0x131,
+    MOVE306_CRUSH_CLAW = 0x132,
+    MOVE307_BLAST_BURN = 0x133,
+    MOVE308_HYDRO_CANNON = 0x134,
+    MOVE309_METEOR_MASH = 0x135,
+    MOVE310_ASTONISH = 0x136,
+    MOVE311_WEATHER_BALL = 0x137,
+    MOVE312_AROMATHERAPY = 0x138,
+    MOVE313_FAKE_TEARS = 0x139,
+    MOVE314_AIR_CUTTER = 0x13A,
+    MOVE315_OVERHEAT = 0x13B,
+    MOVE316_ODOR_SLEUTH = 0x13C,
+    MOVE317_ROCK_TOMB = 0x13D,
+    MOVE318_SILVER_WIND = 0x13E,
+    MOVE319_METAL_SOUND = 0x13F,
+    MOVE320_GRASS_WHISTLE = 0x140,
+    MOVE321_TICKLE = 0x141,
+    MOVE322_COSMIC_POWER = 0x142,
+    MOVE323_WATER_SPOUT = 0x143,
+    MOVE324_SIGNAL_BEAM = 0x144,
+    MOVE325_SHADOW_PUNCH = 0x145,
+    MOVE326_EXTRASENSORY = 0x146,
+    MOVE327_SKY_UPPERCUT = 0x147,
+    MOVE328_SAND_TOMB = 0x148,
+    MOVE329_SHEER_COLD = 0x149,
+    MOVE330_MUDDY_WATER = 0x14A,
+    MOVE331_BULLET_SEED = 0x14B,
+    MOVE332_AERIAL_ACE = 0x14C,
+    MOVE333_ICICLE_SPEAR = 0x14D,
+    MOVE334_IRON_DEFENSE = 0x14E,
+    MOVE335_BLOCK = 0x14F,
+    MOVE336_HOWL = 0x150,
+    MOVE337_DRAGON_CLAW = 0x151,
+    MOVE338_FRENZY_PLANT = 0x152,
+    MOVE339_BULK_UP = 0x153,
+    MOVE340_BOUNCE = 0x154,
+    MOVE341_MUD_SHOT = 0x155,
+    MOVE342_POISON_TAIL = 0x156,
+    MOVE343_COVET = 0x157,
+    MOVE344_VOLT_TACKLE = 0x158,
+    MOVE345_MAGICAL_LEAF = 0x159,
+    MOVE346_WATER_SPORT = 0x15A,
+    MOVE347_CALM_MIND = 0x15B,
+    MOVE348_LEAF_BLADE = 0x15C,
+    MOVE349_DRAGON_DANCE = 0x15D,
+    MOVE350_ROCK_BLAST = 0x15E,
+    MOVE351_SHOCK_WAVE = 0x15F,
+    MOVE352_WATER_PULSE = 0x160,
+    MOVE353_DOOM_DESIRE = 0x161,
+    MOVE354_PSYCHO_BOOST = 0x162,
+    MOVE355_ROOST = 0x163,
+    MOVE356_GRAVITY = 0x164,
+    MOVE357_MIRACLE_EYE = 0x165,
+    MOVE358_WAKE_UP_SLAP = 0x166,
+    MOVE359_HAMMER_ARM = 0x167,
+    MOVE360_GYRO_BALL = 0x168,
+    MOVE361_HEALING_WISH = 0x169,
+    MOVE362_BRINE = 0x16A,
+    MOVE363_NATURAL_GIFT = 0x16B,
+    MOVE364_FEINT = 0x16C,
+    MOVE365_PLUCK = 0x16D,
+    MOVE366_TAILWIND = 0x16E,
+    MOVE367_ACUPRESSURE = 0x16F,
+    MOVE368_METAL_BURST = 0x170,
+    MOVE369_U_TURN = 0x171,
+    MOVE370_CLOSE_COMBAT = 0x172,
+    MOVE371_PAYBACK = 0x173,
+    MOVE372_ASSURANCE = 0x174,
+    MOVE373_EMBARGO = 0x175,
+    MOVE374_FLING = 0x176,
+    MOVE375_PSYCHO_SHIFT = 0x177,
+    MOVE376_TRUMP_CARD = 0x178,
+    MOVE377_HEAL_BLOCK = 0x179,
+    MOVE378_WRING_OUT = 0x17A,
+    MOVE379_POWER_TRICK = 0x17B,
+    MOVE380_GASTRO_ACID = 0x17C,
+    MOVE381_LUCKY_CHANT = 0x17D,
+    MOVE382_ME_FIRST = 0x17E,
+    MOVE383_COPYCAT = 0x17F,
+    MOVE384_POWER_SWAP = 0x180,
+    MOVE385_GUARD_SWAP = 0x181,
+    MOVE386_PUNISHMENT = 0x182,
+    MOVE387_LAST_RESORT = 0x183,
+    MOVE388_WORRY_SEED = 0x184,
+    MOVE389_SUCKER_PUNCH = 0x185,
+    MOVE390_TOXIC_SPIKES = 0x186,
+    MOVE391_HEART_SWAP = 0x187,
+    MOVE392_AQUA_RING = 0x188,
+    MOVE393_MAGNET_RISE = 0x189,
+    MOVE394_FLARE_BLITZ = 0x18A,
+    MOVE395_FORCE_PALM = 0x18B,
+    MOVE396_AURA_SPHERE = 0x18C,
+    MOVE397_ROCK_POLISH = 0x18D,
+    MOVE398_POISON_JAB = 0x18E,
+    MOVE399_DARK_PULSE = 0x18F,
+    MOVE400_NIGHT_SLASH = 0x190,
+    MOVE401_AQUA_TAIL = 0x191,
+    MOVE402_SEED_BOMB = 0x192,
+    MOVE403_AIR_SLASH = 0x193,
+    MOVE404_X_SCISSOR = 0x194,
+    MOVE405_BUG_BUZZ = 0x195,
+    MOVE406_DRAGON_PULSE = 0x196,
+    MOVE407_DRAGON_RUSH = 0x197,
+    MOVE408_POWER_GEM = 0x198,
+    MOVE409_DRAIN_PUNCH = 0x199,
+    MOVE410_VACUUM_WAVE = 0x19A,
+    MOVE411_FOCUS_BLAST = 0x19B,
+    MOVE412_ENERGY_BALL = 0x19C,
+    MOVE413_BRAVE_BIRD = 0x19D,
+    MOVE414_EARTH_POWER = 0x19E,
+    MOVE415_SWITCHEROO = 0x19F,
+    MOVE416_GIGA_IMPACT = 0x1A0,
+    MOVE417_NASTY_PLOT = 0x1A1,
+    MOVE418_BULLET_PUNCH = 0x1A2,
+    MOVE419_AVALANCHE = 0x1A3,
+    MOVE420_ICE_SHARD = 0x1A4,
+    MOVE421_SHADOW_CLAW = 0x1A5,
+    MOVE422_THUNDER_FANG = 0x1A6,
+    MOVE423_ICE_FANG = 0x1A7,
+    MOVE424_FIRE_FANG = 0x1A8,
+    MOVE425_SHADOW_SNEAK = 0x1A9,
+    MOVE426_MUD_BOMB = 0x1AA,
+    MOVE427_PSYCHO_CUT = 0x1AB,
+    MOVE428_ZEN_HEADBUTT = 0x1AC,
+    MOVE429_MIRROR_SHOT = 0x1AD,
+    MOVE430_FLASH_CANNON = 0x1AE,
+    MOVE431_ROCK_CLIMB = 0x1AF,
+    MOVE432_DEFOG = 0x1B0,
+    MOVE433_TRICK_ROOM = 0x1B1,
+    MOVE434_DRACO_METEOR = 0x1B2,
+    MOVE435_DISCHARGE = 0x1B3,
+    MOVE436_LAVA_PLUME = 0x1B4,
+    MOVE437_LEAF_STORM = 0x1B5,
+    MOVE438_POWER_WHIP = 0x1B6,
+    MOVE439_ROCK_WRECKER = 0x1B7,
+    MOVE440_CROSS_POISON = 0x1B8,
+    MOVE441_GUNK_SHOT = 0x1B9,
+    MOVE442_IRON_HEAD = 0x1BA,
+    MOVE443_MAGNET_BOMB = 0x1BB,
+    MOVE444_STONE_EDGE = 0x1BC,
+    MOVE445_CAPTIVATE = 0x1BD,
+    MOVE446_STEALTH_ROCK = 0x1BE,
+    MOVE447_GRASS_KNOT = 0x1BF,
+    MOVE448_CHATTER = 0x1C0,
+    MOVE449_JUDGMENT = 0x1C1,
+    MOVE450_BUG_BITE = 0x1C2,
+    MOVE451_CHARGE_BEAM = 0x1C3,
+    MOVE452_WOOD_HAMMER = 0x1C4,
+    MOVE453_AQUA_JET = 0x1C5,
+    MOVE454_ATTACK_ORDER = 0x1C6,
+    MOVE455_DEFEND_ORDER = 0x1C7,
+    MOVE456_HEAL_ORDER = 0x1C8,
+    MOVE457_HEAD_SMASH = 0x1C9,
+    MOVE458_DOUBLE_HIT = 0x1CA,
+    MOVE459_ROAR_OF_TIME = 0x1CB,
+    MOVE460_SPACIAL_REND = 0x1CC,
+    MOVE461_LUNAR_DANCE = 0x1CD,
+    MOVE462_CRUSH_GRIP = 0x1CE,
+    MOVE463_MAGMA_STORM = 0x1CF,
+    MOVE464_DARK_VOID = 0x1D0,
+    MOVE465_SEED_FLARE = 0x1D1,
+    MOVE466_OMINOUS_WIND = 0x1D2,
+    MOVE467_SHADOW_FORCE = 0x1D3,
+    MOVE468_HONE_CLAWS = 0x1D4,
+    MOVE469_WIDE_GUARD = 0x1D5,
+    MOVE470_GUARD_SPLIT = 0x1D6,
+    MOVE471_POWER_SPLIT = 0x1D7,
+    MOVE472_WONDER_ROOM = 0x1D8,
+    MOVE473_PSYSHOCK = 0x1D9,
+    MOVE474_VENOSHOCK = 0x1DA,
+    MOVE475_AUTOTOMIZE = 0x1DB,
+    MOVE476_RAGE_POWDER = 0x1DC,
+    MOVE477_TELEKINESIS = 0x1DD,
+    MOVE478_MAGIC_ROOM = 0x1DE,
+    MOVE479_SMACK_DOWN = 0x1DF,
+    MOVE480_STORM_THROW = 0x1E0,
+    MOVE481_FLAME_BURST = 0x1E1,
+    MOVE482_SLUDGE_WAVE = 0x1E2,
+    MOVE483_QUIVER_DANCE = 0x1E3,
+    MOVE484_HEAVY_SLAM = 0x1E4,
+    MOVE485_SYNCHRONOISE = 0x1E5,
+    MOVE486_ELECTRO_BALL = 0x1E6,
+    MOVE487_SOAK = 0x1E7,
+    MOVE488_FLAME_CHARGE = 0x1E8,
+    MOVE489_COIL = 0x1E9,
+    MOVE490_LOW_SWEEP = 0x1EA,
+    MOVE491_ACID_SPRAY = 0x1EB,
+    MOVE492_FOUL_PLAY = 0x1EC,
+    MOVE493_SIMPLE_BEAM = 0x1ED,
+    MOVE494_ENTRAINMENT = 0x1EE,
+    MOVE495_AFTER_YOU = 0x1EF,
+    MOVE496_ROUND = 0x1F0,
+    MOVE497_ECHOED_VOICE = 0x1F1,
+    MOVE498_CHIP_AWAY = 0x1F2,
+    MOVE499_CLEAR_SMOG = 0x1F3,
+    MOVE500_STORED_POWER = 0x1F4,
+    MOVE501_QUICK_GUARD = 0x1F5,
+    MOVE502_ALLY_SWITCH = 0x1F6,
+    MOVE503_SCALD = 0x1F7,
+    MOVE504_SHELL_SMASH = 0x1F8,
+    MOVE505_HEAL_PULSE = 0x1F9,
+    MOVE506_HEX = 0x1FA,
+    MOVE507_SKY_DROP = 0x1FB,
+    MOVE508_SHIFT_GEAR = 0x1FC,
+    MOVE509_CIRCLE_THROW = 0x1FD,
+    MOVE510_INCINERATE = 0x1FE,
+    MOVE511_QUASH = 0x1FF,
+    MOVE512_ACROBATICS = 0x200,
+    MOVE513_REFLECT_TYPE = 0x201,
+    MOVE514_RETALIATE = 0x202,
+    MOVE515_FINAL_GAMBIT = 0x203,
+    MOVE516_BESTOW = 0x204,
+    MOVE517_INFERNO = 0x205,
+    MOVE518_WATER_PLEDGE = 0x206,
+    MOVE519_FIRE_PLEDGE = 0x207,
+    MOVE520_GRASS_PLEDGE = 0x208,
+    MOVE521_VOLT_SWITCH = 0x209,
+    MOVE522_STRUGGLE_BUG = 0x20A,
+    MOVE523_BULLDOZE = 0x20B,
+    MOVE524_FROST_BREATH = 0x20C,
+    MOVE525_DRAGON_TAIL = 0x20D,
+    MOVE526_WORK_UP = 0x20E,
+    MOVE527_ELECTROWEB = 0x20F,
+    MOVE528_WILD_CHARGE = 0x210,
+    MOVE529_DRILL_RUN = 0x211,
+    MOVE530_DUAL_CHOP = 0x212,
+    MOVE531_HEART_STAMP = 0x213,
+    MOVE532_HORN_LEECH = 0x214,
+    MOVE533_SACRED_SWORD = 0x215,
+    MOVE534_RAZOR_SHELL = 0x216,
+    MOVE535_HEAT_CRASH = 0x217,
+    MOVE536_LEAF_TORNADO = 0x218,
+    MOVE537_STEAMROLLER = 0x219,
+    MOVE538_COTTON_GUARD = 0x21A,
+    MOVE539_NIGHT_DAZE = 0x21B,
+    MOVE540_PSYSTRIKE = 0x21C,
+    MOVE541_TAIL_SLAP = 0x21D,
+    MOVE542_HURRICANE = 0x21E,
+    MOVE543_HEAD_CHARGE = 0x21F,
+    MOVE544_GEAR_GRIND = 0x220,
+    MOVE545_SEARING_SHOT = 0x221,
+    MOVE546_TECHNO_BLAST = 0x222,
+    MOVE547_RELIC_SONG = 0x223,
+    MOVE548_SECRET_SWORD = 0x224,
+    MOVE549_GLACIATE = 0x225,
+    MOVE550_BOLT_STRIKE = 0x226,
+    MOVE551_BLUE_FLARE = 0x227,
+    MOVE552_FIERY_DANCE = 0x228,
+    MOVE553_FREEZE_SHOCK = 0x229,
+    MOVE554_ICE_BURN = 0x22A,
+    MOVE555_SNARL = 0x22B,
+    MOVE556_ICICLE_CRASH = 0x22C,
+    MOVE557_V_CREATE = 0x22D,
+    MOVE558_FUSION_FLARE = 0x22E,
+    MOVE559_FUSION_BOLT = 0x22F,
+    MOVE560_FLYING_PRESS = 0x230,
+    MOVE561_MAT_BLOCK = 0x231,
+    MOVE562_BELCH = 0x232,
+    MOVE563_ROTOTILLER = 0x233,
+    MOVE564_STICKY_WEB = 0x234,
+    MOVE565_FELL_STINGER = 0x235,
+    MOVE566_PHANTOM_FORCE = 0x236,
+    MOVE567_TRICK_OR_TREAT = 0x237,
+    MOVE568_NOBLE_ROAR = 0x238,
+    MOVE569_ION_DELUGE = 0x239,
+    MOVE570_PARABOLIC_CHARGE = 0x23A,
+    MOVE571_FOREST_S_CURSE = 0x23B,
+    MOVE572_PETAL_BLIZZARD = 0x23C,
+    MOVE573_FREEZE_DRY = 0x23D,
+    MOVE574_DISARMING_VOICE = 0x23E,
+    MOVE575_PARTING_SHOT = 0x23F,
+    MOVE576_TOPSY_TURVY = 0x240,
+    MOVE577_DRAINING_KISS = 0x241,
+    MOVE578_CRAFTY_SHIELD = 0x242,
+    MOVE579_FLOWER_SHIELD = 0x243,
+    MOVE580_GRASSY_TERRAIN = 0x244,
+    MOVE581_MISTY_TERRAIN = 0x245,
+    MOVE582_ELECTRIFY = 0x246,
+    MOVE583_PLAY_ROUGH = 0x247,
+    MOVE584_FAIRY_WIND = 0x248,
+    MOVE585_MOONBLAST = 0x249,
+    MOVE586_BOOMBURST = 0x24A,
+    MOVE587_FAIRY_LOCK = 0x24B,
+    MOVE588_KING_S_SHIELD = 0x24C,
+    MOVE589_PLAY_NICE = 0x24D,
+    MOVE590_CONFIDE = 0x24E,
+    MOVE591_DIAMOND_STORM = 0x24F,
+    MOVE592_STEAM_ERUPTION = 0x250,
+    MOVE593_HYPERSPACE_HOLE = 0x251,
+    MOVE594_WATER_SHURIKEN = 0x252,
+    MOVE595_MYSTICAL_FIRE = 0x253,
+    MOVE596_SPIKY_SHIELD = 0x254,
+    MOVE597_AROMATIC_MIST = 0x255,
+    MOVE598_EERIE_IMPULSE = 0x256,
+    MOVE599_VENOM_DRENCH = 0x257,
+    MOVE600_POWDER = 0x258,
+    MOVE601_GEOMANCY = 0x259,
+    MOVE602_MAGNETIC_FLUX = 0x25A,
+    MOVE603_HAPPY_HOUR = 0x25B,
+    MOVE604_ELECTRIC_TERRAIN = 0x25C,
+    MOVE605_DAZZLING_GLEAM = 0x25D,
+    MOVE606_CELEBRATE = 0x25E,
+    MOVE607_HOLD_HANDS = 0x25F,
+    MOVE608_BABY_DOLL_EYES = 0x260,
+    MOVE609_NUZZLE = 0x261,
+    MOVE610_HOLD_BACK = 0x262,
+    MOVE611_INFESTATION = 0x263,
+    MOVE612_POWER_UP_PUNCH = 0x264,
+    MOVE613_OBLIVION_WING = 0x265,
+    MOVE614_THOUSAND_ARROWS = 0x266,
+    MOVE615_THOUSAND_WAVES = 0x267,
+    MOVE616_LAND_S_WRATH = 0x268,
+    MOVE617_LIGHT_OF_RUIN = 0x269,
+    MOVE618_ORIGIN_PULSE = 0x26A,
+    MOVE619_PRECIPICE_BLADES = 0x26B,
+    MOVE620_DRAGON_ASCENT = 0x26C,
+    MOVE621_HYPERSPACE_FURY = 0x26D,
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_AddCondition
+{
+    HandlerParam_Header header;
+    MoveCondition sickID;
+    ConditionData sickCont;
+    u8 fAlmost;
+    u8 reserved;
+    u8 overwriteMode;
+    u8 pokeID;
+    u8 OverwriteMode;
+    HandlerParam_StrParams exStr;
+};
+
+typedef BattleEventHandlerTableEntry* (*MoveEventAddFunc)(int* a1);
+struct MoveEventAddTable
+{
+    MoveID move;
+    MoveEventAddFunc func;
+};
+
+struct HandlerParam_SwapItem
+{
+    HandlerParam_Header header;
+    u8 pokeID;
+    u8 fIncRecordCount;
+    HandlerParam_StrParams exStr;
+    HandlerParam_StrParams exSubStr1;
+    HandlerParam_StrParams exSubStr2;
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_Damage
+{
+    HandlerParam_Header header;
+    u16 damage;
+    u8 pokeID;
+    char flags;
+    u16 effectNo;
+    u8 posFrom;
+    u8 posTo;
+    HandlerParam_StrParams exStr;
+};
+
+struct HandlerParam_ChangeAbility
+{
+    HandlerParam_Header header;
+    u16 abilityID;
+    u8 pokeID;
+    u8 fSameAbilityEffective;
+    u8 fSkipSwitchInEvent;
+    HandlerParam_StrParams exStr;
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_RemoveSideEffect
+{
+    HandlerParam_Header header;
+    u8 flags[3];
+    u8 side;
+};
+
+enum MoveFailCause
+{
+    MOVEFAIL_NULL = 0x0,
+    MOVEFAIL_PPZERO = 0x1,
+    MOVEFAIL_SLEEP = 0x2,
+    MOVEFAIL_PARALYSIS = 0x3,
+    MOVEFAIL_FREEZE = 0x4,
+    MOVEFAIL_CONFUSION = 0x5,
+    MOVEFAIL_FLINCH = 0x6,
+    MOVEFAIL_FOCUSPUNCHFAIL = 0x7,
+    MOVEFAIL_ATTRACT = 0x8,
+    MOVEFAIL_DISABLE = 0x9,
+    MOVEFAIL_TAUNT = 0xA,
+    MOVEFAIL_TORMENT = 0xB,
+    MOVEFAIL_IMPRISON = 0xC,
+    MOVEFAIL_HEALBLOCK = 0xD,
+    MOVEFAIL_HPFULL = 0xE,
+    MOVEFAIL_INSOMNIA = 0xF,
+    MOVEFAIL_TRUANT = 0x10,
+    MOVEFAIL_MOVELOCK = 0x11,
+    MOVEFAIL_ENCORE = 0x12,
+    MOVEFAIL_ABILITY = 0x13,
+    MOVEFAIL_GRAVITY = 0x14,
+    MOVEFAIL_TO_RECOVER = 0x15,
+    MOVEFAIL_IGNORE = 0x16,
+    MOVEFAIL_IGNORE_FALL_ASLEEP = 0x17,
+    MOVEFAIL_IGNORE_SLEEPING = 0x18,
+    MOVEFAIL_NO_REACTION = 0x19,
+    MOVEFAIL_OTHER = 0x1A,
+};
+
+struct HandlerParam_Message
+{
+    HandlerParam_Header header;
+    HandlerParam_StrParams str;
+};
+
+struct HandlerParam_RecoverHP
+{
+    HandlerParam_Header header;
+    u16 recoverHP;
+    u8 pokeID;
+    u8 fFailCheckThru;
+    HandlerParam_StrParams exStr;
+};
+
+struct HandlerParam_SetItem
+{
+  HandlerParam_Header header;
+  u16 itemID;
+  u8 pokeID;
+  u8 fClearConsume;
+  u8 fClearConsumeOtherPoke;
+  u8 clearConsumePokeID;
+  u8 fCallConsumedEvent;
+  HandlerParam_StrParams exStr;
+};
+
+struct HandlerParam_CureCondition
+{
+    HandlerParam_Header header;
+    MoveCondition sickCode;
+    u8 pokeID[12];
+    u8 poke_cnt;
+    u8 fStdMsgDisable;
+    HandlerParam_StrParams exStr;
+};
+
 // BattleHandler_x definitions
 int HEManager_GetUseItemNo(_WORD* a1);
 unsigned int HEManager_IsUsed(_DWORD* a1);
@@ -6251,7 +7926,7 @@ unsigned int* HEManager_SetResult(unsigned int* result, int a2);
 // AddExpAndEvs definitions
 BtlSetup* MainModule_GetBtlSetup_0(MainModule* a1);
 u32 CalcBaseExpGain(BattleMon* defeatedMon, int KeySystemLevelAdjust);
-BtlType BtlSetup_GetBattleType(MainModule* a1);
+BtlType MainModule_GetBattleType(MainModule* a1);
 int BattleParty_GetPartyCount(BattleParty* a1);
 BtlType BtlSetup_GetBattleType(MainModule* a1);
 void sys_memset(const void* ptr, u8 value, size_t size);
@@ -6260,7 +7935,7 @@ bool BattleMon_IsFainted(BattleMon* a1);
 ItemID BattleMon_GetHeldItem(BattleMon* a1);
 int BattleMon_GetConfrontRecCount(BattleMon* a1);
 int BattleMon_GetConfrontedPokeID(BattleMon* a1, unsigned int a2);
-BattleMon* PokeCon_GetPokeParam(PokeCon* a1, int a2);
+BattleMon* PokeCon_GetBattleMon(PokeCon* a1, int a2);
 int BattleMon_GetID(BattleMon* a1);
 void* MainModule_GetPlayerStatus(MainModule* a1);
 PartyPkm* BattleMon_GetSrcData(BattleMon* a1);
@@ -6335,7 +8010,6 @@ ServerFlow* sub_21AC068_new(ServerFlow* result)
 }
 
 // ServerCommand_TurnCheck definitions
-BattleMon* PokeCon_GetPokeParam(PokeCon* a1, int a2);
 void BattleMon_TurnCheck(BattleMon* a1);
 void BattleMon_ClearComboMoveData(BattleMon* result);
 
@@ -6409,7 +8083,7 @@ unsigned int MoveConditionToPokeCondition(unsigned __int16 a1, int a2, int* a3);
 void j_j_PokeSet_SeekStart_3(PokeSet* a1);
 BattleMon* j_j_PokeSet_SeekNext_7(PokeSet* a1);
 int ServerControl_MoveStatStageChangeEffectCommon(ServerFlow* a1, unsigned __int16* a2, BattleMon* a3, int a4, int a5);
-int ServerControl_MoveConditionCore(ServerFlow* a1, int a2, int a3, int a4, int a5, int a6, int a7);
+int ServerControl_MoveConditionCore(ServerFlow* a1, BattleMon* a2, BattleMon* a3, int a4, int a5, ConditionData a6, int a7);
 void sub_21A6D54();
 
 // ServerEvent_DamageAddEffect definitions
@@ -6484,7 +8158,7 @@ void PSetStack_Pop(int result);
 int ServerControl_TurnCheck(ServerFlow* a1);
 bool ServerControl_CheckMatchup(ServerFlow* a1);
 int j_j_DeadRec_GetCount_1(int a1, unsigned int a2);
-int IsPosOpenForRevivedMon(ServerFlow* a1);
+int Handler_IsPosOpenForRevivedMon(ServerFlow* a1);
 int ServerFlow_ReqChangePokeForServer(ServerFlow* a1, _BYTE* a2);
 unsigned int ServerDisplay_IllusionSet(ServerFlow* a1, unsigned __int8* a2);
 _DWORD* ServerControl_CheckActivation(ServerFlow* a1);
@@ -6755,9 +8429,796 @@ int positionShakingSpot(EncountSystem* encSys, int a2, u8 type);
 void sub_21A272C(void** a1, int a2);
 void setShakingSpotOff(EncountState* result);
 
+// some register expansion related definitions
+GameData* GSYS_GetGameData(GameSystem* gsys);
+PokeParty* GameData_GetParty(GameData* pBaseBlk);
+_DWORD* sub_2034C80(GameData* a1, int a2, int a3, HeapID a4);
+bool GFL_OvlLoad(u32 ovlId);
+void GFL_OvlUnload(u32 ovlId);
+GameEvent* CreateHidenEvent(HidenEventID eventId, int a2, PlayerActionPossibilities* actionOpts);
+
+// EventShortcutChoicePopup_Callback definitions
+void sub_215B2C4(int a1, EventShortcutMenu* a2);
+int ShortcutMenu_GetActionFromKeyItem(RegistrableID registrableID, FieldPlayerAction* a2, _DWORD* a3);
+bool ShortcutMenu_SetKeyItemID(ShortcutMenuWork* wk, RegistrableID registrableID);
+int sub_20175E4(GameData* a1);
+int CheckAnyRibbon(EventShortcutMenu* data);
+int PlayerActionPerms_IsActionBlocked(PlayerActionPerms* perms, int actionNo);
+int sub_215B310(EventShortcutMenu* data);
+void EnableAllActorsMovement(MModelSystem* a1);
+GameEvent* CreateBagItemUseEvent(ShortcutMenuWork* a1, u16 a2);
+GameEvent* CallFieldCommonEventFunc(FieldCommonEventID cmnEventId, GameSystem* gsys, Field* field);
+void EventFieldItemUseBlock_Call(GameEvent* parentEvent, GameSystem* gsys, FieldCommonEventID eventId, bool isBlockedByPerms);
+int sub_2159458(int result, __int16 a2, __int16 a3, int a4);
+void sub_215B2C4(int a1, EventShortcutMenu* a2);
+int sub_21BF1E4(int a1);
+unsigned int sub_21BF0C0(int a1);
+int sub_21BF21C(int a1);
+int sub_21BF230(int a1, _DWORD* a2);
+b32 GameData_IsForceSeasonSync(GameData* gameData);
+_WORD* sub_21BF208(_WORD* result);
+GameEvent* EventFieldAppCall_Create(AppCallFramework* framework, HeapID heapId);
+
+// FIELD_COMMON_EVENTS definitions
+GameEvent* EventFieldToggleCycling_Create(Field* field, GameSystem* gsys);
+GameEvent* EventEntralinkWarpIn_CreateDefault(Field* field, GameSystem* gsys);
+GameEvent* EventMapChangeEscapeRope_Create(Field* field, GameSystem* gsys);
+GameEvent* EventSweetScent_Create(Field* field, GameSystem* gsys);
+GameEvent* EventFieldFishing_Create(Field* field, GameSystem* gsys);
+GameEvent* EventFieldToggleDowsing_Create(Field* field, GameSystem* gsys);
+
+int ItemUseFunction_Bicycle(int a1);
+int ItemUseFunction_TownMap(int a1);
+int ItemUseFunction_PalPad(int a1);
+int ItemUseFunction_Honey(int a1);
+int ItemUseFunction_SuperRod(int a1);
+int ItemUseFunction_VsRecorder(int a1);
+int ItemUseFunction_DowsingMCHN(int a1);
+int ItemUseFunction_EscapeRope(int a1);
+int ItemUseFunction_Xtransceiver(int a1);
+int ItemUseFunction_MedalBox(int a1);
+bool SaveControl_IsItemRegistered(GameData* gameData, RegistrableID registrableID);
+
+// GetRegistrableID / Bag_GetRegistrableID definitions
+int Bag_LoadItemName(BigBagStructTemp* a1, int a2, int a3);
+void Bag_CreateTextBox(BigBagStructTemp* a1, int a2);
+int sub_2199900(_DWORD* a1, int a2);
+int sub_219A22C(int a1);
+
+// setItemDescriptionTextToStrbuf definitions
+MsgData* GFL_MsgSysLoadData(bool isPreloadAll, int arcId, int fileId, HeapID heapId);
+void GFL_MsgDataFree(MsgData* msgdata);
+
+// PML_PkmSetParamCore definitions
+void* PML_PkmGetParamBlockCore(BoxPkm* pkm, u32 pid, int blk_num);
+GenderSet PML_UtilDerivePkmSex(u16 species, u16 form, u32 pid);
+void GFL_StrBufStoreString(StrBuf* strbuf, wchar_t* dest, int length);
+bool PML_PkmIsNicknamed(BoxPkm* pPkm);
+void wcharsncpy(wchar_t* pSrc, wchar_t* pDest, int length);
+
+// PML_PkmGetParamCore definitions
+u16 PML_CryptoGenKey(void* area, int length);
+
+// BagSave_GetFreeSpaceItemCount definitions
+bool BagSave_IsItemInFreeSpace(BagSaveData* bag, u32 itemId);
+void GFL_StrBufLoadString(StrBuf* strbuf, wchar_t* src);
+void GFL_MsgDataLoadRawStr(MsgData* msgdata, int msgId, wchar_t* string, int length);
+u32 CalcLevelByExp(u16 species, u16 form, u32 experience);
+PokeType PML_ItemGetArceusPlateType(u16 itemId);
+u32 PML_PersonalGetParamSingle(u16 species, u16 form, PersonalField field);
+
+// PokeList_ActionMenu definitions
+void sub_219B1DC(PokeList* a1);
+PartyPkm* PokeParty_GetPkm(PokeParty* party, int slot);
+u8* sub_219FB94(PokeList* a1, PokeList_Menu* a2, _DWORD* a3);
+bool PokeList_GetItemCountByID(PokeList* a1, u16 a2);
+void sub_219DE34(PokeList* a1);
+int PokeList_IsGiratinaInOriginForme(PokeList* a1);
+int PokeList_ChangeGiratinaToAlteredForme(PokeList* a1, PartyPkm* a2);
+int PokeList_GetFieldMoveID(PartyPkm* a1, int a2);
+bool CheckAllowHidenEvent(int a1, PlayerActionPossibilities* a2);
+bool sub_2018C64(int a1);
+int sub_219F530(PokeList* a1, PokeList_Plate* a2);
+void sub_219F4D0(PokeList* a1, PokeList_Plate* a2, int a3);
+char* sub_219F008(PokeList* a1, PokeList_Plate* a2, int a3);
+void sub_219FF18(int result, int a2);
+int sub_219F4CC(PokeList_Plate* a1);
+
+// PML_ItemGetParam definitions
+int PML_ItemGetBattleStat(ItemBattleStats* btlStats, ItemField stat);
+
+// PokeList_PrintItemRecoverMessage definitions
+ItemRestoreType PokeList_GetItemRestoreType(ItemID itemID);
+int PokeListPlate_GetCurrentHP(PokeList* a1, PokeList_Plate* a2);
+void sub_21A0678(PokeList* a1);
+u32 PokeParty_GetLevel(PartyPkm* pPkm);
+void PokeListMessage_WordSetNumber(PokeList* a1, PokeList_Message* a2, int a3, int a4, unsigned __int8 a5);
+void sub_21A0750(PokeList* a1);
+StrBuf* GFL_StrBufCreate(int charCount, HeapID heapId);
+int sub_202D2F4(int a1);
+void GFL_StrBufFree(StrBuf* pStrbuf);
+void PokeList_PrintRecoverHPMessage(PokeList* a1);
+bool PokeList_DoesPkmHaveParam(PartyPkm* a1, PkmField a2);
+void sub_21A0D28(PokeList* a1, int a2, unsigned __int8 a3);
+void sub_219DE58(PokeList* a1);
+void sub_21A0CE8(PokeList* a1, int a2);
+
+void GFL_WordSetCopyStrbuf(WordSetSystem* wordSet, int bufId, StrBuf* source, u8* flags);
+PersonalData* PML_PersonalLoadBW2(u16 species, u16 form);
+u32 PML_PersonalGetParam(PersonalData* personal, PersonalField field);
+int loadAbilityNameToStrbuf(WordSetSystem* wordset, int buffid, int msgID);
+    
+// sub_219B8F0 definitions
+int PokeListPlate_IsEgg(PokeList* a1, PokeList_Plate* a2);
+int PokeList_GetPPRestoreStrID(PokeList* a1, unsigned int a2);
+
+// BattleMon_Create definitions
+void BattleMon_SetupBySrcData(BattleMon* a1, PartyPkm* a2, int a3, int a4);
+int BattleMon_GetNumMoves(BattleMon* a1, PartyPkm* a2, int a3);
+void j_ResetStatStages(StatStageParam* result);
+void ClearMoveStatusWork(BattleMon* a1, int a2);
+u32 GetStatusCond(PartyPkm* a1);
+ConditionData MakeBasicStatus(MoveCondition a1);
+void MoveDamageRec_Init(BattleMon* a1);
+void BattleMon_ClearConfrontRecCount(BattleMon* a1);
+
+// ITEM_EVENT_ADD_TABLE definitions
+BattleEventHandlerTableEntry* EventAddCheriBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddChestoBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddRawstBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddAspearBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddPersimBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddPechaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddLumBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddLeppaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddOranBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddBerryJuice(int* a1);
+BattleEventHandlerTableEntry* EventAddSitrusBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddFigyBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddWikiBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddMagoBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddAguavBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddIapapaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddLiechiBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddGanlonBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddSalacBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddPetayaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddApicotBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddLansatBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddStarfBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddEnigmaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddOccaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddPasshoBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddWacanBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddRindoBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddYacheBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddChopleBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddKebiaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddShucaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddCobaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddPayapaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddTangaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddChartiBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddKasibBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddHabanBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddColburBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddBabiriBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddChilanBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddCustapBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddMicleBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddJabocaBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddRowapBerry(int* a1);
+BattleEventHandlerTableEntry* EventAddWhiteHerb(int* a1);
+BattleEventHandlerTableEntry* EventAddMentalHerb(int* a1);
+BattleEventHandlerTableEntry* EventAddBrightPowder(int* a1);
+BattleEventHandlerTableEntry* EventAddMachoBrace(int* a1);
+BattleEventHandlerTableEntry* EventAddQuickClaw(int* a1);
+BattleEventHandlerTableEntry* EventAddLaggingTail(int* a1);
+BattleEventHandlerTableEntry* EventAddLaggingTail(int* a1);
+BattleEventHandlerTableEntry* EventAddKingsRock(int* a1);
+BattleEventHandlerTableEntry* EventAddScopeLens(int* a1);
+BattleEventHandlerTableEntry* EventAddWideLens(int* a1);
+BattleEventHandlerTableEntry* EventAddScopeLens(int* a1);
+BattleEventHandlerTableEntry* EventAddZoomLens(int* a1);
+BattleEventHandlerTableEntry* EventAddLaxIncense(int* a1);
+BattleEventHandlerTableEntry* EventAddMuscleBand(int* a1);
+BattleEventHandlerTableEntry* EventAddWiseGlasses(int* a1);
+BattleEventHandlerTableEntry* EventAddDeepSeaTooth(int* a1);
+BattleEventHandlerTableEntry* EventAddDeepSeaScale(int* a1);
+BattleEventHandlerTableEntry* EventAddMetalPowder(int* a1);
+BattleEventHandlerTableEntry* EventAddQuickPowder(int* a1);
+BattleEventHandlerTableEntry* EventAddLightBall(int* a1);
+BattleEventHandlerTableEntry* EventAddLuckyPunch(int* a1);
+BattleEventHandlerTableEntry* EventAddStick(int* a1);
+BattleEventHandlerTableEntry* EventAddSoulDew(int* a1);
+BattleEventHandlerTableEntry* EventAddThickClub(int* a1);
+BattleEventHandlerTableEntry* EventAddChoiceBand(int* a1);
+BattleEventHandlerTableEntry* EventAddBlackSludge(int* a1);
+BattleEventHandlerTableEntry* EventAddChoiceSpecs(int* a1);
+BattleEventHandlerTableEntry* EventAddChoiceScarf(int* a1);
+BattleEventHandlerTableEntry* EventAddSilverPowder(int* a1);
+BattleEventHandlerTableEntry* EventAddSoftSand(int* a1);
+BattleEventHandlerTableEntry* EventAddHardStone(int* a1);
+BattleEventHandlerTableEntry* EventAddMiracleSeed(int* a1);
+BattleEventHandlerTableEntry* EventAddBlackGlasses(int* a1);
+BattleEventHandlerTableEntry* EventAddBlackBelt(int* a1);
+BattleEventHandlerTableEntry* EventAddMagnet(int* a1);
+BattleEventHandlerTableEntry* EventAddMetalCoat(int* a1);
+BattleEventHandlerTableEntry* EventAddMysticWater(int* a1);
+BattleEventHandlerTableEntry* EventAddSharpBeak(int* a1);
+BattleEventHandlerTableEntry* EventAddRazorFang(int* a1);
+BattleEventHandlerTableEntry* EventAddPoisonBarb(int* a1);
+BattleEventHandlerTableEntry* EventAddNeverMeltIce(int* a1);
+BattleEventHandlerTableEntry* EventAddSpellTag(int* a1);
+BattleEventHandlerTableEntry* EventAddTwistedSpoon(int* a1);
+BattleEventHandlerTableEntry* EventAddCharcoal(int* a1);
+BattleEventHandlerTableEntry* EventAddDragonFang(int* a1);
+BattleEventHandlerTableEntry* EventAddSilkScarf(int* a1);
+BattleEventHandlerTableEntry* EventAddOddIncense(int* a1);
+BattleEventHandlerTableEntry* EventAddRockIncense(int* a1);
+BattleEventHandlerTableEntry* EventAddWaveIncense(int* a1);
+BattleEventHandlerTableEntry* EventAddSeaIncense(int* a1);
+BattleEventHandlerTableEntry* EventAddRoseIncense(int* a1);
+BattleEventHandlerTableEntry* EventAddFocusSash(int* a1);
+BattleEventHandlerTableEntry* EventAddFocusBand(int* a1);
+BattleEventHandlerTableEntry* EventAddExpertBelt(int* a1);
+BattleEventHandlerTableEntry* EventAddLifeOrb(int* a1);
+BattleEventHandlerTableEntry* EventAddMetronomeItem(int* a1);
+BattleEventHandlerTableEntry* EventAddGripClaw(int* a1);
+BattleEventHandlerTableEntry* EventAddShellBell(int* a1);
+BattleEventHandlerTableEntry* EventAddLightClay(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerHerb(int* a1);
+BattleEventHandlerTableEntry* EventAddLeftovers(int* a1);
+BattleEventHandlerTableEntry* EventAddToxicOrb(int* a1);
+BattleEventHandlerTableEntry* EventAddFlameOrb(int* a1);
+BattleEventHandlerTableEntry* EventAddLustrousOrb(int* a1);
+BattleEventHandlerTableEntry* EventAddAdamantOrb(int* a1);
+BattleEventHandlerTableEntry* EventAddIronBall(int* a1);
+BattleEventHandlerTableEntry* EventAddDestinyKnot(int* a1);
+BattleEventHandlerTableEntry* EventAddIcyRock(int* a1);
+BattleEventHandlerTableEntry* EventAddSmoothRock(int* a1);
+BattleEventHandlerTableEntry* EventAddHeatRock(int* a1);
+BattleEventHandlerTableEntry* EventAddDampRock(int* a1);
+BattleEventHandlerTableEntry* EventAddStickyBarb(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerBracer(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerBelt(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerLens(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerBand(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerAnklet(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerWeight(int* a1);
+BattleEventHandlerTableEntry* EventAddFlamePlate(int* a1);
+BattleEventHandlerTableEntry* EventAddSplashPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddZapPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddMeadowPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddIciclePlate(int* a1);
+BattleEventHandlerTableEntry* EventAddFistPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddToxicPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddEarthPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddSkyPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddMindPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddInsectPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddStonePlate(int* a1);
+BattleEventHandlerTableEntry* EventAddSpookyPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddDracoPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddDreadPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddIronPlate(int* a1);
+BattleEventHandlerTableEntry* EventAddBigRoot(int* a1);
+BattleEventHandlerTableEntry* EventAddSmokeBall(int* a1);
+BattleEventHandlerTableEntry* EventAddAmuletCoin(int* a1);
+BattleEventHandlerTableEntry* EventAddAmuletCoin(int* a1);
+BattleEventHandlerTableEntry* EventAddGriseousOrb(int* a1);
+BattleEventHandlerTableEntry* EventAddFloatStone(int* a1);
+BattleEventHandlerTableEntry* EventAddEviolite(int* a1);
+BattleEventHandlerTableEntry* EventAddRockyHelmet(int* a1);
+BattleEventHandlerTableEntry* EventAddAirBalloon(int* a1);
+BattleEventHandlerTableEntry* EventAddRedCard(int* a1);
+BattleEventHandlerTableEntry* EventAddRingTarget(int* a1);
+BattleEventHandlerTableEntry* EventAddBindingBand(int* a1);
+BattleEventHandlerTableEntry* EventAddAbsorbBulb(int* a1);
+BattleEventHandlerTableEntry* EventAddCellBattery(int* a1);
+BattleEventHandlerTableEntry* EventAddEjectButton(int* a1);
+BattleEventHandlerTableEntry* EventAddFireGem(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterGem(int* a1);
+BattleEventHandlerTableEntry* EventAddElectricGem(int* a1);
+BattleEventHandlerTableEntry* EventAddGrassGem(int* a1);
+BattleEventHandlerTableEntry* EventAddIceGem(int* a1);
+BattleEventHandlerTableEntry* EventAddFightingGem(int* a1);
+BattleEventHandlerTableEntry* EventAddPoisonGem(int* a1);
+BattleEventHandlerTableEntry* EventAddGroundGem(int* a1);
+BattleEventHandlerTableEntry* EventAddFlyingGem(int* a1);
+BattleEventHandlerTableEntry* EventAddPsychicGem(int* a1);
+BattleEventHandlerTableEntry* EventAddBugGem(int* a1);
+BattleEventHandlerTableEntry* EventAddRockGem(int* a1);
+BattleEventHandlerTableEntry* EventAddGhostGem(int* a1);
+BattleEventHandlerTableEntry* EventAddDragonGem(int* a1);
+BattleEventHandlerTableEntry* EventAddDarkGem(int* a1);
+BattleEventHandlerTableEntry* EventAddSteelGem(int* a1);
+BattleEventHandlerTableEntry* EventAddNormalGem(int* a1);
+
+// MOVE_EVENT_ADD_TABLE definitions
+BattleEventHandlerTableEntry* EventAddConversion(int* a1);
+BattleEventHandlerTableEntry* EventAddCamouflage(int* a1);
+BattleEventHandlerTableEntry* EventAddHaze(int* a1);
+BattleEventHandlerTableEntry* EventAddDreamEater(int* a1);
+BattleEventHandlerTableEntry* EventAddTriAttack(int* a1);
+BattleEventHandlerTableEntry* EventAddSecretPower(int* a1);
+BattleEventHandlerTableEntry* EventAddChatter(int* a1);
+BattleEventHandlerTableEntry* EventAddSuperFang(int* a1);
+BattleEventHandlerTableEntry* EventAddDragonRage(int* a1);
+BattleEventHandlerTableEntry* EventAddSeismicToss(int* a1);
+BattleEventHandlerTableEntry* EventAddSeismicToss(int* a1);
+BattleEventHandlerTableEntry* EventAddPsywave(int* a1);
+BattleEventHandlerTableEntry* EventAddSnore(int* a1);
+BattleEventHandlerTableEntry* EventAddLastResort(int* a1);
+BattleEventHandlerTableEntry* EventAddFlail(int* a1);
+BattleEventHandlerTableEntry* EventAddFlail(int* a1);
+BattleEventHandlerTableEntry* EventAddFalseSwipe(int* a1);
+BattleEventHandlerTableEntry* EventAddSpiderWeb(int* a1);
+BattleEventHandlerTableEntry* EventAddSpiderWeb(int* a1);
+BattleEventHandlerTableEntry* EventAddSpiderWeb(int* a1);
+BattleEventHandlerTableEntry* EventAddEndure(int* a1);
+BattleEventHandlerTableEntry* EventAddSonicBoom(int* a1);
+BattleEventHandlerTableEntry* EventAddFakeOut(int* a1);
+BattleEventHandlerTableEntry* EventAddEndeavor(int* a1);
+BattleEventHandlerTableEntry* EventAddEruption(int* a1);
+BattleEventHandlerTableEntry* EventAddEruption(int* a1);
+BattleEventHandlerTableEntry* EventAddRefresh(int* a1);
+BattleEventHandlerTableEntry* EventAddMorningSun(int* a1);
+BattleEventHandlerTableEntry* EventAddMorningSun(int* a1);
+BattleEventHandlerTableEntry* EventAddMorningSun(int* a1);
+BattleEventHandlerTableEntry* EventAddCrushGrip(int* a1);
+BattleEventHandlerTableEntry* EventAddCrushGrip(int* a1);
+BattleEventHandlerTableEntry* EventAddWeatherBall(int* a1);
+BattleEventHandlerTableEntry* EventAddProtect(int* a1);
+BattleEventHandlerTableEntry* EventAddProtect(int* a1);
+BattleEventHandlerTableEntry* EventAddSplash(int* a1);
+BattleEventHandlerTableEntry* EventAddCurse(int* a1);
+BattleEventHandlerTableEntry* EventAddThrash(int* a1);
+BattleEventHandlerTableEntry* EventAddUproar(int* a1);
+BattleEventHandlerTableEntry* EventAddThrash(int* a1);
+BattleEventHandlerTableEntry* EventAddThrash(int* a1);
+BattleEventHandlerTableEntry* EventAddBrine(int* a1);
+BattleEventHandlerTableEntry* EventAddWakeUpSlap(int* a1);
+BattleEventHandlerTableEntry* EventAddSmellingSalts(int* a1);
+BattleEventHandlerTableEntry* EventAddAcupressure(int* a1);
+BattleEventHandlerTableEntry* EventAddTrumpCard(int* a1);
+BattleEventHandlerTableEntry* EventAddFly(int* a1);
+BattleEventHandlerTableEntry* EventAddBounce(int* a1);
+BattleEventHandlerTableEntry* EventAddDive(int* a1);
+BattleEventHandlerTableEntry* EventAddDig(int* a1);
+BattleEventHandlerTableEntry* EventAddSolarBeam(int* a1);
+BattleEventHandlerTableEntry* EventAddRazorWind(int* a1);
+BattleEventHandlerTableEntry* EventAddSkyAttack(int* a1);
+BattleEventHandlerTableEntry* EventAddSkullBash(int* a1);
+BattleEventHandlerTableEntry* EventAddEncore(int* a1);
+BattleEventHandlerTableEntry* EventAddTwister(int* a1);
+BattleEventHandlerTableEntry* EventAddTwister(int* a1);
+BattleEventHandlerTableEntry* EventAddEarthquake(int* a1);
+BattleEventHandlerTableEntry* EventAddSurf(int* a1);
+BattleEventHandlerTableEntry* EventAddSkyUppercut(int* a1);
+BattleEventHandlerTableEntry* EventAddMagnitude(int* a1);
+BattleEventHandlerTableEntry* EventAddFeint(int* a1);
+BattleEventHandlerTableEntry* EventAddShadowForce(int* a1);
+BattleEventHandlerTableEntry* EventAddStruggle(int* a1);
+BattleEventHandlerTableEntry* EventAddPunishment(int* a1);
+BattleEventHandlerTableEntry* EventAddTaunt(int* a1);
+BattleEventHandlerTableEntry* EventAddCaptivate(int* a1);
+BattleEventHandlerTableEntry* EventAddBellyDrum(int* a1);
+BattleEventHandlerTableEntry* EventAddDestinyBond(int* a1);
+BattleEventHandlerTableEntry* EventAddFacade(int* a1);
+BattleEventHandlerTableEntry* EventAddPayback(int* a1);
+BattleEventHandlerTableEntry* EventAddHiddenPower(int* a1);
+BattleEventHandlerTableEntry* EventAddMinimize(int* a1);
+BattleEventHandlerTableEntry* EventAddDefenseCurl(int* a1);
+BattleEventHandlerTableEntry* EventAddStomp(int* a1);
+BattleEventHandlerTableEntry* EventAddNightmare(int* a1);
+BattleEventHandlerTableEntry* EventAddSuckerPunch(int* a1);
+BattleEventHandlerTableEntry* EventAddRollout(int* a1);
+BattleEventHandlerTableEntry* EventAddRollout(int* a1);
+BattleEventHandlerTableEntry* EventAddAromatherapy(int* a1);
+BattleEventHandlerTableEntry* EventAddHealBell(int* a1);
+BattleEventHandlerTableEntry* EventAddMemento(int* a1);
+BattleEventHandlerTableEntry* EventAddSpite(int* a1);
+BattleEventHandlerTableEntry* EventAddRest(int* a1);
+BattleEventHandlerTableEntry* EventAddLockOn(int* a1);
+BattleEventHandlerTableEntry* EventAddLockOn(int* a1);
+BattleEventHandlerTableEntry* EventAddReflect(int* a1);
+BattleEventHandlerTableEntry* EventAddLightScreen(int* a1);
+BattleEventHandlerTableEntry* EventAddSafeguard(int* a1);
+BattleEventHandlerTableEntry* EventAddMist(int* a1);
+BattleEventHandlerTableEntry* EventAddTailwind(int* a1);
+BattleEventHandlerTableEntry* EventAddReturn(int* a1);
+BattleEventHandlerTableEntry* EventAddFrustration(int* a1);
+BattleEventHandlerTableEntry* EventAddPresent(int* a1);
+BattleEventHandlerTableEntry* EventAddTorment(int* a1);
+BattleEventHandlerTableEntry* EventAddImprison(int* a1);
+BattleEventHandlerTableEntry* EventAddGravity(int* a1);
+BattleEventHandlerTableEntry* EventAddGrudge(int* a1);
+BattleEventHandlerTableEntry* EventAddHelpingHand(int* a1);
+BattleEventHandlerTableEntry* EventAddGastroAcid(int* a1);
+BattleEventHandlerTableEntry* EventAddRolePlay(int* a1);
+BattleEventHandlerTableEntry* EventAddSpikes(int* a1);
+BattleEventHandlerTableEntry* EventAddToxicSpikes(int* a1);
+BattleEventHandlerTableEntry* EventAddStealthRock(int* a1);
+BattleEventHandlerTableEntry* EventAddRoost(int* a1);
+BattleEventHandlerTableEntry* EventAddMagnetRise(int* a1);
+BattleEventHandlerTableEntry* EventAddFuryCutter(int* a1);
+BattleEventHandlerTableEntry* EventAddPsychoShift(int* a1);
+BattleEventHandlerTableEntry* EventAddAssurance(int* a1);
+BattleEventHandlerTableEntry* EventAddConversion2(int* a1);
+BattleEventHandlerTableEntry* EventAddCounter(int* a1);
+BattleEventHandlerTableEntry* EventAddMirrorCoat(int* a1);
+BattleEventHandlerTableEntry* EventAddMetalBurst(int* a1);
+BattleEventHandlerTableEntry* EventAddRevenge(int* a1);
+BattleEventHandlerTableEntry* EventAddRevenge(int* a1);
+BattleEventHandlerTableEntry* EventAddTripleKick(int* a1);
+BattleEventHandlerTableEntry* EventAddGyroBall(int* a1);
+BattleEventHandlerTableEntry* EventAddPainSplit(int* a1);
+BattleEventHandlerTableEntry* EventAddFollowMe(int* a1);
+BattleEventHandlerTableEntry* EventAddWorrySeed(int* a1);
+BattleEventHandlerTableEntry* EventAddThunderWave(int* a1);
+BattleEventHandlerTableEntry* EventAddPsychUp(int* a1);
+BattleEventHandlerTableEntry* EventAddHeartSwap(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerSwap(int* a1);
+BattleEventHandlerTableEntry* EventAddGuardSwap(int* a1);
+BattleEventHandlerTableEntry* EventAddAttract(int* a1);
+BattleEventHandlerTableEntry* EventAddJudgement(int* a1);
+BattleEventHandlerTableEntry* EventAddNaturalGift(int* a1);
+BattleEventHandlerTableEntry* EventAddKnockOff(int* a1);
+BattleEventHandlerTableEntry* EventAddDisable(int* a1);
+BattleEventHandlerTableEntry* EventAddThief(int* a1);
+BattleEventHandlerTableEntry* EventAddThief(int* a1);
+BattleEventHandlerTableEntry* EventAddTrick(int* a1);
+BattleEventHandlerTableEntry* EventAddTrick(int* a1);
+BattleEventHandlerTableEntry* EventAddMimic(int* a1);
+BattleEventHandlerTableEntry* EventAddSketch(int* a1);
+BattleEventHandlerTableEntry* EventJumpKickAdd(int* a1);
+BattleEventHandlerTableEntry* EventJumpKickAdd(int* a1);
+BattleEventHandlerTableEntry* EventAddDefog(int* a1);
+BattleEventHandlerTableEntry* EventAddBrickBreak(int* a1);
+BattleEventHandlerTableEntry* EventAddTrickRoom(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterSport(int* a1);
+BattleEventHandlerTableEntry* EventAddMudSport(int* a1);
+BattleEventHandlerTableEntry* EventAddCharge(int* a1);
+BattleEventHandlerTableEntry* EventAddPerishSong(int* a1);
+BattleEventHandlerTableEntry* EventAddLeechSeed(int* a1);
+BattleEventHandlerTableEntry* EventAddBeatUp(int* a1);
+BattleEventHandlerTableEntry* EventAddAquaRing(int* a1);
+BattleEventHandlerTableEntry* EventAddLunarDance(int* a1);
+BattleEventHandlerTableEntry* EventAddHealingWish(int* a1);
+BattleEventHandlerTableEntry* EventAddMetronome(int* a1);
+BattleEventHandlerTableEntry* EventAddNaturePower(int* a1);
+BattleEventHandlerTableEntry* EventAddAssist(int* a1);
+BattleEventHandlerTableEntry* EventAddMirrorMove(int* a1);
+BattleEventHandlerTableEntry* EventAddMeFirst(int* a1);
+BattleEventHandlerTableEntry* EventAddCopycat(int* a1);
+BattleEventHandlerTableEntry* EventAddSleepTalk(int* a1);
+BattleEventHandlerTableEntry* EventAddLowKick(int* a1);
+BattleEventHandlerTableEntry* EventAddLowKick(int* a1);
+BattleEventHandlerTableEntry* EventAddFocusPunch(int* a1);
+BattleEventHandlerTableEntry* EventAddStockpile(int* a1);
+BattleEventHandlerTableEntry* EventAddSpitUp(int* a1);
+BattleEventHandlerTableEntry* EventAddSwallow(int* a1);
+BattleEventHandlerTableEntry* EventAddFutureSight(int* a1);
+BattleEventHandlerTableEntry* EventAddDoomDesire(int* a1);
+BattleEventHandlerTableEntry* EventAddRecycle(int* a1);
+BattleEventHandlerTableEntry* EventAddPursuit(int* a1);
+BattleEventHandlerTableEntry* EventAddPayDay(int* a1);
+BattleEventHandlerTableEntry* EventAddBide(int* a1);
+BattleEventHandlerTableEntry* EventAddSnatch(int* a1);
+BattleEventHandlerTableEntry* EventAddMagicCoat(int* a1);
+BattleEventHandlerTableEntry* EventAddTeleport(int* a1);
+BattleEventHandlerTableEntry* EventAddUturn(int* a1);
+BattleEventHandlerTableEntry* EventAddBatonPass(int* a1);
+BattleEventHandlerTableEntry* EventAddPluck(int* a1);
+BattleEventHandlerTableEntry* EventAddPluck(int* a1);
+BattleEventHandlerTableEntry* EventAddFling(int* a1);
+BattleEventHandlerTableEntry* EventAddBind(int* a1);
+BattleEventHandlerTableEntry* EventAddBind(int* a1);
+BattleEventHandlerTableEntry* EventAddBind(int* a1);
+BattleEventHandlerTableEntry* EventAddBind(int* a1);
+BattleEventHandlerTableEntry* EventAddBind(int* a1);
+BattleEventHandlerTableEntry* EventAddBind(int* a1);
+BattleEventHandlerTableEntry* EventAddWhirlpool(int* a1);
+BattleEventHandlerTableEntry* EventAddRapidSpin(int* a1);
+BattleEventHandlerTableEntry* EventAddRapidSpin(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerTrick(int* a1);
+BattleEventHandlerTableEntry* EventAddTransform(int* a1);
+BattleEventHandlerTableEntry* EventAddExplosion(int* a1);
+BattleEventHandlerTableEntry* EventAddExplosion(int* a1);
+BattleEventHandlerTableEntry* EventAddFocusEnergy(int* a1);
+BattleEventHandlerTableEntry* EventAddRage(int* a1);
+BattleEventHandlerTableEntry* EventAddAncientPower(int* a1);
+BattleEventHandlerTableEntry* EventAddAncientPower(int* a1);
+BattleEventHandlerTableEntry* EventAddAncientPower(int* a1);
+BattleEventHandlerTableEntry* EventAddThunder(int* a1);
+BattleEventHandlerTableEntry* EventAddBlizzard(int* a1);
+BattleEventHandlerTableEntry* EventAddWish(int* a1);
+BattleEventHandlerTableEntry* EventAddLuckyChant(int* a1);
+BattleEventHandlerTableEntry* EventAddForesight(int* a1);
+BattleEventHandlerTableEntry* EventAddForesight(int* a1);
+BattleEventHandlerTableEntry* EventAddMiracleEye(int* a1);
+BattleEventHandlerTableEntry* EventAddGrowth(int* a1);
+BattleEventHandlerTableEntry* EventAddVenoshock(int* a1);
+BattleEventHandlerTableEntry* EventAddFollowMe(int* a1);
+BattleEventHandlerTableEntry* EventAddSoak(int* a1);
+BattleEventHandlerTableEntry* EventAddSimpleBeam(int* a1);
+BattleEventHandlerTableEntry* EventAddEntrainment(int* a1);
+BattleEventHandlerTableEntry* EventAddClearSmog(int* a1);
+BattleEventHandlerTableEntry* EventAddStoredPower(int* a1);
+BattleEventHandlerTableEntry* EventAddShellSmash(int* a1);
+BattleEventHandlerTableEntry* EventAddHex(int* a1);
+BattleEventHandlerTableEntry* EventAddAcrobatics(int* a1);
+BattleEventHandlerTableEntry* EventAddUturn(int* a1);
+BattleEventHandlerTableEntry* EventAddWideGuard(int* a1);
+BattleEventHandlerTableEntry* EventAddReflectType(int* a1);
+BattleEventHandlerTableEntry* EventAddPowerSplit(int* a1);
+BattleEventHandlerTableEntry* EventAddGuardSplit(int* a1);
+BattleEventHandlerTableEntry* EventAddAutotomize(int* a1);
+BattleEventHandlerTableEntry* EventAddHeavySlam(int* a1);
+BattleEventHandlerTableEntry* EventAddHeavySlam(int* a1);
+BattleEventHandlerTableEntry* EventAddWonderRoom(int* a1);
+BattleEventHandlerTableEntry* EventAddMagicRoom(int* a1);
+BattleEventHandlerTableEntry* EventAddPsyshock(int* a1);
+BattleEventHandlerTableEntry* EventAddPsyshock(int* a1);
+BattleEventHandlerTableEntry* EventAddFlameBurst(int* a1);
+BattleEventHandlerTableEntry* EventAddElectroBall(int* a1);
+BattleEventHandlerTableEntry* EventAddSynchronoise(int* a1);
+BattleEventHandlerTableEntry* EventAddChipAway(int* a1);
+BattleEventHandlerTableEntry* EventAddChipAway(int* a1);
+BattleEventHandlerTableEntry* EventAddEchoedVoice(int* a1);
+BattleEventHandlerTableEntry* EventAddIncinerate(int* a1);
+BattleEventHandlerTableEntry* EventAddBestow(int* a1);
+BattleEventHandlerTableEntry* EventAddCircleThrow(int* a1);
+BattleEventHandlerTableEntry* EventAddCircleThrow(int* a1);
+BattleEventHandlerTableEntry* EventAddRetaliate(int* a1);
+BattleEventHandlerTableEntry* EventAddFoulPlay(int* a1);
+BattleEventHandlerTableEntry* EventAddSmackDown(int* a1);
+BattleEventHandlerTableEntry* EventAddFinalGambit(int* a1);
+BattleEventHandlerTableEntry* EventAddAfterYou(int* a1);
+BattleEventHandlerTableEntry* EventAddQuash(int* a1);
+BattleEventHandlerTableEntry* EventAddRound(int* a1);
+BattleEventHandlerTableEntry* EventAddQuickGuard(int* a1);
+BattleEventHandlerTableEntry* EventAddAllySwitch(int* a1);
+BattleEventHandlerTableEntry* EventAddTelekinesis(int* a1);
+BattleEventHandlerTableEntry* EventAddSkyDrop(int* a1);
+BattleEventHandlerTableEntry* EventAddStomp(int* a1);
+BattleEventHandlerTableEntry* EventAddThunder(int* a1);
+BattleEventHandlerTableEntry* EventAddPsyshock(int* a1);
+BattleEventHandlerTableEntry* EventAddRelicSong(int* a1);
+BattleEventHandlerTableEntry* EventAddTechnoBlast(int* a1);
+BattleEventHandlerTableEntry* EventAddFreezeShock(int* a1);
+BattleEventHandlerTableEntry* EventAddFreezeShock(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterPledge(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterPledge(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterPledge(int* a1);
+BattleEventHandlerTableEntry* EventAddFusionFlare(int* a1);
+BattleEventHandlerTableEntry* EventAddFusionFlare(int* a1);
+
+// ItemEvent_AddItemCore definitions
+int BattleMon_GetRealStat(BattleMon* a1, BattleMonValue a2);
+BattleEventItem* BattleEvent_AddItem(BattleEventItemType EventType, __int16 SubID, BattleEventPriority MainPriority, int SubPriority, int DependID, const BattleEventHandlerTableEntry* HandlerTable, unsigned __int16 NumHandlers);
+
+// ItemHandlers definitions
+BattleMon* Handler_GetBattleMon(ServerFlow* a1, int a2);
+bool BattleMon_IsStatChangeValid(BattleMon* battleMon, StatStage statChangeType, int statChangeAmount);
+void ItemEvent_PushRun(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int defendingMonID);
+HandlerParam_Header* BattleHandler_PushWork(ServerFlow* a1, BattleHandlerEffect a2, int a3);
+void BattleHandler_PopWork(ServerFlow* a1, void* a2);
+u32 PML_MoveGetCategory(int wazaId);
+void BattleEventVar_MulValue(BattleEventVar a1, int a2);
+void CommonTypeBoostingItem(BattleEventItem* a1, int a2, int a3, int a4);
+int BattleEventVar_RewriteValue(BattleEventVar a1, int a2);
+void HandlerCommonResistBerryDamageAfter(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonID, int* work);
+int CommonResistBerry(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonSlot, int* work, u8 pokeType, int a6);
+bool Handler_GetFightEnableBenchPokeNum(ServerFlow* a1, unsigned int a2);
+int Handler_CheckReservedMemberChangeAction(ServerFlow* a1);
+unsigned int j_MainModule_PokeIDToClientID(unsigned int a1);
+int BattleEventItem_GetSubID(BattleEventItem* a1);
+int Handler_PokeIDToPokePos(int a1, unsigned int a2);
+int CommonStatDropGuardCheck(int a1, int a2, int* a3, int a4);
+void HandlerIronFist(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonSlot, int* work);
+bool IsAffectedBySheerForce(int a1);
+bool GetSideFromMonID(unsigned int a1);
+int PML_ItemIsBerry(u16 itemId);
+int Handler_GetWeather(ServerFlow* a1);
+int BattleMon_GetUsedItem(BattleMon* a1);
+int CommonWeatherRecoveryAbility(ServerFlow* a1, int a2, int a3);
+bool PML_MoveIsAlwaysHit(int moveId);
+void Handler_SetMoveEffectIndex(ServerFlow* a1, char a2);
+
+// IsUnselectableMove definitions
+bool CanMonUseHeldItem(BtlClientWk* a1, BattleMon* a2);
+ConditionData BattleMon_GetMoveCondition(BattleMon* a1, MoveCondition a2);
+u16 Condition_GetParam(ConditionData a1);
+int Move_IsUsable(BattleMon* a1, int a2);
+void Btlv_StringParam_Setup(Btlv_StringParam* a1, char a2, __int16 a3);
+void Btlv_StringParam_AddArg(Btlv_StringParam* a1, int a2);
+bool PML_MoveIsDamaging(int wazaId);
+int BattleMon_GetPreviousMove(BattleMon* a1);
+int BattleMon_GetConditionAffectedMove(BattleMon* a1, MoveCondition a2);
+u32 BattleField_CheckFieldEffectCore(BattleField* a1, BattleFieldEffect a2);
+int BattleField_CheckImprisonCore(BattleField* a1, PokeCon* a2, BattleMon* a3, int a4);
+
+// SetMoveCondition definitions
+bool IsBasicStatus(MoveCondition a1);
+int CureStatusCondition(BattleMon* a1);
+
+// HandlerFollowMeBaitTarget definitions
+BattleStyle Handler_GetBattleStyle(int a1);
+bool MainModule_IsAllyMonID(unsigned int a1, unsigned int a2);
+int Handler_IsMonSwitchOutInterrupted(ServerFlow* a1);
+bool Handler_IsTargetInRange(ServerFlow* a1, int a2, int a3, int a4);
+unsigned int BattleEventVar_SetRewriteOnceValue(BattleEventVar a1, int a2);
+void HandlerFollowMeCheckFail(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFollowMeTextSet(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFollowMeTurnCheck(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+
+// MoveEvent_AddItem definitions
+int MoveEvent_CanEffectBeRegistered(int a1, int a2, _BYTE* a3);
+
+// HandlerIntimidate definitions
+int Handler_GetExistFrontPokePos(ServerFlow* a1, int a2);
+u8* Handler_GetTempWork(ServerFlow* a1);
+int Handler_ExpandPokeID(ServerFlow* a1, __int16 a2, u8* a3);
+void BattleHandler_PushRun(ServerFlow* a1, BattleHandlerEffect a2, int a3);
+bool j_j_PosPoke_IsExist_3(PosPoke* a1, int a2);
+void ServerDisplay_AbilityPopupAdd(ServerFlow* a1, BattleMon* a2);
+bool j_j_PosPoke_IsExist_4(PosPoke* a1, int a2);
+void ServerDisplay_AbilityPopupRemove(ServerFlow* a1, BattleMon* a2);
+int ServerEvent_CheckSubstituteInteraction(ServerFlow* a1, BattleMon* a2, int a3, int a4, int a5, int a6);
+void ServerDisplay_StatStageLimit(ServerFlow* a1, BattleMon* a2, int a3, int a4);
+bool BattleMon_IsSubstituteActive(BattleMon* a1);
+void ServerDisplay_AddMessageImpl(ServerCommandQueue* a1, int a2, __int16 a3, ...);
+int ServerEvent_CheckStatStageChangeSuccess(ServerFlow* a1, BattleMon* a2, int a3, int a4, int a5, int a6);
+void ServerDisplay_StatStage(ServerFlow* a1, BattleMon* a2, unsigned int a3, int a4, unsigned __int16 a5, int a6);
+void ServerEvent_StatStageChangeApplied(ServerFlow* a1, int a2, BattleMon* a3, int a4, int a5);
+void ServerEvent_StatStageChangeFail(ServerFlow* a1, BattleMon* a2, int a3);
+
+// LoadSavedFreeSpaceItems definitions
+PocketType BagSave_GetExistingItemPocket(BagSaveData* bag, u32 itemId);
+void sub_21A067C(int a1, unsigned int a2, int a3, int a4);
+
+// CommonContactStatusAbility definitions
+bool AbilityEvent_RollEffectChance(ServerFlow* a1, unsigned int a2);
+
+// HandlerPickpocket definitions
+bool HandlerCommon_CheckIfCanStealPokeItem(ServerFlow* a1, unsigned int a2, int a3);
+int HandlerCommon_CheckTargetMonID(int a1);
+void BattleHandler_StrSetup(HandlerParam_StrParams* result, unsigned __int8 a2, __int16 a3);
+void BattleHandler_AddArg(HandlerParam_StrParams* result, int a2);
+
+// HandlerRockyHelmet definitions
+int CommonGetItemParam(BattleEventItem* a1, ItemField a2);
+unsigned int DivideMaxHPZeroCheck(BattleMon* a1, unsigned int a2);
+
+// HandlerMummy definitions
+bool Handler_CheckMatchup(int a1);
+
+// Hazard Handlers definitions
+bool GetSideFromMonID(unsigned int a1);
+bool Handler_CheckFloating(ServerFlow* a1, int a2);
+int BattleSideStatus_GetCountFromBattleEventItem(BattleEventItem* a1, unsigned int a2);
+bool BattleMon_HasType(BattleMon* a1, PokeType a2);
+ConditionData Condition_MakePermanent();
+ConditionData Condition_MakeBadlyPoisoned();
+int BattleMon_GetPokeType(BattleMon* a1);
+int GetTypeEffectivenessVsMon(int a1, int a2);
+bool Handler_DoesBattleMonExist(int a1, int a2);
+bool Handler_CheckMatchup(int a1);
+int Handler_PokeIDToPokePos(int a1, unsigned int a2);
+
+// flowsub_CheckWazaAvoid definitions
+int j_PokeSet_GetCountMax_4(PokeSet* a1);
+BattleMon* j_PokeSet_Get_8(PokeSet* a1, unsigned int a2);
+void j_PokeSet_SeekStart_20(PokeSet* a1);
+BattleMon* j_PokeSet_SeekNext_41(PokeSet* a1);
+int ServerEvent_SkipAvoidCheck(ServerFlow* a1, BattleMon* a2, BattleMon* a3, u16* a4);
+bool ServerEvent_CheckHit(ServerFlow* a1, BattleMon* a2, BattleMon* a3, MoveParam* a4);
+void j_PokeSet_Remove_10(PokeSet* a1, BattleMon* a2);
+void ServerDisplay_MoveAvoid(ServerFlow* a1, BattleMon* a2);
+
+// ServerEvent_CheckMultihitHits definitions
+unsigned int RollMultiHitHits(unsigned int result);
+
+// ServerControl_AfterSwitchIn definitions
+void j_j_PokeSet_Clear(const void* a1);
+void j_j_PokeSet_Add(PokeSet* result, BattleMon* a2);
+void j_j_PokeSet_SortBySpeed_0(PokeSet* a1, ServerFlow* a2);
+void ServerEvent_AfterSwitchInPrevious(ServerFlow* a1);
+int BattleHandler_Result(ServerFlow* a1);
+void j_j_PokeSet_SeekStart_21(PokeSet* a1);
+BattleMon* j_j_PokeSet_SeekNext_43(PokeSet* a1);
+void ServerEvent_SwitchIn(ServerFlow* a1, BattleMon* a2);
+BattleMon* j_j_PokeSet_SeekNext_42(PokeSet* a1);
+void ServerEvent_AfterLastSwitchIn(ServerFlow* a1);
+
+// ServerControl_DamageAddCondition definitions
+int ServerEvent_CheckMoveAddCondition(ServerFlow* serverFlow, int moveID, BattleMon* attackingMon, BattleMon* defendingMon, ConditionData* conditionData);
+
+// BattleHandler_ChangeAbility definitions
+bool j_j_Tables_IsAbilityMultitype(int a1);
+void ServerEvent_ChangeAbilityBefore(ServerFlow* a1, int a2, int a3, int a4);
+BattleEventItem* AbilityEvent_RemoveItem(BattleMon* a1);
+void BattleMon_ChangeAbility(BattleMon* a1, __int16 a2);
+BattleEventItem* AbilityEvent_AddItem(BattleMon* a1);
+void ServerEvent_ChangeAbilityAfter(ServerFlow* a1, int a2);
+void ServerControl_CheckItemReaction(ServerFlow* a1, BattleMon* a2, int a3);
+int ServerControl_UnnerveAction(ServerFlow* a1, int a2);
+
+// ServerDisplay_SkillSwap definitions
+_DWORD* j_j_PokeSet_Get_3(int a1, int a2);
+int j_CheckSkillSwapFailAbility(int a1);
+int j_CheckSkillSwapFailAbility_0(int a1);
+BattleEventItem* AbilityEvent_Swap(BattleMon* a1, BattleMon* a2);
+
+// HandlerMoldBreakerSkipCheck definitions
+int j_j_IsMoldBreakerAffectedAbility(int a1);
+
+// FlowerGift handlers definitions
+bool CheckFlowerGiftEnablePokemon(ServerFlow* a1, int a2);
+void CommonFlowerGiftFormChange(BattleEventItem* a1, ServerFlow* a2, int a3, int a4, unsigned __int8 a5);
+void HandlerFlowerGiftWeather(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftSwitchIn(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftSpecialDefense(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftPower(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftGotAbility(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftAirLock(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftAbilityOff(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerFlowerGiftAbilityChange(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+
+
+// Forecast handlers definitions
+int BattleMon_GetSpecies(BattleMon* a1);
+void HandlerForecastWeather(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerForecastSwitchIn(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerForecastGetAbility(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerForecastChangeAbility(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerForecastAirLock(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+void HandlerForecastAbilityOff(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+
+// ServerEvent_CalcDamage definitions
+int ServerEvent_GetMovePower(ServerFlow* a1, BattleMon* a2, BattleMon* a3, MoveParam* a4);
+int ServerEvent_GetAttackPower(ServerFlow* a1, BattleMon* AttackingMon, BattleMon* DefendingMon, MoveParam* a4, int criticalFlag);
+int ServerEvent_GetTargetDefenses(ServerFlow* a1, BattleMon* a2, BattleMon* a3, MoveParam* a4, int a5);
+unsigned int CalcBaseDamage(int power, int attack, int level, unsigned int defense);
+int ServerEvent_GetWeather(ServerFlow* a1);
+int WeatherPowerMod(int a1, int a2);
+int MainModule_GetDebugFlag();
+bool sub_21AE34C(ServerFlow* a1);
+int ServerEvent_SameTypeAttackBonus(ServerFlow* a1, BattleMon* a2, PokeType a3);
+unsigned int TypeEffectivenessPowerMod(unsigned int result, unsigned int a2);
+
+// AddConditionCheckFailOverwrite definitions
+bool PokeTypePair_HasType(int pokemonTypePair, PokeType type);
+
 extern u32 g_GameBeaconSys;
 extern SystemUI* g_SystemUI;
+extern MsgData* g_PMLSpeciesNamesResident;
+extern BGSysLCDConfig cfg;
 #define GAME_DATA *(GameData**)(g_GameBeaconSys + 4)
+extern short g_GFLStrTerminator;
+
+bool IsEqual(int a1, int a2)
+{
+    char* c1 = (char*)&a1;
+    char* c2 = (char*)&a2;
+
+    for (u16 i = 0; i < 4; ++i)
+    {
+        if (c1[i] != c2[i])
+            return false;
+    }
+    return true;
+}
+
+void GetWideString(short* buffer, u16 size, const char* string)
+{
+    for (u16 i = 0; i < size - 1; ++i)
+        buffer[i] = (short)string[i];
+    buffer[size - 1] = g_GFLStrTerminator;
+}
+
 C_DECL_END
 
 // I dont care, im not organizing this

@@ -1,7 +1,7 @@
 #ifndef __LEVEL_CAP_H
 #define __LEVEL_CAP_H
 
-#include "include_all.h"
+#include "custom/include_all.h"
 
 #define LVL_CAP_VAR 16415
 
@@ -11,7 +11,7 @@ void SetLvlCap(u16 lvl_cap)
     EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
     u16* lvl_cap_ptr = EventWork_GetWkPtr(eventWork, LVL_CAP_VAR);
 
-    DPRINT("CHANGED LEVEL CAP: %d\n", lvl_cap);
+    DPRINTF("CHANGED LEVEL CAP: %d\n", lvl_cap);
 
     *lvl_cap_ptr = lvl_cap;
 }
