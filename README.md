@@ -20,10 +20,22 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - Fully functional with speed/priority items and the moves After You and Quash
   - To detect when After You and Quash are used (without using move ID) I use the game variable 16400, if you are already using it change it at the ```ORDER_ALTERING_MOVE_VAR``` definition, and compile and install the new patch
   - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
+### Item Expansion
+  - The source code in the ItemExpansion folder currectly compiles to 4 dlls which contain the following:
+    - Implementation of new battle items (Ability Capsule, Mints, Assault Vest, Loaded Dice, etc.)
+    - Implementation of level caps
+    - Implementation of Infinite Rare Candy item and Infinite Repel (that can be registered)
+    - Implementation of Dynamic Speed
+  - The new items are missing icons and can not currently be moved to the free space bag
+  - The new items might have behavioral and visual bugs (mostly text related)
+  - The Narc files in the folder all go in the a/0/0/2 folder in your CTRMap project (the 63, 64, 481 & 482 are item text, the rest are for battle text and candy & repel implementations)
+  - Each cpp file matches the name of the ESDB it uses
+  - The code is all commented to give context of what does what and sometimes why (provably went overboard with that)
+  - This is not a standalone patch because I'm building a code base that can be later divided depending on the features the user wants
+  - Heavy-Duty Boots are not implemented (OVL_169 crashed the game, I'm on it)
+  - Eject Pack interactions with pursuit are untested, it's likely to work like with U-Turn or Volt Switch
 ### Work In Progress
-  - Infinite Repel (source comming soon)
-  - Registered item expansion (source comming soon)
-  - Item expansion (source comming soon)
+  - Finish Item expansion
 
 ## How to Install
   - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin
