@@ -40,7 +40,7 @@ Before listing the features here is a list of things that are still a work in pr
   - The jumps in ID number of the new items are due to a game breaking bug, so make sure to not use item IDs (654 - 664) and (692 - 695)
   - The new items might have behavioral and visual bugs
   - Each cpp file matches the name of the ESDB it uses
-  - The code is all commented to give context of what does what and sometimes why (provably went overboard with that)
+  - The code is all commented to give context of what does what and sometimes why (probably went overboard with that)
   - This is not a standalone patch because I'm building a code base that can be later divided depending on the features the user wants
   - Heavy-Duty Boots are not implemented (OVL_169 crashed the game, I'm on it)
   - Eject Pack interactions with pursuit are untested, it's likely to work like with U-Turn or Volt Switch
