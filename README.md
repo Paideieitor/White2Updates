@@ -21,19 +21,66 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
   - To detect when After You and Quash are used (without using move ID) I use the game variable 16400, if you are already using it change it at the ```ORDER_ALTERING_MOVE_VAR``` definition, and compile and install the new patch
   - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
 ### Item Expansion
-  - The source code in the ItemExpansion folder currectly compiles to 4 dlls which contain the following:
-    - Implementation of new battle items (Ability Capsule, Mints, Assault Vest, Loaded Dice, etc.)
-    - Implementation of level caps
-    - Implementation of Infinite Rare Candy item and Infinite Repel (that can be registered)
-    - Implementation of Dynamic Speed
-  - The new items are missing icons and can not currently be moved to the free space bag
-  - The new items might have behavioral and visual bugs (mostly text related)
-  - The Narc files in the folder all go in the a/0/0/2 folder in your CTRMap project (the 63, 64, 481 & 482 are item text, the rest are for battle text and candy & repel implementations)
+IMPORTANT 
+
+The source code in the ItemExpansion folder currectly compiles to 4 dlls which contain the following:
+  - Implementation of new battle items (Ability Capsule, Mints, Assault Vest, Loaded Dice, etc.)
+  - Implementation of level caps
+  - Implementation of Infinite Rare Candy item and Infinite Repel (that can be registered)
+  - Implementation of Dynamic Speed
+
+To see more details on each feature read their respective explanation in this readme.
+
+If you don't want any of this features you will have to take them out of the code before compiling (some can be toggled by a definition).
+
+After compiling the patch you will need to copy the files in the NARCs forlder on their respective folder in your CTRMap project, alternatively you can unpack, expand and repack the whole narc file with Knarc and insert it in the ROM.
+
+Before listing the features here is a list of things that are still a work in progress or that might be good to know to use the patch:
+  - The new items can not be moved to the free space bag for now
+  - The jumps in ID number of the new items are due to a game breaking bug, so make sure to not use item IDs (654 - 664) and (692 - 695)
+  - The new items might have behavioral and visual bugs
   - Each cpp file matches the name of the ESDB it uses
   - The code is all commented to give context of what does what and sometimes why (provably went overboard with that)
   - This is not a standalone patch because I'm building a code base that can be later divided depending on the features the user wants
   - Heavy-Duty Boots are not implemented (OVL_169 crashed the game, I'm on it)
   - Eject Pack interactions with pursuit are untested, it's likely to work like with U-Turn or Volt Switch
+  - When using the Infinite Repel Item when registered, no message will pop up (work in progress)
+
+FEATURES
+
+This patch contains the following features:
+  - Added 49 new items from newer generations (followed by their new ID):
+    - Weakness Policy [639]
+    - Assault Vest [640]
+    - Pixie Plate [641]
+    - Ability Capasule [642]
+    - Luminous Moss [643]
+    - Snowball [644]
+    - Safety Goggles [645]
+    - Roseli Berry [646]
+    - Kee Berry [647]
+    - Maranga Berry [648]
+    - Bottle Cap [649] (not implemented)
+    - Gold Bottle Cap [650]
+    - Adrenaline Orb [651]
+    - Protective Pads [652]
+    - Throat Spray [653]
+    - Eject Pack [665]
+    - Heavy-Duty Boot [666] (not implemented)
+    - Blunder Policy [667] (visual bug with the icon)
+    - Room Service [668]
+    - Utility Ubrella [669]
+    - All Mints [670 - 690] (ordered the same way as the vanilla games)
+    - Ability Patch [691]
+    - Ability Shield [696]
+    - Clear Amulet [697]
+    - Mirror Herb [698]
+    - Punching Gloves [699]
+    - Covert Cloak [700]
+    - Loaded Dice [701]
+    - Fairy Feather [702]
+  - Apart from adding the Infinite Rare Candy [622] and Infinite Repel [79] it now allows the player to register those items
+
 ### Work In Progress
   - Finish Item expansion
 
