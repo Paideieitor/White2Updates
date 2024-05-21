@@ -8,28 +8,28 @@ C_DECL_BEGIN // GROUPS
 
 // --- DATA ---
 
-ItemID ItemsThatPreventStatusMoveUse[] = {
+ITEM_ID ItemsThatPreventStatusMoveUse[] = {
     IT0640_ASSAULT_VEST,
 };
 struct NoContactItem
 {
-    ItemID ID;
+    ITEM_ID itemID;
     MoveFlag filter;
 };
 NoContactItem ItemsThatPreventContact[] = {
     {IT0880_PROTECTIVE_PADS, (MoveFlag)0xFF},
     {IT1884_PUNCHING_GLOVE, FLAG_PUNCH},
 };
-ItemID ItemsThatPreventHazardEffects[] = {
+ITEM_ID ItemsThatPreventHazardEffects[] = {
     IT1120_HEAVY_DUTY_BOOTS,
 };
-ItemID ItemsThatGuaranteeMultiHit[] = {
+ITEM_ID ItemsThatGuaranteeMultiHit[] = {
     IT1886_LOADED_DICE,
 };
-ItemID ItemsThatPreventMoldbreaker[] = {
+ITEM_ID ItemsThatPreventMoldbreaker[] = {
     IT1881_ABILITY_SHIELD,
 };
-ItemID ItemsThatWeatherEffects[] = {
+ITEM_ID ItemsThatWeatherEffects[] = {
     IT1123_UTILITY_UMBRELLA,
 };
 
@@ -160,7 +160,7 @@ bool IsModifyItemMove(MoveID moveID, ItemID heldItem)
     return false;
 }
 
-bool CommonItemListCheck(ItemID itemID, ItemID* itemList, int listSize)
+bool CommonItemListCheck(ItemID itemID, ITEM_ID* itemList, int listSize)
 {
     if (BattleField_CheckEffect(EFFECT_MAGIC_ROOM))
         return false;
@@ -180,7 +180,7 @@ bool DoesItemPreventContact(ItemID itemID, MoveID moveID)
         return false;
 
     for (u16 i = 0; i < ARRAY_COUNT(ItemsThatPreventContact); ++i)
-        if (itemID == ItemsThatPreventContact[i].ID)
+        if (itemID == ItemsThatPreventContact[i].itemID)
         {
             if (ItemsThatPreventContact[i].filter == 0xFF)
                 return true;
@@ -3020,7 +3020,7 @@ BattleEventItem* THUMB_BRANCH_ItemEvent_AddItemCore(BattleMon* a1, ItemID a2)
     for (i = 0; i < ARRAY_COUNT(ExtItemEventAddTable); ++i) // Use expanded list to find item events
     {
         v5 = i;
-        if (a2 == ExtItemEventAddTable[i].item)
+        if (a2 == ExtItemEventAddTable[i].itemID)
         {
             RealStat = BattleMon_GetRealStat(a1, VALUE_SPEED_STAT);
             ID = BattleMon_GetID(a1);

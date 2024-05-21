@@ -5,12 +5,6 @@
 #define BAG_REPELEND_MSGID 64
 
 C_DECL_BEGIN
-BagItem* BagSave_AddItemCore(BagSaveData* bag, u16 item_idx, u16 quantity, HeapID heapId);
-bool THUMB_BRANCH_BagSave_AddItem(BagSaveData* bag, u16 itemId, u16 quantity, HeapID heapId)
-{
-    return BagSave_AddItemCore(bag, itemId, quantity, heapId) != 0;
-}
-
 bool THUMB_BRANCH_BagSave_IsItemFreeSpaceBit(BagSaveData* a1, int itemId)
 {
     if (itemId > DEFAULT_LAST_ITEM)
@@ -73,8 +67,8 @@ u8 ExtItemCategories[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,4,0,
     0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,4,4,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,/*Vanilla End*/
+    0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -84,73 +78,13 @@ u8 ExtItemCategories[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0/*Max amount until item use battle text bugs out*/
 };
 
 // [ARM9:02090D7C] List of stuff about item graphics, no idea so far
 u16 ITEM_GRAPHICS_CHARS_AND_PALETTES[] = {
-    0x3FD,0x3FE, 2, 3, 4, 5, 6, 7,
-    8, 9,0xA,0xB,0xC,0xD,0xE,0xF,
+    0x3FD,0x3FE,0x2,0x3,0x4,0x5,0x6,0x7,
+    0x8,0x9,0xA,0xB,0xC,0xD,0xE,0xF,
     0x10,0x11,0x12,0x13,0x14,0x13,0x15,0x16,
     0x17,0x16,0x297,0x298,0x299,0x29A,0x29B,0x29C,
     0x29D,0x29E,0x18,0x19,0x1A,0x1B,0x1E,0x1C,
@@ -308,7 +242,71 @@ u16 ITEM_GRAPHICS_CHARS_AND_PALETTES[] = {
     0x33D,0x33E,0x33D,0x33E,0x339,0x33A,0x3EA,0x3E9,
     0x3EC,0x3EB,0x3EC,0x3EB,0x3F0,0x3EF,0x3F2,0x3F1,
     0x3F4,0x3F3,0x3F6,0x3F5,0x3F8,0x3F7,0x3FA,0x3F9,
-    0x339,0x3E7,0x339,0x33A,0x3FC,0x3FB
+    0x339,0x3E7,0x339,0x33A,0x3FC,0x3FB,/*Vanilla End*/
+    1025, 1026, // Weakness Policy
+    1027, 1028, // Assault Vest
+    1029, 1030, // Pixie Plate
+    1031, 1032, // Ability Capasule
+    1033, 1034, // Luminous Moss
+    1035, 1036, // Snowball
+    1037, 1038, // Safety Goggles
+    1039, 1040, // Roseli Berry
+    1041, 1042, // Kee Berry
+    1043, 1044, // Maranga Berry
+    1045, 1046, // Bottle Cap
+    1045, 1047, // Gold Bottle Cap
+    1048, 1049, // Adrenaline Orb
+    1050, 1051, // Protective Pads
+    1052, 1053, // Throat Spray
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    1054, 1055, // Eject Pack
+    1056, 1057, // Heavy-Duty Boots
+    1025, 1058, // Blunder Policy
+    1059, 1060, // Room Service
+    1061, 1062, // Utility Ubrella
+    1063, 1064, // Attack Mint
+    1063, 1064, // Attack Mint
+    1063, 1064, // Attack Mint
+    1063, 1064, // Attack Mint
+    1063, 1065, // Defense Mint
+    1063, 1065, // Defense Mint
+    1063, 1065, // Defense Mint
+    1063, 1065, // Defense Mint
+    1063, 1066, // Sp.Attack Mint
+    1063, 1066, // Sp.Attack Mint
+    1063, 1066, // Sp.Attack Mint
+    1063, 1066, // Sp.Attack Mint
+    1063, 1067, // Sp.Defense Mint
+    1063, 1067, // Sp.Defense Mint
+    1063, 1067, // Sp.Defense Mint
+    1063, 1067, // Sp.Defense Mint
+    1063, 1068, // Speed Mint
+    1063, 1068, // Speed Mint
+    1063, 1068, // Speed Mint
+    1063, 1068, // Speed Mint
+    1063, 1069, // Neutral Mint
+    1070, 1071, // Ability Patch
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    0x3FD, 0x3FE, // ERROR
+    1072, 1073, // Ability Shield
+    1074, 1075, // Clear Amulet
+    1076, 1077, // Mirror Herb
+    1078, 1079, // Punching Gloves
+    1080, 1081, // Covert Cloak
+    1082, 1083, // Loaded Dice
+    1084, 1085, // Fairy Feather
 };
 
 // [ARM9:02092A24] Extended list of items that can be registered and their respective RegisterID
@@ -330,7 +328,7 @@ u16 ExtRegistrableItems[] = {
     REG_ITEM(REGIT_INFINITE_REPEL, IT0079_REPEL),
 };
 
-ItemID ExtBerryItemIDs[] = {
+ITEM_ID ExtBerryItemIDs[] = {
 IT0149_CHERI_BERRY,
 IT0150_CHESTO_BERRY,
 IT0151_PECHA_BERRY,
@@ -837,6 +835,92 @@ ItemData* LoadNewItemData(ItemID item_idx, HeapID heapId)
 
         return data;
     }
+    if (IsEqual(item_idx, IT0795_BOTTLE_CAP)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_IV_MOD, MAX_IV); // doesn't work
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT0796_GOLD_BOTTLE_CAP)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_IV_MOD, MAX_ALL);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
     if (IsEqual(item_idx, IT0846_ADRENALINE_ORB))
     {
         ItemData* data;
@@ -1173,6 +1257,938 @@ ItemData* LoadNewItemData(ItemID item_idx, HeapID heapId)
 
         return data;
     }
+    if (IsEqual(item_idx, IT1231_LONELY_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_LONELY);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1232_ADAMANT_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_ADAMANT);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1233_NAUGHTY_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_NAUGHTY);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1234_BRAVE_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_BRAVE);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1235_BOLD_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_BOLD);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1236_IMPISH_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_IMPISH);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1237_LAX_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_LAX);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1238_RELAXED_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_RELAXED);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1239_MODEST_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_MODEST);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1240_MILD_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_MILD);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1241_RASH_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_RASH);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1242_QUIET_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_QUIET);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1243_CALM_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_CALM);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1244_GENTLE_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_GENTLE);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+    if (IsEqual(item_idx, IT1245_CAREFUL_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_CAREFUL);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1246_SASSY_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_SASSY);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1247_TIMID_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_TIMID);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1248_HASTY_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_HASTY);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1249_JOLLY_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_JOLLY);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1250_NAIVE_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_NAIVE);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1251_SERIOUS_MINT)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_NATURE, NAT_SERIOUS);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
+    if (IsEqual(item_idx, IT1606_ABILITY_PATCH)) // NEW POKEMON EFFECT ITEM ARCHETYPE
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 480;
+        data->HeldEffect = 0;
+        data->HeldArgument = 0;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x9F;
+        data->EffectField = 1;
+        data->EffectBattle = 0;
+        data->HasBattleStats = MAKE_NEW_EFFECT(ITEFF_ABILITY, ABILITY_PATCH);
+        data->ItemClass = 0;
+        data->Consumable = 0;
+        data->SortIndex = 100;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+
+    }
     if (IsEqual(item_idx, IT1881_ABILITY_SHIELD))
     {
         ItemData* data;
@@ -1468,6 +2484,49 @@ ItemData* LoadNewItemData(ItemID item_idx, HeapID heapId)
         return data;
     }
     
+    if (item_idx > DEFAULT_LAST_ITEM)
+    {
+        ItemData* data;
+        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
+
+        data->Price = 300;
+        data->HeldEffect = 117;
+        data->HeldArgument = 4;
+        data->NaturalGiftEffect = 0;
+        data->FlingEffect = 0;
+        data->FlingPower = 30;
+        data->NaturalGiftPower = 0;
+        data->Packed = 0x1F;
+        data->EffectField = 0;
+        data->EffectBattle = 0;
+        data->HasBattleStats = 0;
+        data->ItemClass = 1;
+        data->Consumable = 0;
+        data->SortIndex = 60;
+        data->BattleStats.CureInflict = 0;
+        data->BattleStats.Boost[0] = 0;
+        data->BattleStats.Boost[1] = 0;
+        data->BattleStats.Boost[2] = 0;
+        data->BattleStats.Boost[3] = 0;
+        data->BattleStats.FunctionFlags0 = 0;
+        data->BattleStats.FunctionFlags1 = 0;
+        data->BattleStats.EVHP = 0;
+        data->BattleStats.EVATK = 0;
+        data->BattleStats.EVDEF = 0;
+        data->BattleStats.EVSPE = 0;
+        data->BattleStats.EVSPA = 0;
+        data->BattleStats.EVSPD = 0;
+        data->BattleStats.HealAmount = 0;
+        data->BattleStats.PPGain = 0;
+        data->BattleStats.Friendship1 = 0;
+        data->BattleStats.Friendship2 = 0;
+        data->BattleStats.Friendship3 = 0;
+        data->BattleStats.field_1F = 0;
+        data->BattleStats.field_20 = 0;
+
+        return data;
+    }
+   
     return nullptr;
 }
 
@@ -1673,6 +2732,7 @@ int THUMB_BRANCH_BagSave_GetFreeSpaceItemCount(BagSaveData* bag)
             ++v2;
         }
     }
+
     return v2;
 }
 
@@ -2063,6 +3123,43 @@ int THUMB_BRANCH_sub_215B818(int a1, int itemId, int a3, int a4)
     return v8;
 }
 
+unsigned int sub_2035970(int a1);
+u32 THUMB_BRANCH_GetItemGraphicsDatID(ITEM_ID itemId, unsigned int paletteType)
+{
+    if (itemId >= IT_ITEM_AMOUNT)
+    {
+        itemId = 0;
+    }
+
+    switch (paletteType)
+    {
+    case 0:
+        if (!itemId)
+            return 0;
+        break;
+    case 1:
+        if (itemId)
+            itemId = ITEM_GRAPHICS_CHARS_AND_PALETTES[2 * itemId];
+        else
+            itemId = 1021;
+        break;
+    case 2:
+        if (itemId)
+            itemId = ITEM_GRAPHICS_CHARS_AND_PALETTES[2 * itemId + 1];
+        else
+            itemId = 1022;
+        break;
+    case 3:
+        itemId = ((u16*)0x2090BF8)[2 * sub_2035970(itemId)];
+        break;
+    case 4:
+        itemId = ((u16*)0x2090BFA)[2 * sub_2035970(itemId)];
+        break;
+    default:
+        return 0;
+    }
+    return itemId;
+}
 C_DECL_END
 
 // LIMITER FUNCTIONS
