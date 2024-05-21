@@ -23,7 +23,7 @@ Code Injection Patches to upgrade the White 2 gameplay experience while making a
 ### Item Expansion
 IMPORTANT 
 
-The source code in the ItemExpansion folder currectly compiles to 4 dlls which contain the following:
+The source code in the ItemExpansion folder currently compiles to 4 dlls which contain the following:
   - Implementation of new battle items (Ability Capsule, Mints, Assault Vest, Loaded Dice, etc.)
   - Implementation of level caps
   - Implementation of Infinite Rare Candy item and Infinite Repel (that can be registered)
