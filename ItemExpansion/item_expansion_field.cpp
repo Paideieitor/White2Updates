@@ -2,61 +2,6 @@
 
 C_DECL_BEGIN
 BagItem* BagSave_AddItemCore(BagSaveData* bag, u16 item_idx, u16 quantity, HeapID heapId);
-bool THUMB_BRANCH_BagSave_AddItem(BagSaveData* bag, u16 itemId, u16 quantity, HeapID heapId)
-{
-    int amount = 50;
-    BagSave_AddItemCore(bag, IT0639_WEAKNESS_POLICY, amount, heapId);
-    BagSave_AddItemCore(bag, IT0640_ASSAULT_VEST, amount, heapId);
-    BagSave_AddItemCore(bag, IT0644_PIXIE_PLATE, amount, heapId);
-    BagSave_AddItemCore(bag, IT0645_ABILITY_CAPSULE, amount, heapId);
-    BagSave_AddItemCore(bag, IT0648_LUMINOUS_MOSS, amount, heapId);
-    BagSave_AddItemCore(bag, IT0649_SNOWBALL, amount, heapId);
-    BagSave_AddItemCore(bag, IT0650_SAFETY_GOGGLES, amount, heapId);
-    BagSave_AddItemCore(bag, IT0686_ROSELI_BERRY, amount, heapId);
-    BagSave_AddItemCore(bag, IT0687_KEE_BERRY, amount, heapId);
-    BagSave_AddItemCore(bag, IT0688_MARANGA_BERRY, amount, heapId);
-    BagSave_AddItemCore(bag, IT0795_BOTTLE_CAP, amount, heapId);
-    BagSave_AddItemCore(bag, IT0796_GOLD_BOTTLE_CAP, amount, heapId);
-    BagSave_AddItemCore(bag, IT0846_ADRENALINE_ORB, amount, heapId);
-    BagSave_AddItemCore(bag, IT0880_PROTECTIVE_PADS, amount, heapId);
-    BagSave_AddItemCore(bag, IT1118_THROAT_SPRAY, amount, heapId);
-    BagSave_AddItemCore(bag, IT1119_EJECT_PACK, amount, heapId);
-    BagSave_AddItemCore(bag, IT1120_HEAVY_DUTY_BOOTS, amount, heapId);
-    BagSave_AddItemCore(bag, IT1121_BLUNDER_POLICY, amount, heapId);
-    BagSave_AddItemCore(bag, IT1122_ROOM_SERVICE, amount, heapId);
-    BagSave_AddItemCore(bag, IT1123_UTILITY_UMBRELLA, amount, heapId);
-    BagSave_AddItemCore(bag, IT1231_LONELY_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1232_ADAMANT_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1233_NAUGHTY_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1234_BRAVE_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1235_BOLD_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1236_IMPISH_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1237_LAX_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1238_RELAXED_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1239_MODEST_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1240_MILD_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1241_RASH_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1242_QUIET_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1243_CALM_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1244_GENTLE_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1245_CAREFUL_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1246_SASSY_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1247_TIMID_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1248_HASTY_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1249_JOLLY_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1250_NAIVE_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1251_SERIOUS_MINT, amount, heapId);
-    BagSave_AddItemCore(bag, IT1606_ABILITY_PATCH, amount, heapId);
-    BagSave_AddItemCore(bag, IT1881_ABILITY_SHIELD, amount, heapId);
-    BagSave_AddItemCore(bag, IT1882_CLEAR_AMULET, amount, heapId);
-    BagSave_AddItemCore(bag, IT1883_MIRROR_HERB, amount, heapId);
-    BagSave_AddItemCore(bag, IT1886_LOADED_DICE, amount, heapId);
-    BagSave_AddItemCore(bag, IT1884_PUNCHING_GLOVE, amount, heapId);
-    BagSave_AddItemCore(bag, IT1885_COVERT_CLOAK, amount, heapId);
-    BagSave_AddItemCore(bag, IT2401_FAIRY_FEATHER, amount, heapId);
-
-    return BagSave_AddItemCore(bag, itemId, quantity, heapId) != 0;
-}
 
 // --- PREDEF ---
 GameEvent* EventFieldToggleRepel_Create(Field* field, GameSystem* gsys);
