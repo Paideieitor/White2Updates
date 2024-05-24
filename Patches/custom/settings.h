@@ -1,12 +1,23 @@
-#ifndef __ITEM_EXPANSION_H
-#define __ITEM_EXPANSION_H
+#ifndef __FEATURE_SETTINGS_H
+#define __FEATURE_SETTINGS_H	
 
-#include "custom/include_all.h"
+#define ADD_LEVEL_CAP true
+#define GIVE_EVS false
+#define RARE_CANDY_IGNORE_LVL_CAP true
 
-typedef int ITEM_ID; // enum ItemID
+#define ADD_INFINITE_RARE_CANDY true
+#define INFINITE_CANDY_ID IT0622
+#define REGIT_INFINITE_CANDY REGIT_UNUSED_34
 
-#define DEFAULT_LAST_ITEM IT0638_REVEAL_GLASS
+#define ADD_INFINITE_REPEL true
+#define REPEL_SHAKING_GRASS true
+#define INFINITE_REPEL_ID IT0079_REPEL
+#define REGIT_INFINITE_REPEL REGIT_UNUSED_35
+#define ACTID_REPEL 254
 
+#define ADD_DYNAMIC_SPEED true
+
+#define ADD_NEW_ITEMS false
 #define IT0639_WEAKNESS_POLICY      639
 #define IT0640_ASSAULT_VEST         640
 #define IT0644_PIXIE_PLATE          641
@@ -58,90 +69,29 @@ typedef int ITEM_ID; // enum ItemID
 #define IT1885_COVERT_CLOAK         700
 #define IT1886_LOADED_DICE          701
 #define IT2401_FAIRY_FEATHER        702
-#define IT_ITEM_AMOUNT              703 // this must be last
+#define IT_ITEM_AMOUNT              703 
+// IT_ITEM_AMOUNT must be biggest number
+// some item IDs might crash the game (like 654 - 664 & 692 - 695)
+// more than 1023 item ID will have errors with battle text
 
-#define INFINITE_CANDY_ID IT0622/*GOD STONE*/
-#define REGIT_INFINITE_CANDY REGIT_UNUSED_34
-#define RARE_CANDY_IGNORE_LVL_CAP true
+// FLAGS
+#define INTIMIDATE_FLAG 500
 
-#define INFINITE_REPEL_ID IT0079_REPEL
-#define REGIT_INFINITE_REPEL REGIT_UNUSED_35
-#define REPEL_SHAKING_GRASS true
-#define ACTID_REPEL 254
+// VARIABLES
+#define LVL_CAP_VAR 16415
+#define ORDER_ALTERING_MOVE_VAR 16400
 
-#define ITSTAT_NEW_EFFECT_TYPE 63
-#define ITSTAT_NEW_EFFECT 64
-#define MAKE_NEW_EFFECT(type, effect) (0x1 | (type << 1) | (effect << 3))
-
-#define RESTORETYPE_NATURE 30
-#define RESTORETYPE_ABILITY 31
-#define RESTORETYPE_IV_MOD 32
-
-#define REG_ITEM(regid, itemid) (regid << 10) | itemid
-
-// Pokemon related effects for new items
-enum NewItemPokemonEffects
-{
-    ITEFF_NONE = 0,
-    ITEFF_NATURE = 1,
-    ITEFF_ABILITY = 2,
-    ITEFF_IV_MOD = 3,
-};
-
-enum PokemonNature
-{
-    NAT_HARDY = 0,
-    NAT_LONELY = 1,
-    NAT_BRAVE = 2,
-    NAT_ADAMANT = 3,
-    NAT_NAUGHTY = 4,
-    NAT_BOLD = 5,
-    NAT_DOCILE = 6,
-    NAT_RELAXED = 7,
-    NAT_IMPISH = 8,
-    NAT_LAX = 9,
-    NAT_TIMID = 10,
-    NAT_HASTY = 11,
-    NAT_SERIOUS = 12,
-    NAT_JOLLY = 13,
-    NAT_NAIVE = 14,
-    NAT_MODEST = 15,
-    NAT_MILD = 16,
-    NAT_QUIET = 17,
-    NAT_BASHFUL = 18,
-    NAT_RASH = 19,
-    NAT_CALM = 20,
-    NAT_GENTLE = 21,
-    NAT_SASSY = 22,
-    NAT_CAREFUL = 23,
-    NAT_QUIRKY = 24,
-};
-
-enum AbilityChangeBehaviour
-{
-    ABILITY_1 = 0,
-    ABILITY_2 = 1,
-    ABILITY_HIDDEN = 2,
-    ABILITY_CAPSULE = 3,
-    ABILITY_PATCH = 4,
-};
-
-enum PokemonIVModifier
-{
-    MAX_IV = 0,
-    MAX_ALL = 1,
-    MAX_ATK = 2,
-    MAX_DEF = 3,
-    MAX_SPE = 4,
-    MAX_SPA = 5,
-    MAX_SPD = 6,
-    MIN_IV = 7,
-    MIN_ALL = 8,
-    MIN_ATK = 9,
-    MIN_DEF = 10,
-    MIN_SPE = 11,
-    MIN_SPA = 12,
-    MIN_SPD = 13,
-};
+// MESSAGE IDs
+// Game Text - File 6
+#define BAG_ITEMUSED_MSGID 63
+#define BAG_REPELEND_MSGID 64
+// Game Text - File 18
+#define BATTLE_ASSAULTVEST_MSGID 878
+#define BARRLE_CLEARAMULET_MSGID 879
+// Game Text - File 178
+#define POKELIST_NATURECHANGE_MSGID 73
+#define POKELIST_ABILITYCHANGE_MSGID 74
+#define POKELIST_IVMODALL_MSGID 75
+#define POKELIST_IVMODSINGLE_MSGID 76
 
 #endif

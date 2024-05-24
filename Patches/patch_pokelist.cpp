@@ -1,19 +1,18 @@
+#include "custom/settings.h"
 #include "custom/item_expansion.h"
-#include "custom/level_cap.h"
 
-// messages in game text file 178 (empty in vanilla)
-#define POKELIST_NATURECHANGE_MSGID 73
-#define POKELIST_ABILITYCHANGE_MSGID 74
-#define POKELIST_IVMODALL_MSGID 75
-#define POKELIST_IVMODSINGLE_MSGID 76
+#include "custom/level_cap.h"
 
 C_DECL_BEGIN
 // --- DATA ---
 
 // NEW
 
-ItemID InfiniteBattleItems[] = {
+ITEM_ID InfiniteBattleItems[] = {
+#if ADD_INFINITE_RARE_CANDY
     INFINITE_CANDY_ID,
+#endif
+    IT_ITEM_AMOUNT
 };
 
 
@@ -673,6 +672,7 @@ int THUMB_BRANCH_PokeList_SubItem(PokeList* a1, u16 a2)
         return 0;
 }
 
+#if ADD_NEW_ITEMS
 // Return what type of healing or boost an item gives
 ItemRestoreType THUMB_BRANCH_PokeList_GetItemRestoreType(ItemID itemID)
 {
@@ -1047,6 +1047,7 @@ ItemRestoreType THUMB_BRANCH_PokeList_PrintItemRecoverMessage(PokeList* a1, u16 
     }
     return itemRestoreTypeRet;
 }
+#endif
 
 // Checks if an item can be used
 bool THUMB_BRANCH_SAFESTACK_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, unsigned int item_ID, int a3, unsigned __int16 a4)
@@ -1105,8 +1106,13 @@ bool THUMB_BRANCH_SAFESTACK_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, 
         if (PML_ItemGetParam(DataFile, ITSTAT_BOOST_RARECANDY))
         {
             u32 level_cap = 100;
+#if ADD_INFINITE_RARE_CANDY
             if (item_ID == INFINITE_CANDY_ID || !RARE_CANDY_IGNORE_LVL_CAP)
                 level_cap = GetLvlCap();
+#else
+            if (!RARE_CANDY_IGNORE_LVL_CAP)
+                level_cap = GetLvlCap();
+#endif
             u32 level = PokeParty_GetParam(a1, PF_Level, 0);
             if (level < level_cap)
             {
@@ -1114,6 +1120,7 @@ bool THUMB_BRANCH_SAFESTACK_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, 
             }
         }
 
+#if ADD_NEW_ITEMS
         newEffectType = (NewItemPokemonEffects)PML_ItemGetParam(DataFile, (ItemField)ITSTAT_NEW_EFFECT_TYPE);
         if (newEffectType)
         {
@@ -1133,7 +1140,7 @@ bool THUMB_BRANCH_SAFESTACK_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, 
                 break;
             }
         }
-
+#endif
         if ((PML_ItemGetParam(DataFile, ITSTAT_BOOST_PP1) || PML_ItemGetParam(DataFile, ITSTAT_BOOST_PPMAX))
             && PokeParty_GetParam(a1, (PkmField)(a3 + 62), 0) < 3)
         {
@@ -1262,6 +1269,7 @@ bool THUMB_BRANCH_SAFESTACK_PokeList_CanItemWithBattleStatsBeUsed(PartyPkm* a1, 
     return 0;
 }
 
+#if ADD_NEW_ITEMS
 // Applies the effect of an item
 int THUMB_BRANCH_SAFESTACK_PokeList_ApplyItemEffect(PartyPkm* a1, unsigned int a2, int a3, unsigned __int16 a4, int a5)
 {
@@ -1610,9 +1618,11 @@ LABEL_51:
     GFL_HeapFree(DataFile);
     return v6;
 }
+#endif
 
 // ARM9
 
+#if ADD_NEW_ITEMS
 // Extracts data from the ItemData struct
 int THUMB_BRANCH_PML_ItemGetParam(ItemData* itemData, ItemField itemField)
 {
@@ -2523,8 +2533,6 @@ u32 THUMB_BRANCH_PML_PkmGetParamCore(BoxPkm* pkm, PkmField field, void* extra)
     }
     return result;
 }
-C_DECL_END
+#endif
 
-//DPRINT("CRASH\n");
-//((int(*)(int))(0x0))(1);
-//DPRINT("NO CRASH\n");
+C_DECL_END

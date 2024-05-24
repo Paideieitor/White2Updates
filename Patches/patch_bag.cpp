@@ -1,8 +1,8 @@
+#include "custom/settings.h"
 #include "custom/item_expansion.h"
 
-// messages in game text file 6 (empty in vanilla)
-#define BAG_ITEMUSED_MSGID 63
-#define BAG_REPELEND_MSGID 64
+#include "custom/include_all.h"
+#include "custom/include_all.h"
 
 C_DECL_BEGIN
 bool THUMB_BRANCH_BagSave_IsItemFreeSpaceBit(BagSaveData* a1, int itemId)
@@ -21,7 +21,9 @@ ItemID RegistrablePokeListItems[] = {
     IT0628_DNA_SPLICERS,
     IT0629_DNA_SPLICERS,
     IT0638_REVEAL_GLASS,
-    INFINITE_CANDY_ID  // Infinite Rare Candy
+#if ADD_INFINITE_RARE_CANDY
+    INFINITE_CANDY_ID,
+#endif
 };
 
 
@@ -46,10 +48,15 @@ ItemUseFunction ItemUseFunctionArray[] = {
 // ARM9
 
 // [ARM9_DATA:0208F4FC] Extended list that determines the bag pocket an item is put in, the index in the list matches the ItemID
+#if ADD_INFINITE_REPEL
+#define REPEL_CATEGORY 4
+#else
+#define REPEL_CATEGORY 0
+#endif
 u8 ExtItemCategories[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,REPEL_CATEGORY,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,
     3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
@@ -67,6 +74,7 @@ u8 ExtItemCategories[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,4,0,
     0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,4,4,2,2,2,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,/*Vanilla End*/
+#if ADD_NEW_ITEMS
     0,0,0,0,0,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -79,6 +87,7 @@ u8 ExtItemCategories[] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0/*Max amount until item use battle text bugs out*/
+#endif
 };
 
 // [ARM9:02090D7C] List of stuff about item graphics, no idea so far
@@ -243,6 +252,7 @@ u16 ITEM_GRAPHICS_CHARS_AND_PALETTES[] = {
     0x3EC,0x3EB,0x3EC,0x3EB,0x3F0,0x3EF,0x3F2,0x3F1,
     0x3F4,0x3F3,0x3F6,0x3F5,0x3F8,0x3F7,0x3FA,0x3F9,
     0x339,0x3E7,0x339,0x33A,0x3FC,0x3FB,/*Vanilla End*/
+#if ADD_NEW_ITEMS
     1025, 1026, // Weakness Policy
     1027, 1028, // Assault Vest
     1029, 1030, // Pixie Plate
@@ -307,6 +317,7 @@ u16 ITEM_GRAPHICS_CHARS_AND_PALETTES[] = {
     1080, 1081, // Covert Cloak
     1082, 1083, // Loaded Dice
     1084, 1085, // Fairy Feather
+#endif
 };
 
 // [ARM9:02092A24] Extended list of items that can be registered and their respective RegisterID
@@ -324,8 +335,12 @@ u16 ExtRegistrableItems[] = {
     REG_ITEM(REGIT_DNA_SPLICERS_1, IT0628_DNA_SPLICERS),
     REG_ITEM(REGIT_DNA_SPLICERS_2, IT0629_DNA_SPLICERS),
     REG_ITEM(REGIT_REVEAL_GLASS, IT0638_REVEAL_GLASS),
+#if ADD_INFINITE_RARE_CANDY
     REG_ITEM(REGIT_INFINITE_CANDY, IT0622),
+#endif
+#if ADD_INFINITE_REPEL
     REG_ITEM(REGIT_INFINITE_REPEL, IT0079_REPEL),
+#endif
 };
 
 ITEM_ID ExtBerryItemIDs[] = {
@@ -393,9 +408,11 @@ IT0209_MICLE_BERRY,
 IT0210_CUSTAP_BERRY,
 IT0211_JABOCA_BERRY,
 IT0212_ROWAP_BERRY,
+#if ADD_NEW_ITEMS
 IT0686_ROSELI_BERRY,
 IT0687_KEE_BERRY,
 IT0688_MARANGA_BERRY,
+#endif
 };
 
 // --- FUNCTIONS ---
@@ -410,6 +427,7 @@ bool IsRegistrablePokeListItem(ItemID itemID)
     return false;
 }
 
+#if ADD_NEW_ITEMS
 ItemData* LoadNewItemData(ItemID item_idx, HeapID heapId)
 {
     if (IsEqual(item_idx, IT0639_WEAKNESS_POLICY))
@@ -2529,9 +2547,11 @@ ItemData* LoadNewItemData(ItemID item_idx, HeapID heapId)
    
     return nullptr;
 }
+#endif
 
 // OVL_142
 
+#if ADD_INFINITE_REPEL
 // Function that is called when the repel item is used from the bag, triggers the effect and creates the text boxes
 int THUMB_BRANCH_Bag_RepelEffect(BigBagStructTemp* a1)
 {
@@ -2572,6 +2592,7 @@ int THUMB_BRANCH_Bag_RepelEffect(BigBagStructTemp* a1)
     }
     return false;
 }
+#endif
 
 // CAUTION: This function is called LoadSavedFreeSpaceItems in other ESDBs
 void THUMB_BRANCH_sub_21A0430(_WORD* a1, BagSaveData* bagSaveData, unsigned __int16 a3, __int16 heapID)
@@ -2663,9 +2684,11 @@ void* THUMB_BRANCH_PML_ItemReadDataFile(u16 item_idx, ItemDataType info_type, s1
     {
     case ITEMDATA_PARAMS:
     {
+#if ADD_NEW_ITEMS
         ItemData* itemData = LoadNewItemData((ItemID)item_idx, heapId);
         if (itemData)
             return itemData;
+#endif
     }
         return GFL_ArcSysReadHeapNew(24, idxSafe, (HeapID)heapId);
     case ITEMDATA_SPR1:
@@ -2682,10 +2705,11 @@ void* THUMB_BRANCH_PML_ItemArcHandleReadFile(ArcTool* arc, u16 item_idx, HeapID 
     {
         item_idx = 0;
     }
+#if ADD_NEW_ITEMS
     ItemData* itemData = LoadNewItemData((ItemID)item_idx, heapId);
     if (itemData)
         return itemData;
-        
+#endif
     return GFL_ArcToolReadHeapNew(arc, item_idx, heapId);
 }
 
@@ -2753,12 +2777,16 @@ int THUMB_BRANCH_sub_215B22C(RegistrableID registrableID, _DWORD* actionID, _DWO
     case REGIT_DOWSING_MCHN:    *actionID = ACTID_DOWSING_MCHN;    break;
     case REGIT_XTRANSCEIVER:    *actionID = ACTID_XTRANSCEIVER;    break;
     case REGIT_MEDAL_BOX:       *actionID = ACTID_MEDAL_BOX;       break;
+#if ADD_INFINITE_REPEL
     case REGIT_INFINITE_REPEL:  *actionID = ACTID_REPEL;           break;
+#endif
     case REGIT_GRACIDEA:
     case REGIT_DNA_SPLICERS_1:
     case REGIT_DNA_SPLICERS_2:
     case REGIT_REVEAL_GLASS:
+#if ADD_INFINITE_RARE_CANDY
     case REGIT_INFINITE_CANDY:
+#endif
         return 0;
     case REGIT_NOT_REGISTRABLE:
     default:
@@ -2937,15 +2965,19 @@ bool THUMB_BRANCH_sub_215B050(ShortcutMenuWork* wk, RegistrableID registrableID)
         wk->ItemID = IT0638_REVEAL_GLASS;
         isCommonEvent = 0;
         break;
+#if ADD_INFINITE_RARE_CANDY
     case REGIT_INFINITE_CANDY:
         wk->field_10 = 0; // triggers the Pokemon List menu
         wk->ItemID = INFINITE_CANDY_ID; // sets the item to use
         isCommonEvent = 0;
         break;
+#endif
+#if ADD_INFINITE_REPEL
     case REGIT_INFINITE_REPEL:
         wk->EventID = 6; // sets the event type
         isCommonEvent = 1; // calls an event
         break;
+#endif
     case REGIT_NOT_REGISTRABLE:
     default:
         wk->field_10 = 1;
@@ -3161,55 +3193,3 @@ u32 THUMB_BRANCH_GetItemGraphicsDatID(ITEM_ID itemId, unsigned int paletteType)
     return itemId;
 }
 C_DECL_END
-
-// LIMITER FUNCTIONS
-/*
-// ARM 9
-
-// function not researched (just removed item limiter)
-unsigned int THUMB_BRANCH_sub_2009A18(int a1, int a2)
-{
-    unsigned int result; // r0
-
-    if (a2 > 20)
-        return 0;
-    result = *(unsigned __int16*)(a1 + 2 * a2 + 228);
-    if (result >= IT_ITEM_AMOUNT) // removed limiter
-        return 0;
-    return result;
-};
-
-// function not researched (just removed item limiter)
-bool THUMB_BRANCH_sub_2014340(int* a1)
-{
-    return !*(a1 + 52) || *(a1 + 52) > (IT_ITEM_AMOUNT - 1); // removed limiter
-};
-
-// function not researched (just removed item limiter)
-bool THUMB_BRANCH_sub_20143A4(int* a1)
-{
-    return !*(a1 + 54) || *(a1 + 54) > (IT_ITEM_AMOUNT - 1);
-}
-
-// function not researched (just removed item limiter) MAY HAVE ERROR
-int THUMB_BRANCH_sub_2026C98(unsigned int a1)
-{
-    if (a1 < IT_ITEM_AMOUNT)
-        return ((int*)0x02090AC4)[a1 >> 5] & (1 << (((a1 & 0x80000000) != 0) + ROR((a1 << 27) - (a1 >> 31), 27)));
-    else
-        return 0;
-}
-
-// function not researched (just removed item limiter) MAY HAVE ERROR
-int THUMB_BRANCH_sub_2026CC8(unsigned int a1)
-{
-    if (a1 < IT_ITEM_AMOUNT)
-    {
-        return ((int*)0x02090A74)[a1 >> 5] & (1 << (((a1 & 0x80000000) != 0) + ROR((a1 << 27) - (a1 >> 31), 27)));
-    }
-    else
-    {
-        return 1;
-    }
-}
-*/

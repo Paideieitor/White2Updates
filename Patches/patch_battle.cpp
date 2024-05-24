@@ -1,8 +1,8 @@
-#include "custom/item_expansion.h"
+#include "custom/settings.h"
 #include "custom/battle_expansion.h"
+#include "custom/item_expansion.h"
 
-#define BATTLE_ASSAULTVEST_MSGID 878
-#define BARRLE_CLEARAMULET_MSGID 879
+#include "custom/level_cap.h"
 
 C_DECL_BEGIN // GROUPS
 
@@ -228,6 +228,333 @@ bool IsIntimidated(AbilID attackerAbility)
     if (GetIntimidateFlag() && attackerAbility == ABIL022_INTIMIDATE)
         return true;
     return false;
+}
+C_DECL_END
+
+C_DECL_BEGIN // SIDE EFFECT EXPANSION
+// Accessing the Sife Effect functions crashed the game so I rewrote the whole system
+// Thats why I branch the 2 access points to create a Side Effect BattleItem (BattleHandler_AddSideEffect & ItemEffect_StatusGuard) 
+// and build from there
+struct BattleSideStatus
+{
+    BattleSideCondition Conditions[14];
+};
+struct BattleSideManager
+{
+    BattleSideStatus Sides[2];
+};
+extern BattleSideManager SideStatus;
+
+BattleEventHandlerTableEntry* EventAddSideReflect(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D878;
+}
+BattleEventHandlerTableEntry* EventAddSideLightScreen(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D898;
+}
+BattleEventHandlerTableEntry* EventAddSideSafeguard(int* a1)
+{
+    *a1 = 2;
+    return (BattleEventHandlerTableEntry*)0x689D8D0;
+}
+BattleEventHandlerTableEntry* EventAddSideMist(int* a1)
+{
+    *a1 = 2;
+    return (BattleEventHandlerTableEntry*)0x689D8E0;
+}
+BattleEventHandlerTableEntry* EventAddSideTailwind(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D8C0;
+}
+BattleEventHandlerTableEntry* EventAddSideLuckyChant(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D8B8;
+}
+// Heavy-Duty Boots hazard checks
+void HandlerSideSpikes(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide, int* work)
+{
+    HandlerParam_Damage* v9;
+
+    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
+    if (currentSide == GetSideFromMonID(currentSlot) && !Handler_CheckFloating(serverFlow, currentSlot))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
+        if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
+            return;
+
+        int spikeLayers = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide);
+        int dmgPercent = 0;
+        switch (spikeLayers)
+        {
+        case 1:
+            dmgPercent = 8;
+            break;
+        case 2:
+            dmgPercent = 6;
+            break;
+        case 3:
+            dmgPercent = 4;
+            break;
+        }
+
+        v9 = (HandlerParam_Damage*)BattleHandler_PushWork(serverFlow, EFFECT_DAMAGE, 31);
+        v9->pokeID = currentSlot;
+        v9->damage = DivideMaxHPZeroCheck(currentMon, dmgPercent);
+        BattleHandler_StrSetup(&v9->exStr, 2u, 851);
+        BattleHandler_AddArg(&v9->exStr, currentSlot);
+        BattleHandler_PopWork(serverFlow, v9);
+    }
+}
+BattleEventHandlerTableEntry SideSpikesHandlers[] = {
+    {EVENT_SWITCH_IN, HandlerSideSpikes},
+};
+BattleEventHandlerTableEntry* EventAddSideSpikes(int* a1)
+{
+    *a1 = 1;
+    return SideSpikesHandlers;
+}
+// Heavy-Duty Boots hazard checks
+void HandlerSideToxicSpikes(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide, int* work)
+{
+    HandlerParam_RemoveSideEffect* v7; // r1
+    HandlerParam_RemoveSideEffect* v9; // r0
+    HandlerParam_AddCondition* v10; // r4
+
+    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
+    if (currentSide == GetSideFromMonID(currentSlot) && !Handler_CheckFloating(serverFlow, currentSlot))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
+        if (BattleMon_HasType(currentMon, TYPE_POISON))
+        {
+            v7 = (HandlerParam_RemoveSideEffect*)BattleHandler_PushWork(serverFlow, EFFECT_REMOVE_SIDE_EFFECT, currentSlot);
+            v7->side = currentSide;
+            v7->flags[0] = 3;
+            for (unsigned int i = 1; i < 3; ++i)
+            {
+                v9 = (HandlerParam_RemoveSideEffect*)((char*)v7 + i);
+                v9->flags[0] = 0;
+            }
+            if (v7->flags[0] > 1u)
+            {
+                v7->flags[1] |= 0x80u;
+            }
+            BattleHandler_PopWork(serverFlow, v7);
+        }
+        else
+        {
+            if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
+                return;
+
+            v10 = (HandlerParam_AddCondition*)BattleHandler_PushWork(serverFlow, EFFECT_ADD_CONDITION, 31);
+            v10->sickID = CONDITION_POISON;
+            unsigned int battleCount = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide);
+            ConditionData permanent;
+            if (battleCount <= 1)
+            {
+                permanent = Condition_MakePermanent();
+            }
+            else
+            {
+                permanent = Condition_MakeBadlyPoisoned();
+            }
+            v10->sickCont = permanent;
+            v10->pokeID = currentSlot;
+            BattleHandler_PopWork(serverFlow, v10);
+        }
+    }
+}
+BattleEventHandlerTableEntry SideToxicSpikesHandlers[] = {
+    {EVENT_SWITCH_IN, HandlerSideToxicSpikes},
+};
+BattleEventHandlerTableEntry* EventAddSideToxicSpikes(int* a1)
+{
+    *a1 = 1;
+    return SideToxicSpikesHandlers;
+}
+// Heavy-Duty Boots hazard checks
+void HandlerSideStealthRock(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide, int* work)
+{
+    HandlerParam_Damage* v9;
+
+    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
+    if (currentSide == GetSideFromMonID(currentSlot))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
+        if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
+            return;
+
+        int pokeType = BattleMon_GetPokeType(currentMon);
+        TypeEffectiveness effectiveness = (TypeEffectiveness)GetTypeEffectivenessVsMon(TYPE_ROCK, pokeType);
+        unsigned int dmgPercent = 0;
+
+        if (IsEqual(effectiveness, EFFECTIVENESS_IMMUNE))
+        {
+            return;
+        }
+        else if (IsEqual(effectiveness, EFFECTIVENESS_1_4))
+        {
+            dmgPercent = 32;
+        }
+        else if (IsEqual(effectiveness, EFFECTIVENESS_1_2))
+        {
+            dmgPercent = 16;
+        }
+        else if (IsEqual(effectiveness, EFFECTIVENESS_1))
+        {
+            dmgPercent = 8;
+        }
+        else if (IsEqual(effectiveness, EFFECTIVENESS_2))
+        {
+            dmgPercent = 4;
+        }
+        else if (IsEqual(effectiveness, EFFECTIVENESS_4))
+        {
+            dmgPercent = 2;
+        }
+
+        v9 = (HandlerParam_Damage*)BattleHandler_PushWork(serverFlow, EFFECT_DAMAGE, 31);
+        v9->pokeID = currentSlot;
+        v9->damage = DivideMaxHPZeroCheck(currentMon, dmgPercent);
+        BattleHandler_StrSetup(&v9->exStr, 2u, 854);
+        BattleHandler_AddArg(&v9->exStr, currentSlot);
+        BattleHandler_PopWork(serverFlow, v9);
+    }
+}
+BattleEventHandlerTableEntry SideStealthRockHandlers[] = {
+    {EVENT_SWITCH_IN, HandlerSideStealthRock},
+};
+BattleEventHandlerTableEntry* EventAddSideStealthRock(int* a1)
+{
+    *a1 = 1;
+    return SideStealthRockHandlers;
+}
+BattleEventHandlerTableEntry* EventAddSideWideGuard(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D888;
+}
+BattleEventHandlerTableEntry* EventAddSideQuickGuard(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D8A0;
+}
+BattleEventHandlerTableEntry* EventAddSideRainbow(int* a1)
+{
+    *a1 = 3;
+    return (BattleEventHandlerTableEntry*)0x689D8F0;
+}
+BattleEventHandlerTableEntry* EventAddSideSeaOfFire(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D880;
+}
+BattleEventHandlerTableEntry* EventAddSideSwamp(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x689D8A8;
+}
+
+SideEffectEventAddTable ExtSideEffectEventAddTable[] = {
+{SIDEEFF_REFLECT, EventAddSideReflect, 1},
+{SIDEEFF_LIGHT_SCREEN, EventAddSideLightScreen, 1},
+{SIDEEFF_SAFEGUARD, EventAddSideSafeguard, 1},
+{SIDEEFF_MIST, EventAddSideMist, 1},
+{SIDEEFF_TAILWIND, EventAddSideTailwind, 1},
+{SIDEEFF_LUCKY_CHANT, EventAddSideLuckyChant, 1},
+{SIDEEFF_SPIKES, EventAddSideSpikes, 3},
+{SIDEEFF_TOXIC_SPIKES, EventAddSideToxicSpikes, 2},
+{SIDEEFF_STEALTH_ROCK, EventAddSideStealthRock, 1},
+{SIDEEFF_WIDE_GUARD, EventAddSideWideGuard, 1},
+{SIDEEFF_QUICK_GUARD, EventAddSideQuickGuard, 1},
+{SIDEEFF_RAINBOW, EventAddSideRainbow, 1},
+{SIDEEFF_SEA_OF_FIRE, EventAddSideSeaOfFire, 1},
+{SIDEEFF_SWAMP, EventAddSideSwamp, 1},
+};
+
+int* SideEffectEvent_AddItem(int a1, int sideEffectID, ConditionData a3)
+{
+    __int16 v3;
+    BattleSideCondition* v4;
+    unsigned int Count;
+    unsigned int i;
+    BattleEventHandlerTableEntry* v7;
+    BattleEventItem* v8;
+    ConditionData v9;
+    int v12[8];
+    ConditionData varg_r2;
+
+    v12[6] = a1;
+    v12[7] = sideEffectID;
+    varg_r2 = a3;
+    v3 = sideEffectID;
+    v4 = &SideStatus.Sides[a1].Conditions[sideEffectID];
+    Count = v4->Count;
+    for (i = 0; i < ARRAY_COUNT(ExtSideEffectEventAddTable); ++i)
+    {
+        if (sideEffectID == ExtSideEffectEventAddTable[i].effect)
+        {
+            if (!Count)
+            {
+                v7 = ExtSideEffectEventAddTable[i].func(v12);
+                v8 = BattleEvent_AddItem(EVENTITEM_SIDE, v3, EVENTPRI_SIDE_DEFAULT, 0, a1, v7, v12[0]);
+                BattleEventItem_SetWorkValue(v8, 6, varg_r2);
+                v4->Count = 1;
+                v9 = varg_r2;
+                v4->TurnCounter = 0;
+                v4->conditionData = v9;
+                v4->BattleEventItem = v8;
+                return (int*)&v8->prev;
+            }
+            if (Count < ExtSideEffectEventAddTable[i].maxCount)
+            {
+                ++v4->Count;
+                return (int*)&v4->BattleEventItem->prev;
+            }
+        }
+    }
+    return 0;
+}
+int THUMB_BRANCH_BattleHandler_AddSideEffect(ServerFlow* a1, HandlerParam_AddSideEffect* a2)
+{
+    int side; // r3
+    ConditionData cont; // [sp+4h] [bp-14h] BYREF
+
+    side = a2->side;
+    cont = a2->cont;
+    ServerEvent_CheckSideEffectParam(a1, a2->header.flags << 19 >> 27, a2->effect, side, &cont);
+    if (!SideEffectEvent_AddItem(a2->side, a2->effect, cont))
+    {
+        return 0;
+    }
+    BattleHandler_SetString(a1, &a2->exStr);
+    return 1;
+}
+int THUMB_BRANCH_ItemEffect_StatusGuard(ServerFlow* a1, BattleMon* a2)
+{
+    int ID; // r0
+    int SideFromMonID; // r6
+    ConditionData Turn; // r0
+    int v6; // r0
+    HandlerParam_Header* v7; // r4
+
+    ID = BattleMon_GetID(a2);
+    SideFromMonID = GetSideFromMonID(ID);
+    Turn = Condition_MakeTurn(5);
+    SideEffectEvent_AddItem(SideFromMonID, 3, Turn);
+    if (!v6)
+    {
+        return 0;
+    }
+    v7 = BattleHandler_PushWork(a1, EFFECT_MESSAGE, 31);
+    BattleHandler_StrSetup((HandlerParam_StrParams*)&v7[1], 1u, 136);
+    BattleHandler_AddArg((HandlerParam_StrParams*)&v7[1], SideFromMonID);
+    BattleHandler_PopWork(a1, v7);
+    return 1;
 }
 C_DECL_END
 
@@ -1800,183 +2127,6 @@ int THUMB_BRANCH_AddConditionCheckFailOverwrite(ServerFlow* serverFlow, BattleMo
     }
     return 0;
 }
-
-// OVL_169
-
-// Heavy-Duty Boots hazard checks
-//void THUMB_BRANCH_HandlerSideSpikes(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide)
-//{
-//    HandlerParam_Damage* v9;
-//
-//    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
-//    if (currentSide == GetSideFromMonID(currentSlot) && !Handler_CheckFloating(serverFlow, currentSlot))
-//    {
-//        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
-//        if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
-//            return;
-//
-//        int spikeLayers = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide);
-//        int dmgPercent = 0;
-//        switch (spikeLayers)
-//        {
-//        case 1:
-//            dmgPercent = 8;
-//            break;
-//        case 2:
-//            dmgPercent = 6;
-//            break;
-//        case 3:
-//            dmgPercent = 4;
-//            break;
-//        }
-//
-//        v9 = (HandlerParam_Damage*)BattleHandler_PushWork(serverFlow, EFFECT_DAMAGE, 31);
-//        v9->pokeID = currentSlot;
-//        v9->damage = DivideMaxHPZeroCheck(currentMon, dmgPercent);  
-//        BattleHandler_StrSetup(&v9->exStr, 2u, 851);
-//        BattleHandler_AddArg(&v9->exStr, currentSlot);
-//        BattleHandler_PopWork(serverFlow, v9);
-//    }
-//}
-
-// Heavy-Duty Boots hazard checks
-//void THUMB_BRANCH_HandlerSideToxicSpikes(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide)
-//{
-//    HandlerParam_RemoveSideEffect* v7; // r1
-//    HandlerParam_RemoveSideEffect* v9; // r0
-//    HandlerParam_AddCondition* v10; // r4
-//
-//    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
-//    if (currentSide == GetSideFromMonID(currentSlot) && !Handler_CheckFloating(serverFlow, currentSlot))
-//    {
-//        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
-//        if (BattleMon_HasType(currentMon, TYPE_POISON))
-//        {
-//            v7 = (HandlerParam_RemoveSideEffect*)BattleHandler_PushWork(serverFlow, EFFECT_REMOVE_SIDE_EFFECT, currentSlot);
-//            v7->side = currentSide;
-//            v7->flags[0] = 3;
-//            for (unsigned int i = 1; i < 3; ++i)
-//            {
-//                v9 = (HandlerParam_RemoveSideEffect*)((char*)v7 + i);
-//                v9->flags[0] = 0;
-//            }
-//            if (v7->flags[0] > 1u)
-//            {
-//                v7->flags[1] |= 0x80u;
-//            }
-//            BattleHandler_PopWork(serverFlow, v7);
-//        }
-//        else
-//        {
-//            if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
-//                return;
-//
-//            v10 = (HandlerParam_AddCondition*)BattleHandler_PushWork(serverFlow, EFFECT_ADD_CONDITION, 31);
-//            v10->sickID = CONDITION_POISON;
-//            unsigned int battleCount = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide);
-//            ConditionData permanent;
-//            if (battleCount <= 1)
-//            {
-//                permanent = Condition_MakePermanent();
-//            }
-//            else
-//            {
-//                permanent = Condition_MakeBadlyPoisoned();
-//            }
-//            v10->sickCont = permanent;
-//            v10->pokeID = currentSlot;
-//            BattleHandler_PopWork(serverFlow, v10);
-//        }
-//    }
-//}
-
-// Heavy-Duty Boots hazard checks
-//void THUMB_BRANCH_HandlerSideStealthRock(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide, int* work)
-//{
-//    DPRINT("SIDE EFFECT STEALTH ROCK HANDLER\n");
-//    HandlerParam_Damage* v9;
-//    
-//    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
-//    if (currentSide == GetSideFromMonID(currentSlot))
-//    {
-//        DPRINTF("STEALTH ROCK -> SIDE: %d | SLOT: %d\n", currentSide, currentSlot);
-//        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
-//        if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
-//        {
-//            DPRINTF("   HEAVY-DUTY BOOTS (%d)\n", BattleMon_GetHeldItem(currentMon));
-//            return;
-//        }
-//    
-//        int pokeType = BattleMon_GetPokeType(currentMon);
-//        TypeEffectiveness effectiveness = (TypeEffectiveness)GetTypeEffectivenessVsMon(TYPE_ROCK, pokeType);
-//        unsigned int dmgPercent = 0;
-//        if (effectiveness <= EFFECTIVENESS_4)
-//        {
-//            switch (effectiveness)
-//            {
-//            case EFFECTIVENESS_IMMUNE:
-//                return;
-//            case EFFECTIVENESS_1_4:
-//                dmgPercent = 32;
-//                break;
-//            case EFFECTIVENESS_1_2:
-//                dmgPercent = 16;
-//                break;
-//            case EFFECTIVENESS_1:
-//                dmgPercent = 8;
-//                break;
-//            case EFFECTIVENESS_2:
-//                dmgPercent = 4;
-//                break;
-//            case EFFECTIVENESS_4:
-//                dmgPercent = 2;
-//                break;
-//            }
-//        }
-//    
-//        v9 = (HandlerParam_Damage*)BattleHandler_PushWork(serverFlow, EFFECT_DAMAGE, 31);
-//        v9->pokeID = currentSlot;
-//        v9->damage = DivideMaxHPZeroCheck(currentMon, dmgPercent);
-//        BattleHandler_StrSetup(&v9->exStr, 2u, 854);
-//        BattleHandler_AddArg(&v9->exStr, currentSlot);
-//        BattleHandler_PopWork(serverFlow, v9);
-//    }
-//}
-
-// Heavy-Duty Boots hazard checks
-//void THUMB_BRANCH_HandlerSideSeaOfFire(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide)
-//{
-//    unsigned int currentSlot; // r4
-//    BattleMon* currentMon; // r7
-//    HandlerParam_AddAnimation* v7; // r6
-//    HandlerParam_Damage* v8; // r6
-//
-//    currentSlot = (unsigned __int8)BattleEventVar_GetValue(VAR_MON_ID);
-//    if (currentSlot != 31
-//        && Handler_DoesBattleMonExist((int)serverFlow, currentSlot)
-//        && !Handler_CheckMatchup((int)serverFlow)
-//        && currentSide == GetSideFromMonID(currentSlot))
-//    {
-//        currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
-//        if (!BattleMon_HasType(currentMon, TYPE_FIRE))
-//        {
-//            if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
-//                return;
-//
-//            v7 = (HandlerParam_AddAnimation*)BattleHandler_PushWork(serverFlow, EFFECT_ADD_ANIMATION, currentSlot);
-//            v7->pos_from = Handler_PokeIDToPokePos((int)serverFlow, currentSlot);
-//            v7->pos_to = 6;
-//            v7->animNo = 654;
-//            BattleHandler_PopWork(serverFlow, v7);
-//            v8 = (HandlerParam_Damage*)BattleHandler_PushWork(serverFlow, EFFECT_DAMAGE, 31);
-//            v8->pokeID = currentSlot;
-//            v8->damage = DivideMaxHPZeroCheck(currentMon, 8u);
-//            BattleHandler_StrSetup(&v8->exStr, 2u, 1156);
-//            BattleHandler_AddArg(&v8->exStr, currentSlot);
-//            BattleHandler_PopWork(serverFlow, v8);
-//        }
-//    }
-//}
 C_DECL_END
 
 C_DECL_BEGIN // ITEM EXPANSION
@@ -3142,6 +3292,7 @@ int THUMB_BRANCH_ServerControl_AfterSwitchIn(ServerFlow* serverFlow)
 C_DECL_END
 
 C_DECL_BEGIN // DYNAMIC SPEED
+#if ADD_DYNAMIC_SPEED
 enum OrderAlteringMoves
 {
     OAM_NONE = 0,
@@ -3501,12 +3652,8 @@ unsigned int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* a1, unsigned i
         return current_idx + 1;
     }
 }
-C_DECL_END
+#endif
 
-// EXP CAPS
-#include "custom/level_cap.h"
-
-C_DECL_BEGIN
 void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int DefeatedMon, _DWORD* a4)
 {
     CalcExpWork* expEvs = (CalcExpWork*)a4;
@@ -3664,7 +3811,11 @@ void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int D
         }
     }
 
+#if ADD_LEVEL_CAP
     u32 lvl_cap = GetLvlCap();
+#else
+    u32 lvl_cap = 100;
+#endif
     for (unsigned int n = 0; n < NumMonsInParty; ++n)
     {
         BattleMon* battle_pokemon = BattleParty_GetMonData(party, n);
