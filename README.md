@@ -79,7 +79,7 @@ To install the patches you will need to compile the 4 CPP files in the pathces f
     - ``arm-none-eabi-g++ -r -mthumb -I [W2DH path] -march=armv5t -Os [Patches path]/patch_pokelist.cpp -o patch_pokelist.elf``
   - You should have now 4 ELF files named like the patches, open CTRMap and go to the Extras tab and do the following for each of the files:
     - Make sure the *install to /patches* checkbox is enabled
-    - ``LCntrl + LShift + Click`` on the "Convert ELF to DLL" button
+    - ``LCtrl + LShift + Click`` on the "Convert ELF to DLL" button
     - Select a YML file from the ESDBs folder
     - Select the ELF file that correspond to the YML file you selected
     - Create the DLL file
