@@ -1,6 +1,21 @@
 #ifndef __INCLUDE_ALL_H
 #define __INCLUDE_ALL_H
 
+#define _BYTE unsigned char
+#define _WORD unsigned short
+#define _DWORD unsigned int
+#define _QWORD unsigned long
+
+#ifdef __GNUC__
+#define SWAN_PACKED __attribute__((__packed__))
+#define SWAN_ALIGNED(x) __attribute__((aligned(x)))
+#endif
+
+#ifdef _MSC_VER //unsupported on MSVC
+#define SWAN_PACKED
+#define SWAN_ALIGNED(x)
+#endif
+
 #define DEBUG_PRINT true
 #if DEBUG_PRINT
 #include "kernel/kPrint.h"
@@ -7542,7 +7557,8 @@ typedef BattleEventHandlerTableEntry* (*SideEffectEventAddFunc)(int*);
 
 struct SideEffectEventAddTable
 {
-    SideEffect effect;
+    // actual data-type -> enum SideEffect
+    int sideEffect;
     SideEffectEventAddFunc func;
     int maxCount;
 };
@@ -7554,6 +7570,36 @@ struct HandlerParam_AddSideEffect
     ConditionData cont;
     u8 side;
     HandlerParam_StrParams exStr;
+};
+
+struct EventFieldMenu
+{
+    HeapID HeapID;
+    GameEvent* ThisEvent;
+    GameSystem* m_GameSystem;
+    Field* m_Field;
+    _DWORD dword10;
+    _DWORD State;
+    _DWORD LastSubscreenID;
+    AppCallFramework m_AppCallFramework;
+};
+
+struct FieldProcLinkEntry
+{
+    int OvlID;
+    GameProcFunctions* ProcFuncs;
+    void* (*ProcDataMakeFunc)(EventFieldAppCall* event, int itemId, int lastAppId, void* lastAppData);
+    int(*CreateResult)(EventFieldAppCall*, void*);
+    void* field_10;
+    void(*FreeSubprocDataFunc)(void*);
+};
+
+enum Season
+{
+    SEASON_SPRING = 0x0,
+    SEASON_SUMMER = 0x1,
+    SEASON_AUTUMN = 0x2,
+    SEASON_WINTER = 0x3,
 };
 
 // BattleHandler_x definitions
@@ -8799,7 +8845,6 @@ bool Handler_CheckMatchup(int a1);
 // Hazard Handlers definitions
 bool GetSideFromMonID(unsigned int a1);
 bool Handler_CheckFloating(ServerFlow* a1, int a2);
-int BattleSideStatus_GetCountFromBattleEventItem(BattleEventItem* a1, unsigned int a2);
 bool BattleMon_HasType(BattleMon* a1, PokeType a2);
 ConditionData Condition_MakePermanent();
 ConditionData Condition_MakeBadlyPoisoned();
@@ -8897,6 +8942,71 @@ bool PokeTypePair_HasType(int pokemonTypePair, PokeType type);
 void BattleEventItem_SetWorkValue(BattleEventItem* a1, int a2, ConditionData a3);
 void ServerEvent_CheckSideEffectParam(ServerFlow* a1, int a2, int a3, int a4, ConditionData* a5);
 ConditionData Condition_MakeTurn(int a1);
+void BattleEventItem_Remove(BattleEventItem* a1);
+void ServerControl_SideEffectEndMessage(int a1, unsigned int a2, ServerFlow* a3);
+
+// FieldMenu definitions
+FieldSubscreen* Field_GetSubscreen(Field* a1);
+b32 FieldSubscreen_IsReady(FieldSubscreen* subscreen);
+void sub_20173F8(GameData* gameData, char a2);
+void FieldSubscreen_ReqChange(FieldSubscreen* subscreen, FieldSubscreenID screenId);
+FieldSubscreenID FieldSubscreen_GetReturnSubscreen(FieldSubscreen* subscreen);
+void sub_2198524(FieldSubscreen* a1);
+int sub_2198894(FieldSubscreen* subscr);
+int sub_215AAA8(int a1);
+GameEvent* EventFieldMenuReturn_Create(GameSystem* a1, Field* a2, int a3);
+int sub_215B7E8(_DWORD* a1);
+void EventFieldAppCall_ConvAppResultToEventType(FieldSubAppResult result, ItemUseEventType* dest);
+b32 FieldAppCallParam_CanRetry(FieldAppCallParam* param);
+GameEvent* CallFieldMapEntranceOutTransitionDefault(GameSystem* a1, Field* a2, unsigned int a3, int a4);
+GameEvent* CreateFieldCloseEvent(GameSystem* gsys, Field* field);
+int sub_215B800(FieldAppCallParam* a1);
+GameEvent* EventFieldOpen_CreateHeadless(GameSystem* gsys);
+void FieldG2D_SetLCDConfig();
+void FieldG2D_Prepare3DSurface(Field* field);
+GameEvent* CallFieldMapEntranceInTransition(GameSystem* gsys, Field* field, unsigned int a3, int a4, int a5, Season lastSeason, Season newSeason);
+void sub_215B794(EventFieldAppCall* event);
+int sub_2198B44(int a1);
+TCBManagerEx* GFL_TCBExMgrCreate(HeapID heapId, HeapID workHeapId, int limit, int extraSize);
+int sub_202E7D0(int a1, int a2, int a3, int a4);
+int sub_20219C4(HeapID a1);
+void sub_2163F20(int a1);
+int sub_2164190(int a1);
+int sub_2163F78(int a1, int a2);
+int sub_216408C(int a1);
+int sub_2164220(int a1);
+int sub_216425C(int a1);
+int sub_200746C(SaveControl* a1);
+void sub_2024F18(BmpWin* a1, int a2);
+void* GameData_GetRecords(GameData* gameData);
+FieldSubscreen* Field_GetSubscreen(Field* a1);
+int sub_2198B50(int a1);
+int RecordAddOne(void* a1, int a2);
+int sub_2198B80(int a1);
+int sub_21640D0(int a1, int a2);
+int sub_2164150(void);
+int sub_2164298(int a1);
+int sub_21642F4();
+int sub_216431C(int a1);
+TCBManager* GFL_VBlankGetTCBMgr();
+int sub_2035630(TCBManager* a1, int a2, int a3, int a4, int a5);
+int sub_2198B5C(int a1);
+int sub_216433C(int a1);
+SaveData* sub_201782C(GameData* a1);
+int sub_2017850(int a1);
+void sub_2198B74();
+int sub_2164358(int a1);
+int sub_21642D0(int a1);
+int sub_2035838(int a1);
+int sub_2198B68(int a1);
+WordSetSystem* GFL_WordSetSystemCreateDefault(HeapID heapId);
+StrBuf* GFL_MsgDataLoadStrbufNew(MsgData* msgData, int msgId);
+u16* GetGameDataPlayerInfo(GameData* gameData);
+void GFL_WordSetSystemFree(WordSetSystem* wordSet);
+int sub_2163F90(int a1);
+b32 GFL_SndIsPlaying(SoundResID sndId);
+int sub_2163EE0(void);
+void sub_2198530(int a1, HeapID heapId);
 
 extern u32 g_GameBeaconSys;
 extern SystemUI* g_SystemUI;
