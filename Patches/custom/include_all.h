@@ -7557,8 +7557,7 @@ typedef BattleEventHandlerTableEntry* (*SideEffectEventAddFunc)(int*);
 
 struct SideEffectEventAddTable
 {
-    // actual data-type -> enum SideEffect
-    int sideEffect;
+    SideEffect effect;
     SideEffectEventAddFunc func;
     int maxCount;
 };
