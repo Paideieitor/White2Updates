@@ -8943,6 +8943,7 @@ void ServerEvent_CheckSideEffectParam(ServerFlow* a1, int a2, int a3, int a4, Co
 ConditionData Condition_MakeTurn(int a1);
 void BattleEventItem_Remove(BattleEventItem* a1);
 void ServerControl_SideEffectEndMessage(int a1, unsigned int a2, ServerFlow* a3);
+int BattleSideStatus_GetCountFromBattleEventItem(BattleEventItem* a1, unsigned int currentSide);
 
 // FieldMenu definitions
 FieldSubscreen* Field_GetSubscreen(Field* a1);
