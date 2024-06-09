@@ -18,7 +18,7 @@
 
 #define DEBUG_PRINT true
 #if DEBUG_PRINT
-#include "kernel/kPrint.h"
+#include "kPrint.h"
 #define DPRINT(format) k::Print(format)
 #define DPRINTF(format, ...) k::Printf(format, __VA_ARGS__)
 #elif !DEBUG_PRINT
