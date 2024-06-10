@@ -1,5 +1,5 @@
 # White2Updates
-Code Injection Patches to upgrade the White 2 gameplay
+Code Injection Patches to upgrade the White 2 gameplay. This code is fully compatible with the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/), using a different environment will probably require some changes to the code.
 
 ## Patches
 ### Hard Level Caps
@@ -55,8 +55,12 @@ Known Issues:
   - Some item IDs cause the game to crash, so make sure to not use item IDs (654 - 664) and (692 - 695), there might be other crash IDs
   - Eject Pack interactions with pursuit are untested, it's likely to work like with U-Turn or Volt Switch
 
+### Crit Damage
+  - Crit damage boost reduced from x2 to x1.5
+    
 ### Work In Progress
-  - Free space expansion
+  - Side and Filed effects Expansion (new hazards, weathers and terrains)
+  - Free space expansion (not doing this, atleast for a while)
 
 ## How to Install
 ### Installing tools
@@ -68,18 +72,16 @@ Known Issues:
 ### Compiling the code
 Before compiling make sure to open the ``settings.h`` file with your prefered text editor, here you can modify the patches you will be installing, I don't recomend modifying the non-boolean definitions unless you know what you are doing.
 To install the patches you will need to compile the 4 CPP files in the pathces folder, follow this steps:
-  - Install the [ARM GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
-  - Download the [White 2 Development Headers](https://github.com/kingdom-of-ds-hacking/swan) , this will be refered as W2DH from now.
-  - Move the `custom` folder inside the folder of the W2DH (as a folder).
-  - Open a cmd terminal (if you are in Windows go to the W2DH folder,  click the path input box, type "cmd" and click Enter)
+  - If you don't have a Code Injection environment follow the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/)
+  - Open a cmd terminal (if you are in Windows go to the path input box, type "cmd" and click Enter)
   - Input the following commands (substitute the parts bettwen [] with the path in your computer):
-    - ``arm-none-eabi-g++ -r -mthumb -I [W2DH path] -march=armv5t -Os [Patches path]/patch_bag.cpp -o patch_bag.elf``
-    - ``arm-none-eabi-g++ -r -mthumb -I [W2DH path] -march=armv5t -Os [Patches path]/patch_battle.cpp -o patch_battle.elf``
-    - ``arm-none-eabi-g++ -r -mthumb -I [W2DH path] -march=armv5t -Os [Patches path]/patch_field.cpp -o patch_field.elf``
-    - ``arm-none-eabi-g++ -r -mthumb -I [W2DH path] -march=armv5t -Os [Patches path]/patch_pokelist.cpp -o patch_pokelist.elf``
+    - ``arm-none-eabi-g++ [Patches path]/patch_bag.cpp -I [swan path] -I [NitroKernel/include path] -o [Output path]/patch_bag.elf -r -mthumb -march=armv5t -Os``
+    - ``arm-none-eabi-g++ [Patches path]/patch_battle.cpp -I [swan path] -I [NitroKernel/include path] -o [Output path]/patch_battle.elf -r -mthumb -march=armv5t -Os``
+    - ``arm-none-eabi-g++ [Patches path]/patch_field.cpp -I [swan path] -I [NitroKernel/include path] -o [Output path]/patch_field.elf -r -mthumb -march=armv5t -Os``
+    - ``arm-none-eabi-g++ [Patches path]/patch_pokelist.cpp -I [swan path] -I [NitroKernel/include path] -o [Output path]/patch_pokelist.elf -r -mthumb -march=armv5t -Os``
   - You should have now 4 ELF files named like the patches, open CTRMap and go to the Extras tab and do the following for each of the files:
     - Make sure the *install to /patches* checkbox is enabled
-    - ``LCtrl + LShift + Click`` on the "Convert ELF to DLL" button
+    - ``LShift + Click`` on the "Convert ELF to DLL" button
     - Select a YML file from the ESDBs folder
     - Select the ELF file that correspond to the YML file you selected
     - Create the DLL file
