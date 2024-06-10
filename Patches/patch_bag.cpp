@@ -2,7 +2,6 @@
 #include "custom/item_expansion.h"
 
 #include "custom/include_all.h"
-#include "custom/include_all.h"
 
 C_DECL_BEGIN
 bool THUMB_BRANCH_BagSave_IsItemFreeSpaceBit(BagSaveData* a1, int itemId)
@@ -2460,49 +2459,6 @@ ItemData* LoadNewItemData(ItemID item_idx, HeapID heapId)
         return data;
     }
     if (IsEqual(item_idx, IT2401_FAIRY_FEATHER)) // NEW POKEMON EFFECT ITEM ARCHETYPE
-    {
-        ItemData* data;
-        data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);
-
-        data->Price = 300;
-        data->HeldEffect = 117;
-        data->HeldArgument = 4;
-        data->NaturalGiftEffect = 0;
-        data->FlingEffect = 0;
-        data->FlingPower = 30;
-        data->NaturalGiftPower = 0;
-        data->Packed = 0x1F;
-        data->EffectField = 0;
-        data->EffectBattle = 0;
-        data->HasBattleStats = 0;
-        data->ItemClass = 1;
-        data->Consumable = 0;
-        data->SortIndex = 60;
-        data->BattleStats.CureInflict = 0;
-        data->BattleStats.Boost[0] = 0;
-        data->BattleStats.Boost[1] = 0;
-        data->BattleStats.Boost[2] = 0;
-        data->BattleStats.Boost[3] = 0;
-        data->BattleStats.FunctionFlags0 = 0;
-        data->BattleStats.FunctionFlags1 = 0;
-        data->BattleStats.EVHP = 0;
-        data->BattleStats.EVATK = 0;
-        data->BattleStats.EVDEF = 0;
-        data->BattleStats.EVSPE = 0;
-        data->BattleStats.EVSPA = 0;
-        data->BattleStats.EVSPD = 0;
-        data->BattleStats.HealAmount = 0;
-        data->BattleStats.PPGain = 0;
-        data->BattleStats.Friendship1 = 0;
-        data->BattleStats.Friendship2 = 0;
-        data->BattleStats.Friendship3 = 0;
-        data->BattleStats.field_1F = 0;
-        data->BattleStats.field_20 = 0;
-
-        return data;
-    }
-    
-    if (item_idx > DEFAULT_LAST_ITEM)
     {
         ItemData* data;
         data = (ItemData*)GFL_HeapAllocate(heapId, sizeof(ItemData), 0, "arc_tool.c", 0xBBu);

@@ -16,6 +16,9 @@
 #define SWAN_ALIGNED(x)
 #endif
 
+#define ROL(x, value) (x << value) | (x >> ((sizeof(x) << 3) - value))
+#define ROR(x, value) (x >> value) | (x << ((sizeof(x) << 3) - value))
+
 #define DEBUG_PRINT true
 #if DEBUG_PRINT
 #include "kPrint.h"
@@ -30,6 +33,31 @@
 
 #include "swantypes.h"
 
+u32& HIDWORD(u64& x)
+{
+    return *(reinterpret_cast<u32*>(&x) + 1);
+}
+
+u32& LODWORD(u64& x)
+{
+    return *(reinterpret_cast<u32*>(&x) + 0);
+}
+
+u16& HIWORD(u32& x)
+{
+    return *(reinterpret_cast<u16*>(&x) + 1);
+}
+
+u16& LOWORD(u32& x)
+{
+    return *(reinterpret_cast<u16*>(&x) + 0);
+}
+
+u8& LOBYTE(u32& x)
+{
+    return *(reinterpret_cast<u8*>(&x) + 0);
+}
+
 #include "battle/btl_result.h"
 #include "field/fieldmap.h"
 #include "field/field_mmodel.h"
@@ -42,6 +70,52 @@
 
 
 C_DECL_BEGIN
+struct SaveBlkInitData
+{
+    int idx;
+    void* sv_size;
+    void* sv_init;
+};
+
+struct SaveBlockHandle
+{
+    int SaveID;
+    int BlockSize;
+    int BlockMemoryOffset;
+};
+
+struct SaveDataTable
+{
+    SaveBlkInitData* Initializers;
+    u32 InitializersCount;
+    u32 HeaderSize;
+    u32 SaveDataSize;
+    u32 SaveAreaSize;
+    SaveBlockHandle* BlockHandles;
+    u32 ExtraSize;
+};
+
+struct SaveData
+{
+    u32 BlockStartOffset;
+    u32 BlockEndOffset;
+    u32 SaveAreaSize;
+    u32 Magic;
+    u8 field_10[12];
+    u8 field_1C;
+    u8 field_1D;
+    u8 field_1E[6];
+    u32 field_24;
+    u32 field_28;
+    SaveDataTable* saveDataTable;
+    u32 SaveDataSize;
+    void* SaveRAMArea;
+    u8 field_38[256];
+    u32 field_138;
+    u32 field_13C;
+    u32 FooterSize;
+};
+
 enum BattleStyle
 {
     BTL_STYLE_SINGLE = 0x0,
@@ -7434,6 +7508,31 @@ struct HandlerParam_ChangeAbility
     HandlerParam_StrParams exStr;
 };
 
+struct RemoveSideEffectFlags
+{
+    // flags[0]
+    u8 ukn;
+
+    // flags[1]
+    u8 reflect : 1;
+    u8 lightScreen : 1;
+    u8 safeguard : 1;
+    u8 mist : 1;
+    u8 tailwind : 1;
+    u8 luckyChant : 1;
+    u8 spikes : 1;
+    u8 toxicSpikes : 1;
+
+    // flags[2]
+    u8 stealthRocks : 1;
+    u8 wideGuard : 1;
+    u8 quickGuard : 1;
+    u8 rainbow : 1;
+    u8 seaOfFire : 1;
+    u8 swamp : 1;
+    u8 unusedEffect : 1;
+    u8 unusedEffect2 : 1;
+};
 struct SWAN_ALIGNED(4) HandlerParam_RemoveSideEffect
 {
     HandlerParam_Header header;
@@ -7545,7 +7644,7 @@ enum SideEffect
     SIDEEFF_LUCKY_CHANT = 0x5,
     SIDEEFF_SPIKES = 0x6,
     SIDEEFF_TOXIC_SPIKES = 0x7,
-    SIDEEFF_STEALTH_ROCK = 0x8,
+    SIDEEFF_STEALTH_ROCK = 0x8, 
     SIDEEFF_WIDE_GUARD = 0x9,
     SIDEEFF_QUICK_GUARD = 0xA,
     SIDEEFF_RAINBOW = 0xB,
@@ -7557,7 +7656,8 @@ typedef BattleEventHandlerTableEntry* (*SideEffectEventAddFunc)(int*);
 
 struct SideEffectEventAddTable
 {
-    SideEffect effect;
+    // actual data-type -> enum SideEffect
+    int sideEffect;
     SideEffectEventAddFunc func;
     int maxCount;
 };
@@ -7565,7 +7665,7 @@ struct SideEffectEventAddTable
 struct HandlerParam_AddSideEffect
 {
     HandlerParam_Header header;
-    u32 effect;
+    SideEffect effect;
     ConditionData cont;
     u8 side;
     HandlerParam_StrParams exStr;
@@ -8943,7 +9043,8 @@ void ServerEvent_CheckSideEffectParam(ServerFlow* a1, int a2, int a3, int a4, Co
 ConditionData Condition_MakeTurn(int a1);
 void BattleEventItem_Remove(BattleEventItem* a1);
 void ServerControl_SideEffectEndMessage(int a1, unsigned int a2, ServerFlow* a3);
-int BattleSideStatus_GetCountFromBattleEventItem(BattleEventItem* a1, unsigned int currentSide);
+int j_j_SideEvent_RemoveItem(int a1, int a2);
+void ServerControl_SideEffectEndMessageCore(ServerFlow* a1, unsigned int a2, int a3);
 
 // FieldMenu definitions
 FieldSubscreen* Field_GetSubscreen(Field* a1);

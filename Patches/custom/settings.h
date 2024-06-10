@@ -17,7 +17,10 @@
 
 #define ADD_DYNAMIC_SPEED true
 
-#define ADD_NEW_ITEMS false
+#define ADD_CRIT_CHANGES true
+#define CRIT_DMG_BOOST 1.5f
+
+#define ADD_NEW_ITEMS true
 #define IT0639_WEAKNESS_POLICY      639
 #define IT0640_ASSAULT_VEST         640
 #define IT0644_PIXIE_PLATE          641

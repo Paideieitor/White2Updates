@@ -4,8 +4,10 @@
 
 #include "custom/level_cap.h"
 
-C_DECL_BEGIN // GROUPS
+extern "C" 
+{
 
+// GROUPS
 // --- DATA ---
 
 ITEM_ID ItemsThatPreventStatusMoveUse[] = {
@@ -229,21 +231,147 @@ bool IsIntimidated(AbilID attackerAbility)
         return true;
     return false;
 }
-C_DECL_END
 
-C_DECL_BEGIN // SIDE EFFECT EXPANSION
+#if ADD_CRIT_CHANGES
+// CRIT CHANGES
+int THUMB_BRANCH_ServerEvent_CalcDamage(ServerFlow* a1, BattleMon* attackingMon, BattleMon* defendingMon, MoveParam* moveParam, 
+    int typeEffectiveness,int targetDmgRatio, int criticalFlag, int battleDebugMode, _WORD* destDamage)
+{
+    int attackingSlot; // r0
+    int defendingSlot; // r0
+    int defense; // r7
+    unsigned __int8 level; // r0
+    int baseDamage; // r0
+    unsigned int damage; // r7
+    int Weather; // r0
+    int weatherDmgRatio; // r1
+    int damageRoll; // r0
+    PokeType moveType; // r2
+    int v22; // r0
+    int damageAfterType; // r4
+    int damageRatio; // r4
+    int damageAfterProc2; // r0
+    u32 finalDamage; // [sp+8h] [bp-28h]
+    int isFixedDamage; // [sp+Ch] [bp-24h]
+    int Category; // [sp+10h] [bp-20h]
+    int power; // [sp+14h] [bp-1Ch]
+    int attack; // [sp+18h] [bp-18h]
+
+    Category = PML_MoveGetCategory(moveParam->MoveID);
+    isFixedDamage = 0;
+    BattleEventVar_Push();
+    BattleEventVar_SetConstValue(VAR_TYPE_EFFECTIVENESS, typeEffectiveness);
+    attackingSlot = BattleMon_GetID(attackingMon);
+    BattleEventVar_SetConstValue(VAR_ATTACKING_MON, attackingSlot);
+    defendingSlot = BattleMon_GetID(defendingMon);
+    BattleEventVar_SetConstValue(VAR_DEFENDING_MON, defendingSlot);
+    BattleEventVar_SetConstValue(VAR_CRITICAL_FLAG, criticalFlag);
+    BattleEventVar_SetConstValue(VAR_MOVE_TYPE, moveParam->moveType);
+    BattleEventVar_SetConstValue(VAR_MOVE_ID, moveParam->MoveID);
+    BattleEventVar_SetConstValue(VAR_MOVE_CATEGORY, Category);
+    BattleEventVar_SetValue(VAR_FIXED_DAMAGE, 0);
+    BattleEvent_CallHandlers(a1, EVENT_MOVE_DAMAGE_PROCESSING_1);
+    finalDamage = BattleEventVar_GetValue(VAR_FIXED_DAMAGE);
+    if (finalDamage)
+    {
+        isFixedDamage = 1;
+    }
+    else
+    {
+        power = ServerEvent_GetMovePower(a1, attackingMon, defendingMon, moveParam);
+        attack = ServerEvent_GetAttackPower(a1, attackingMon, defendingMon, moveParam, criticalFlag);
+        defense = ServerEvent_GetTargetDefenses(a1, attackingMon, defendingMon, moveParam, criticalFlag);
+        level = BattleMon_GetValue(attackingMon, VALUE_LEVEL);
+        baseDamage = CalcBaseDamage(power, attack, level, defense);
+        damage = baseDamage;
+        if (targetDmgRatio != 4096)
+        {
+            damage = fixed_round(baseDamage, targetDmgRatio);
+        }
+        Weather = ServerEvent_GetWeather(a1);
+        weatherDmgRatio = WeatherPowerMod(Weather, moveParam->moveType);
+        if (weatherDmgRatio != 4096)
+        {
+            damage = fixed_round(damage, weatherDmgRatio);
+        }
+        if (criticalFlag)
+        {
+            damage = (int)((float)damage * CRIT_DMG_BOOST);
+        }
+        if (!MainModule_GetDebugFlag() && sub_21AE34C(a1))
+        {
+            if (battleDebugMode)
+            {
+                damageRoll = 85;
+            }
+            else
+            {
+                damageRoll = (100 - BattleRandom(16u));
+            }
+            damage = damageRoll * damage / 100;
+        }
+        moveType = (PokeType)moveParam->moveType;
+        if (moveType != TYPE_NULL)
+        {
+            v22 = ServerEvent_SameTypeAttackBonus(a1, attackingMon, moveType);
+            damage = fixed_round(damage, v22);
+        }
+        damageAfterType = TypeEffectivenessPowerMod(damage, typeEffectiveness);
+        if (Category == 1
+            && BattleMon_GetStatus(attackingMon) == CONDITION_BURN
+            && BattleMon_GetValue(attackingMon, VALUE_EFFECTIVE_ABILITY) != ABIL062_GUTS)
+        {
+            damageAfterType = 50 * damageAfterType / 100u;
+        }
+        if (!damageAfterType)
+        {
+            damageAfterType = 1;
+        }
+        BattleEventVar_SetMulValue(VAR_RATIO, 4096, 41, 0x20000);
+        BattleEventVar_SetValue(VAR_DAMAGE, damageAfterType);
+        BattleEvent_CallHandlers(a1, EVENT_MOVE_DAMAGE_PROCESSING_2);
+        damageRatio = BattleEventVar_GetValue(VAR_RATIO);
+        damageAfterProc2 = BattleEventVar_GetValue(VAR_DAMAGE);
+        LOWORD(finalDamage) = fixed_round(damageAfterProc2, damageRatio);
+    }
+    BattleEvent_CallHandlers(a1, EVENT_MOVE_DAMAGE_PROCESSING_END);
+    BattleEventVar_Pop();
+    *destDamage = finalDamage;
+    return isFixedDamage;
+}
+#endif
+
+// SIDE EFFECT EXPANSION
 // Accessing the Sife Effect functions crashed the game so I rewrote the whole system
 // Thats why I branch the 2 access points to create a Side Effect BattleItem (BattleHandler_AddSideEffect & ItemEffect_StatusGuard) 
 // and build from there
 struct BattleSideStatus
 {
-    BattleSideCondition Conditions[14];
+    BattleSideCondition Conditions[DEFAULT_SIDE_CONDITION_AMOUNT];
 };
 struct BattleSideManager
 {
     BattleSideStatus Sides[2];
 };
 extern BattleSideManager SideStatus;
+BattleSideManager SideStatusExt;
+u8 removeSideEffExtFlags;
+
+int BattleSideStatus_GetCountFromBattleEventItem(BattleEventItem* a1, unsigned int currentSide)
+{
+    int effect = BattleEventItem_GetSubID(a1);
+    if (currentSide >= 2)
+    {
+        return 0;
+    }
+    else
+    {
+        if (effect <= DEFAULT_SIDE_CONDITION_AMOUNT)
+            return SideStatus.Sides[currentSide].Conditions[effect].Count;
+        else
+            return SideStatusExt.Sides[currentSide].Conditions[effect - DEFAULT_SIDE_CONDITION_AMOUNT].Count;
+    }
+}
 
 BattleEventHandlerTableEntry* EventAddSideReflect(int* a1)
 {
@@ -287,7 +415,7 @@ void HandlerSideSpikes(BattleEventItem* a1, ServerFlow* serverFlow, int currentS
         if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
             return;
 
-        int spikeLayers = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide);
+        int spikeLayers = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide); // New Definition
         int dmgPercent = 0;
         switch (spikeLayers)
         {
@@ -352,7 +480,7 @@ void HandlerSideToxicSpikes(BattleEventItem* a1, ServerFlow* serverFlow, int cur
 
             v10 = (HandlerParam_AddCondition*)BattleHandler_PushWork(serverFlow, EFFECT_ADD_CONDITION, 31);
             v10->sickID = CONDITION_POISON;
-            unsigned int battleCount = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide);
+            unsigned int battleCount = BattleSideStatus_GetCountFromBattleEventItem(a1, currentSide); // New Definition
             ConditionData permanent;
             if (battleCount <= 1)
             {
@@ -459,6 +587,36 @@ BattleEventHandlerTableEntry* EventAddSideSwamp(int* a1)
     return (BattleEventHandlerTableEntry*)0x689D8A8;
 }
 
+// STICKY WEB
+// Heavy-Duty Boots hazard checks
+void HandlerSideStickyWeb(BattleEventItem* a1, ServerFlow* serverFlow, int currentSide, int* work)
+{
+    HandlerParam_ChangeStatStage* v3;
+
+    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
+    if (currentSide == GetSideFromMonID(currentSlot))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
+        if (DoesItemPreventHazardEffects(BattleMon_GetHeldItem(currentMon))) // Heavy-Duty Boots check
+            return;
+
+        v3 = (HandlerParam_ChangeStatStage*)BattleHandler_PushWork(serverFlow, EFFECT_CHANGE_STAT_STAGE, currentSlot);
+        v3->poke_cnt = 1;
+        v3->pokeID[0] = currentSlot;
+        v3->rankType = STATSTAGE_SPEED;
+        v3->rankVolume = -1;
+        BattleHandler_PopWork(serverFlow, v3);
+    }
+}
+BattleEventHandlerTableEntry SideStickyWebHandlers[] = {
+    {EVENT_SWITCH_IN, HandlerSideStickyWeb},    // Rapid Spin implementation is in HandlerRapidSpin
+};
+BattleEventHandlerTableEntry* EventAddSideStickyWeb(int* a1)
+{
+    *a1 = 1;
+    return SideStickyWebHandlers;
+}
+
 SideEffectEventAddTable ExtSideEffectEventAddTable[] = {
 {SIDEEFF_REFLECT, EventAddSideReflect, 1},
 {SIDEEFF_LIGHT_SCREEN, EventAddSideLightScreen, 1},
@@ -474,46 +632,53 @@ SideEffectEventAddTable ExtSideEffectEventAddTable[] = {
 {SIDEEFF_RAINBOW, EventAddSideRainbow, 1},
 {SIDEEFF_SEA_OF_FIRE, EventAddSideSeaOfFire, 1},
 {SIDEEFF_SWAMP, EventAddSideSwamp, 1},
+{SIDEEFF_STICKY_WEB, EventAddSideStickyWeb, 1},
 };
 
-int* SideEffectEvent_AddItem(int a1, int sideEffectID, ConditionData a3)
+int* SideEffectEvent_AddItem(int currentSide, SideEffect effect, ConditionData condData)
 {
-    __int16 v3;
-    BattleSideCondition* v4;
-    unsigned int Count;
-    unsigned int i;
-    BattleEventHandlerTableEntry* v7;
-    BattleEventItem* v8;
-    ConditionData v9;
-    int v12[8];
-    ConditionData varg_r2;
+    __int16 effectCpy; // r5
+    BattleSideCondition* sideCondition; // r4
+    unsigned int Count; // r0
+    unsigned int i; // r6
+    BattleEventHandlerTableEntry* eventFunc; // r0
+    BattleEventItem* eventItem; // r5
+    ConditionData v9; // r0
+    int v12[8]; // [sp+10h] [bp-28h] BYREF
+    ConditionData condDataCpy; // [sp+30h] [bp-8h]
 
-    v12[6] = a1;
-    v12[7] = sideEffectID;
-    varg_r2 = a3;
-    v3 = sideEffectID;
-    v4 = &SideStatus.Sides[a1].Conditions[sideEffectID];
-    Count = v4->Count;
+    v12[6] = currentSide;
+    v12[7] = effect;
+    condDataCpy = condData;
+    effectCpy = effect;
+
+    if (effect < DEFAULT_SIDE_CONDITION_AMOUNT)
+        sideCondition = &SideStatus.Sides[currentSide].Conditions[effect];
+    else
+        sideCondition = &SideStatusExt.Sides[currentSide].Conditions[effect - DEFAULT_SIDE_CONDITION_AMOUNT];
+
+    Count = sideCondition->Count;
     for (i = 0; i < ARRAY_COUNT(ExtSideEffectEventAddTable); ++i)
     {
-        if (sideEffectID == ExtSideEffectEventAddTable[i].effect)
+        if (effect == ExtSideEffectEventAddTable[i].sideEffect)
         {
             if (!Count)
             {
-                v7 = ExtSideEffectEventAddTable[i].func(v12);
-                v8 = BattleEvent_AddItem(EVENTITEM_SIDE, v3, EVENTPRI_SIDE_DEFAULT, 0, a1, v7, v12[0]);
-                BattleEventItem_SetWorkValue(v8, 6, varg_r2);
-                v4->Count = 1;
-                v9 = varg_r2;
-                v4->TurnCounter = 0;
-                v4->conditionData = v9;
-                v4->BattleEventItem = v8;
-                return (int*)&v8->prev;
+                eventFunc = ExtSideEffectEventAddTable[i].func(v12);
+                eventItem = BattleEvent_AddItem(EVENTITEM_SIDE, effectCpy, EVENTPRI_SIDE_DEFAULT, 0, currentSide, eventFunc, v12[0]);
+                BattleEventItem_SetWorkValue(eventItem, 6, condDataCpy);
+                sideCondition->Count = 1;
+                v9 = condDataCpy;
+                sideCondition->TurnCounter = 0;
+                sideCondition->conditionData = v9;
+                sideCondition->BattleEventItem = eventItem;
+
+                return (int*)&eventItem->prev;
             }
             if (Count < ExtSideEffectEventAddTable[i].maxCount)
             {
-                ++v4->Count;
-                return (int*)&v4->BattleEventItem->prev;
+                ++sideCondition->Count;
+                return (int*)&sideCondition->BattleEventItem->prev;
             }
         }
     }
@@ -545,7 +710,7 @@ int THUMB_BRANCH_ItemEffect_StatusGuard(ServerFlow* a1, BattleMon* a2)
     ID = BattleMon_GetID(a2);
     SideFromMonID = GetSideFromMonID(ID);
     Turn = Condition_MakeTurn(5);
-    SideEffectEvent_AddItem(SideFromMonID, 3, Turn);
+    SideEffectEvent_AddItem(SideFromMonID, SIDEEFF_MIST, Turn);
     if (!v6)
     {
         return 0;
@@ -556,9 +721,166 @@ int THUMB_BRANCH_ItemEffect_StatusGuard(ServerFlow* a1, BattleMon* a2)
     BattleHandler_PopWork(a1, v7);
     return 1;
 }
-C_DECL_END
 
-C_DECL_BEGIN // ABILITY EXPANSION
+void THUMB_BRANCH_BattleSideStatus_Clear()
+{
+    sys_memset(&SideStatus, 0, 448u);
+    sys_memset(&SideStatusExt, 0, 448u);
+}
+
+int THUMB_BRANCH_j_j_BattleSideStatus_GetCount(int currentSide, SideEffect effect)
+{
+    if (effect < DEFAULT_SIDE_CONDITION_AMOUNT)
+        return SideStatus.Sides[currentSide].Conditions[effect].Count;
+    else
+        return SideStatusExt.Sides[currentSide].Conditions[effect - DEFAULT_SIDE_CONDITION_AMOUNT].Count;
+}
+
+bool BattleSideStatus_IsEffectActive(int currentSide, SideEffect effect)
+{
+    if (effect < DEFAULT_SIDE_CONDITION_AMOUNT)
+        return SideStatus.Sides[currentSide].Conditions[effect].BattleEventItem != 0;
+    else
+        return SideStatusExt.Sides[currentSide].Conditions[effect - DEFAULT_SIDE_CONDITION_AMOUNT].BattleEventItem != 0;
+}
+bool THUMB_BRANCH_Handler_IsSideEffectActive(int a1, int currentSide, SideEffect effect)
+{
+    return BattleSideStatus_IsEffectActive(currentSide, effect);
+}
+bool THUMB_BRANCH_j_j_BattleSideStatus_IsEffectActive(int currentSide, SideEffect effect)
+{
+    return BattleSideStatus_IsEffectActive(currentSide, effect);
+}
+bool THUMB_BRANCH_j_j_BattleSideStatus_IsEffectActive_0(int currentSide, SideEffect effect)
+{
+    return BattleSideStatus_IsEffectActive(currentSide, effect);
+}
+bool THUMB_BRANCH_j_j_BattleSideStatus_IsEffectActive_1(int currentSide, SideEffect effect)
+{
+    return BattleSideStatus_IsEffectActive(currentSide, effect);
+}
+bool THUMB_BRANCH_j_j_BattleSideStatus_IsEffectActive_2(int currentSide, SideEffect effect)
+{
+    return BattleSideStatus_IsEffectActive(currentSide, effect);
+}
+bool THUMB_BRANCH_j_j_BattleSideStatus_IsEffectActive_3(int currentSide, SideEffect effect)
+{
+    return BattleSideStatus_IsEffectActive(currentSide, effect);
+}
+
+int THUMB_BRANCH_j_j_SideEvent_RemoveItem(int currentSide, SideEffect effect)
+{
+    BattleSideCondition* sideCondition; // r4
+
+    if (effect < DEFAULT_SIDE_CONDITION_AMOUNT)
+        sideCondition = &SideStatus.Sides[currentSide].Conditions[effect];
+    else
+        sideCondition = &SideStatusExt.Sides[currentSide].Conditions[effect - DEFAULT_SIDE_CONDITION_AMOUNT];
+
+    if (!sideCondition->BattleEventItem)
+    {
+        return 0;
+    }
+    BattleEventItem_Remove(sideCondition->BattleEventItem);
+    sideCondition->BattleEventItem = 0;
+    sideCondition->Count = 0;
+
+    int condDataInt = *((int*)&sideCondition->conditionData);
+    condDataInt &= 0xFFFFFFF8;
+    sideCondition->conditionData = *((ConditionData*)&condDataInt);
+
+    return 1;
+}
+
+void THUMB_BRANCH_ServerControl_TurnCheckSide(ServerFlow* a1)
+{
+    BattleSideCondition* sideCondition;
+    unsigned int turnCounter;
+
+    for (unsigned int currentSide = 0; currentSide < 2; ++currentSide)
+    {
+        for (unsigned int effect = 0; effect < ARRAY_COUNT(ExtSideEffectEventAddTable); ++effect)
+        {
+            if (effect < DEFAULT_SIDE_CONDITION_AMOUNT)
+                sideCondition = &SideStatus.Sides[currentSide].Conditions[effect];
+            else
+                sideCondition = &SideStatusExt.Sides[currentSide].Conditions[effect - DEFAULT_SIDE_CONDITION_AMOUNT];
+
+            int condDataInt = *((int*)&sideCondition->conditionData);
+
+            if (sideCondition->Count != 0 && (condDataInt & 7) == 2)
+            {
+                turnCounter = sideCondition->TurnCounter + 1;
+                sideCondition->TurnCounter = turnCounter;
+                if (turnCounter >= (condDataInt << 23) >> 26)
+                {
+                    sideCondition->Count = 0;
+
+                    condDataInt &= 0xFFFFFFF8;
+                    sideCondition->conditionData = *((ConditionData*)&condDataInt);
+
+                    BattleEventItem_Remove(sideCondition->BattleEventItem);
+                    sideCondition->BattleEventItem = 0;
+                    ServerControl_SideEffectEndMessage(currentSide, effect, a1);
+                }
+            }
+        }
+    }
+}
+
+bool GetSideFromOpposingMonID(unsigned int a1);
+void CommonCreateSideEffect(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work, u8 opposingSide, SideEffect effect, ConditionData condData, u16 msgID);
+void THUMB_BRANCH_HandlerStealthRock(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work)
+{
+    ConditionData permanent;
+    u8 opposingSide;
+
+    permanent = Condition_MakePermanent();
+    opposingSide = GetSideFromOpposingMonID(currentSlot);
+    CommonCreateSideEffect(a1, serverFlow, currentSlot, work, opposingSide, (SideEffect)SIDEEFF_STICKY_WEB, *&permanent, 156);
+}
+
+int THUMB_BRANCH_BattleHandler_RemoveSideEffectCore(ServerFlow* serverFlow, HandlerParam_RemoveSideEffect* params)
+{
+    unsigned int flagIdx;
+    bool effectFlagActive;
+
+    int removedAnEffect = 0;
+    for (u16 i = 0; i <= DEFAULT_SIDE_CONDITION_AMOUNT; ++i)
+    {
+        flagIdx = ((i >> 3) + 1);
+
+        effectFlagActive = flagIdx < params->flags[0] && ((1 << (i & 7)) & params->flags[flagIdx]) != 0;
+        if (effectFlagActive)
+        {
+            if (i >= DEFAULT_SIDE_CONDITION_AMOUNT) // if the unused flags are set we check the extended flags
+            {
+                for (u16 j = DEFAULT_SIDE_CONDITION_AMOUNT; j < SIDE_CONDITION_AMOUNT; ++j)
+                {
+                    u8 flag = 1 << (j - DEFAULT_SIDE_CONDITION_AMOUNT);
+                    if (removeSideEffExtFlags & flag)
+                    {
+                        if (j_j_SideEvent_RemoveItem(params->side, j))
+                        {
+                            ServerControl_SideEffectEndMessageCore(serverFlow, SIDEEFF_STEALTH_ROCK, params->side);
+                            removedAnEffect = 1;
+                        }
+                    }
+                }
+            }
+            else if (j_j_SideEvent_RemoveItem(params->side, i))
+            {
+                ServerControl_SideEffectEndMessageCore(serverFlow, i, params->side);
+                removedAnEffect = 1;
+            }
+        }
+    }
+
+    removeSideEffExtFlags = 0;
+    return removedAnEffect;
+}
+
+// ABILITY EXPANSION
 // NEW
  
 // New event triggered before an ability change that allows cancelling the change (called here -> BattleHandler_ChangeAbility)
@@ -1223,9 +1545,9 @@ bool THUMB_BRANCH_HandlerMoldBreakerSkipCheck(BattleEventItem* a1, ServerFlow* s
     }
     return 0;
 }
-C_DECL_END
 
-C_DECL_BEGIN // MOVE EXPANSION
+
+// MOVE EXPANSION
 // NEW
 
 void HandlerRagePowderBaitTarget(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
@@ -1702,6 +2024,129 @@ void THUMB_BRANCH_HandlerWeatherBallPower(BattleEventItem* a1, ServerFlow* serve
     }
 }
 
+// Sticy Web removal
+void THUMB_BRANCH_HandlerRapidSpin(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work)
+{
+    HandlerParam_CureCondition* v6;
+    HandlerParam_CureCondition* v7;
+    HandlerParam_RemoveSideEffect* v10;
+
+    if (currentSlot == BattleEventVar_GetValue(VAR_ATTACKING_MON))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
+        if (BattleMon_CheckIfMoveCondition(currentMon, CONDITION_LEECHSEED))
+        {
+            v6 = (HandlerParam_CureCondition*)BattleHandler_PushWork(serverFlow, EFFECT_CURE_STATUS, currentSlot);
+            v6->poke_cnt = 1;
+            v6->pokeID[0] = currentSlot;
+            v6->sickCode = CONDITION_LEECHSEED;
+            BattleHandler_PopWork(serverFlow, v6);
+        }
+        if (BattleMon_CheckIfMoveCondition(currentMon, CONDITION_BIND))
+        {
+            v7 = (HandlerParam_CureCondition*)BattleHandler_PushWork(serverFlow, EFFECT_CURE_STATUS, currentSlot);
+            v7->poke_cnt = 1;
+            v7->pokeID[0] = currentSlot;
+            v7->sickCode = CONDITION_BIND;
+            BattleHandler_PopWork(serverFlow, v7);
+        }
+        int currentSlotSide = GetSideFromMonID(currentSlot);
+
+        bool isSpikesActive = BattleSideStatus_IsEffectActive(currentSlotSide, SIDEEFF_SPIKES);
+        bool isToxSpikesActive = BattleSideStatus_IsEffectActive(currentSlotSide, SIDEEFF_TOXIC_SPIKES);
+        bool isStealthRocksActive = BattleSideStatus_IsEffectActive(currentSlotSide, SIDEEFF_STEALTH_ROCK);
+        bool isStickyWebActive = BattleSideStatus_IsEffectActive(currentSlotSide, (SideEffect)SIDEEFF_STICKY_WEB);
+        if (isSpikesActive || isToxSpikesActive || isStealthRocksActive || isStickyWebActive)
+        {
+            v10 = (HandlerParam_RemoveSideEffect*)BattleHandler_PushWork(serverFlow, EFFECT_REMOVE_SIDE_EFFECT, currentSlot);
+            v10->side = currentSlotSide;
+            v10->flags[0] = 3;
+
+            if (isSpikesActive && v10->flags[0] > 1u)
+            {
+                v10->flags[1] |= 0b01000000;
+            }
+            if (isToxSpikesActive && v10->flags[0] > 1u)
+            {
+                v10->flags[1] |= 0b10000000;
+            }
+            if (isStealthRocksActive && v10->flags[0] > 2u)
+            {
+                v10->flags[2] |= 0b00000001;
+            }
+            if (isStickyWebActive && v10->flags[0] > 2u)
+            {
+                v10->flags[2] |= 0b11000000; // we set the unused bits to indicate the use of the extended flags
+                removeSideEffExtFlags |= 1;
+            }
+
+            BattleHandler_PopWork(serverFlow, v10);
+        }
+    }
+}
+
+// Sticy Web removal
+void THUMB_BRANCH_HandlerDefog(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work)
+{
+    HandlerParam_ChangeStatStage* v7;
+    HandlerParam_RemoveSideEffect* v8;
+
+    if (currentSlot == BattleEventVar_GetValue(VAR_ATTACKING_MON))
+    {
+        int targetSlot = BattleEventVar_GetValue(VAR_TARGET_MON_ID);
+        BattleMon* targetMon = Handler_GetBattleMon(serverFlow, targetSlot);
+        if (!BattleMon_IsSubstituteActive(targetMon))
+        {
+            v7 = (HandlerParam_ChangeStatStage*)BattleHandler_PushWork(serverFlow, EFFECT_CHANGE_STAT_STAGE, currentSlot);
+            v7->rankType = STATSTAGE_EVASION;
+            v7->rankVolume = -1;
+            v7->fMoveAnimation = 1;
+            v7->poke_cnt = 1;
+            v7->pokeID[0] = targetSlot;
+            BattleHandler_PopWork(serverFlow, v7);
+        }
+        v8 = (HandlerParam_RemoveSideEffect*)BattleHandler_PushWork(serverFlow, EFFECT_REMOVE_SIDE_EFFECT, currentSlot);
+        v8->side = GetSideFromMonID(targetSlot);
+        v8->flags[0] = 3;
+
+        if (v8->flags[0] > 1u)
+        {
+            v8->flags[1] |= 1u;
+        }
+        if (v8->flags[0] > 1u)
+        {
+            v8->flags[1] |= 2u;
+        }
+        if (v8->flags[0] > 1u)
+        {
+            v8->flags[1] |= 8u;
+        }
+        if (v8->flags[0] > 1u)
+        {
+            v8->flags[1] |= 4u;
+        }
+        if (v8->flags[0] > 1u)
+        {
+            v8->flags[1] |= 0x40u;
+        }
+        if (v8->flags[0] > 1u)
+        {
+            v8->flags[1] |= 0x80u;
+        }
+        if (v8->flags[0] > 2u)
+        {
+            v8->flags[2] |= 1u;
+        }
+
+        if (v8->flags[0] > 2u)
+        {
+            v8->flags[2] |= 0b11000000; // we set the unused bits to indicate the use of the extended flags
+            removeSideEffExtFlags |= 1;
+        }
+        BattleHandler_PopWork(serverFlow, v8);
+    }
+}
+
 // Function that adds events when moves have them
 int THUMB_BRANCH_MoveEvent_AddItem(BattleMon* battleMon, int moveID, int subPriority)
 {
@@ -2127,9 +2572,9 @@ int THUMB_BRANCH_AddConditionCheckFailOverwrite(ServerFlow* serverFlow, BattleMo
     }
     return 0;
 }
-C_DECL_END
 
-C_DECL_BEGIN // ITEM EXPANSION
+
+// ITEM EXPANSION
 // NEW
 
 // WEAKNESS POLICY
@@ -3289,9 +3734,9 @@ int THUMB_BRANCH_ServerControl_AfterSwitchIn(ServerFlow* serverFlow)
 
     return result;
 }
-C_DECL_END
 
-C_DECL_BEGIN // DYNAMIC SPEED
+
+// DYNAMIC SPEED
 #if ADD_DYNAMIC_SPEED
 enum OrderAlteringMoves
 {
@@ -3783,7 +4228,7 @@ void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int D
             }
             expEvs[m].level = ScaleExpGainedByLevel((int)battleMon, expEvs[m].level, Level, DefeatedMonLevel);
 
-            if (!IsTrainerOT(&pPkm->base, pTrainerInfo))
+            if (!IsTrainerOT(&pPkm->Base, pTrainerInfo))
             {
                 Region = PokeParty_GetParam(pPkm, PF_Region, 0);
                 if (Region == TrainerInfo_GetRegion(pTrainerInfo))
@@ -3841,4 +4286,5 @@ void THUMB_BRANCH_AddExpAndEVs(ServerFlow* serverFlow, BattleParty* party, int D
         }
     }
 }
-C_DECL_END
+
+}

@@ -1,9 +1,9 @@
 #ifndef __LEVEL_CAP_H
 #define __LEVEL_CAP_H
 
-#include "custom/settings.h"
+#include "settings.h"
 
-#include "custom/include_all.h"
+#include "include_all.h"
 
 C_DECL_BEGIN
 void SetLvlCap(u16 lvl_cap)
