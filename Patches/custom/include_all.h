@@ -509,14 +509,14 @@ struct SWAN_ALIGNED(4) BattleEventItem
 
 struct BattleField
 {
-    int Weather;
-    int WeatherTurns;
-    void* BattleEventItems[8];
+    int weather;
+    int weatherTurns;
+    BattleEventItem* battleEventItems[8];
     ConditionData conditionData[8];
-    u32 TurnCount[8];
-    u32 DependPokeID[8][6];
-    u32 DependPokeCount[8];
-    u32 EffectEnableFlags[8];
+    u32 turnCount[8];
+    u32 dependPokeID[8][6];
+    u32 dependPokeCount[8];
+    u32 effectEnableFlags[8];
 };
 
 struct SEND_DATA_BUFFER
@@ -7598,10 +7598,10 @@ struct HandlerParam_SetItem
   HandlerParam_StrParams exStr;
 };
 
-struct HandlerParam_CureCondition
+struct SWAN_ALIGNED(4) HandlerParam_CureCondition
 {
     HandlerParam_Header header;
-    MoveCondition sickCode;
+    int sickCode;
     u8 pokeID[12];
     u8 poke_cnt;
     u8 fStdMsgDisable;
@@ -7701,71 +7701,158 @@ enum Season
     SEASON_WINTER = 0x3,
 };
 
-// BattleHandler_x definitions
+struct BattleSideStatus
+{
+    BattleSideCondition Conditions[14];
+};
+
+struct BattleSideManager
+{
+    BattleSideStatus Sides[2];
+};
+
+enum FieldEffect
+{
+    FLDEFF_WEATHER = 0x0,
+    FLDEFF_TRICK_ROOM = 0x1,
+    FLDEFF_GRAVITY = 0x2,
+    FLDEFF_IMPRISON = 0x3,
+    FLDEFF_WATER_SPORT = 0x4,
+    FLDEFF_MUD_SPORT = 0x5,
+    FLDEFF_WONDER_ROOM = 0x6,
+    FLDEFF_MAGIC_ROOM = 0x7,
+};
+
+typedef BattleEventHandlerTableEntry* (* FieldEffectEventAddFunc)(int*);
+
+struct FieldEffectEventAddTable
+{
+    FieldEffect effect;
+    FieldEffectEventAddFunc func;
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_AddFieldEffect
+{
+    HandlerParam_Header header;
+    FieldEffect effect;
+    ConditionData cond;
+    u8 fAddDependPoke;
+    char field_D;
+    char field_E;
+    char field_F;
+    HandlerParam_StrParams exStr;
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_ChangeWeather
+{
+    HandlerParam_Header header;
+    u8 weather;
+    u8 turn;
+    u8 fAirLock;
+    u8 field_7;
+    HandlerParam_StrParams exStr;
+};
+
+struct HandlerParam_UseItem
+{
+    HandlerParam_Header header;
+    u32 flags;
+};
+
+struct HandlerParam_RemoveFieldEffect
+{
+    HandlerParam_Header header;
+    BattleFieldEffect effect;
+};
+
+enum SecretPowerEffect
+{
+    SCTPOWEFF_ADD_COND = 0,
+    SCTPOWEFF_LOWER_STAT = 1,
+    SCTPOWEFF_FLINCH = 2,
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_ChangeType
+{
+    HandlerParam_Header header;
+    u16 next_type;
+    u8 pokeID;
+    char field_7;
+};
+
+// BattleHandler_Execute definitions
+BattleMon* PokeCon_GetBattleMonConst(PokeCon* a1, int a2);
 int HEManager_GetUseItemNo(_WORD* a1);
 unsigned int HEManager_IsUsed(_DWORD* a1);
 unsigned int HEManager_GetPrevResult(_DWORD* a1);
 BattleMon* PokeCon_GetPokeParamConst(PokeCon* a1, int a2);
 bool BattleMon_IsFainted(BattleMon* a1);
-bool BattleHandler_UseHeldItem(ServerFlow* a1, _DWORD* a2);
+bool BattleHandler_UseHeldItem(ServerFlow* a1, HandlerParam_Header* a2);
 int BattleHandler_UseItem(ServerFlow* a1, HandlerParam_Header* a2);
-int BattleHandler_AbilityPopupAdd(ServerFlow* a1, _DWORD* a2);
-int BattleHandler_AbilityPopupRemove(ServerFlow* a1, _DWORD* a2);
-int BattleHandler_Message(ServerFlow* a1, _DWORD* a2);
-bool BattleHandler_RecoverHP(ServerFlow* a1, int a2, int a3);
-int BattleHandler_Drain(ServerFlow* a1, int a2);
+int BattleHandler_UseHeldItemAnimation(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_AbilityPopupAdd(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_AbilityPopupRemove(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_Message(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_RecoverHP(ServerFlow* a1, HandlerParam_Header* a2, int a3);
+int BattleHandler_Drain(ServerFlow* a1, HandlerParam_Header* a2);
 int BattleHandler_Damage(ServerFlow* a1, HandlerParam_Header* a2);
-int BattleHandler_ChangeHP(ServerFlow* a1, unsigned __int8* a2);
+int BattleHandler_ChangeHP(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_RestorePP(ServerFlow* a1, HandlerParam_Header* a2);
 int BattleHandler_RecoverPP(ServerFlow* a1, HandlerParam_Header* a2);
-int BattleHandler_DecrementPP(ServerFlow* a1, int a2);
-int BattleHandler_CureCondition(ServerFlow* a1, int a2, int a3);
-int BattleHandler_AddCondition(ServerFlow* a1, int a2);
-int BattleHandler_StatChange(ServerFlow* a1, int a2, unsigned __int16 a3);
-int BattleHandler_SetStatStage(int a1, unsigned __int8* a2);
-int BattleHandler_ResetStatStage(int a1, int a2);
-int BattleHandler_SetStatus(ServerFlow* a1, int a2);
-int BattleHandler_RecoverStatStage(int a1, int a2);
-int BattleHandler_Faint(ServerFlow* a1, int a2);
-int BattleHandler_ChangeType(int a1, int a2);
-int BattleHandler_SetTurnFlag(int a1, int a2);
-int BattleHandler_ResetTurnFlag(int a1, int a2);
-int BattleHandler_SetContinueFlag(ServerFlow* a1, int a2);
-int BattleHandler_ResetContinueFlag(ServerFlow* a1, int a2);
-int BattleHandler_AddSideEffect(ServerFlow* a1, int a2);
-int BattleHandler_RemoveSideEffectCore(int a1, int a2);
-int BattleHandler_AddFieldEffect(int a1, int a2);
+int BattleHandler_DecrementPP(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_CureCondition(ServerFlow* a1, HandlerParam_Header* a2, int a3);
+int BattleHandler_AddCondition(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ChangeStatStage(ServerFlow* a1, HandlerParam_Header* a2, u16 a3);
+int BattleHandler_StatChange(ServerFlow* a1, HandlerParam_Header* a2, unsigned __int16 a3);
+int BattleHandler_SetStat(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_RestoreStatStage(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetStatStage(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ResetStatStage(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetStatus(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_RecoverStatStage(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_Faint(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ChangeType(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetTurnFlag(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetConditionFlag(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ResetConditionFlag(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ResetTurnFlag(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetContinueFlag(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ResetContinueFlag(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_AddSideEffect(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_RemoveSideEffectCore(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_AddFieldEffect(ServerFlow* a1, HandlerParam_Header* a2);
 int BattleHandler_RemoveFieldEffect(ServerFlow* a1, HandlerParam_Header* a2);
-int BattleHandler_ChangeWeather(ServerFlow* a1, int a2);
-bool BattleHandler_AddPosEffect(int a1, int a2);
-int BattleHandler_AbilityChange(ServerFlow* a1, int a2);
-int BattleHandler_SetItem(ServerFlow* a1, int a2);
-int BattleHandler_CheckHeldItem(ServerFlow* a1, int a2);
-int BattleHandler_ForceUseItem(ServerFlow* a1, int a2);
-int BattleHandler_ConsumeItem(ServerFlow* a1, HandlerParam_ConsumeItem* a2);
-int BattleHandler_SwapItem(ServerFlow* a1, int a2);
-int BattleHandler_UpdateMove(int a1, int a2);
-int BattleHandler_SetCounter(ServerFlow* a1, unsigned __int8* a2);
-int BattleHandler_DelayMoveDamage(int* a1, int a2);
-int BattleHandler_QuitBattle(ServerFlow* a1, _DWORD* a2);
-int BattleHandler_Switch(ServerFlow* a1, HandlerParam_Switch* a2);
-int BattleHandler_BatonPass(ServerFlow* a1, int a2);
-bool BattleHandler_Flinch(ServerFlow* a1, int a2);
-int BattleHandler_Revive(ServerFlow* a1, int a2);
-int BattleHandler_SetWeight(ServerFlow* a1, int a2);
-bool BattleHandler_ForceSwitch(int a1, int a2);
-int BattleHandler_InterruptAction(ServerFlow* a1, int a2);
-bool BattleHandler_InterruptMove(ServerFlow* a1, int a2);
-int BattleHandler_SendLast(ServerFlow* a1, int a2);
-int BattleHandler_SwapPoke(ServerFlow* a1, HandlerParam_SwapPoke* a2);
-int BattleHandler_Transform(ServerFlow* a1, HandlerParam_Transform* a2);
-int BattleHandler_IllusionBreak(ServerFlow* a1, HandlerParam_IllusionBreak* a2);
-int BattleHandler_GravityCheck(ServerFlow* a1, _DWORD* a2);
-int BattleHandler_HideTurnCancel(ServerFlow* a1, int a2);
-int BattleHandler_AnimAtPos(ServerFlow* a1, HandlerParam_AddAnimation* a2);
+int BattleHandler_ChangeWeather(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_AddPosEffect(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ChangeAbility(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetHeldItem(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_CheckHeldItem(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ForceUseHeldItem(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ConsumeItem(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SwapItem(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_UpdateMove(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetCounter(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_DelayMoveDamage(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_QuitBattle(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_Switch(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_BatonPass(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_Flinch(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_Revive(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetWeight(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_ForceSwitch(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_InterruptAction(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_InterruptMove(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SendLast(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SwapPoke(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_Transform(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_IllusionBreak(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_GravityCheck(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_CancelSemiInvuln(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_AddAnimation(ServerFlow* a1, HandlerParam_Header* a2);
 int BattleHandler_RemoveMessageWindow(ServerFlow* a1);
-int BattleHandler_ChangeForm(ServerFlow* a1, HandlerParam_ChangeForm* a2);
-int BattleHandler_SetMoveAnimIndex(ServerFlow* a1, HandlerParam_Header* a2);
-int BattleHandler_SetMoveAnimEnable(ServerFlow* a1);
+int BattleHandler_ChangeForm(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_SetAnimationID(ServerFlow* a1, HandlerParam_Header* a2);
+int BattleHandler_PlayAnimation(ServerFlow* a1);
 
 unsigned int* HEManager_SetResult(unsigned int* result, int a2);
 
@@ -8067,7 +8154,7 @@ PartyPkm* BattleMon_GetSrcData(BattleMon* a1);
 b32 PokeParty_DecryptPkm(PartyPkm* pPkm);
 u32 PokeParty_GetParam(PartyPkm* pPkm, PkmField field, void* extra);
 b32 PokeParty_EncryptPkm(PartyPkm* pPkm, b32 encrypt);
-u32 BattleField_CheckEffect(BattleFieldEffect a1);
+u32 BattleField_CheckEffect(FieldEffect a1);
 ItemID BattleMon_GetHeldItem(BattleMon* a1);
 
 // PokeList_ApplyItemEffect definitions
@@ -8862,7 +8949,7 @@ int Handler_CheckReservedMemberChangeAction(ServerFlow* a1);
 unsigned int j_MainModule_PokeIDToClientID(unsigned int a1);
 int BattleEventItem_GetSubID(BattleEventItem* a1);
 int Handler_PokeIDToPokePos(int a1, unsigned int a2);
-int CommonStatDropGuardCheck(int a1, int a2, int* a3, int a4);
+void CommonStatDropGuardCheck(ServerFlow* serverFlow, int pokemonSlot, int* work, int moveEffect);
 void HandlerIronFist(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonSlot, int* work);
 bool IsAffectedBySheerForce(int a1);
 bool GetSideFromMonID(unsigned int a1);
@@ -8883,7 +8970,7 @@ void Btlv_StringParam_AddArg(Btlv_StringParam* a1, int a2);
 bool PML_MoveIsDamaging(int wazaId);
 int BattleMon_GetPreviousMove(BattleMon* a1);
 int BattleMon_GetConditionAffectedMove(BattleMon* a1, MoveCondition a2);
-u32 BattleField_CheckFieldEffectCore(BattleField* a1, BattleFieldEffect a2);
+u32 BattleField_CheckFieldEffectCore(BattleField* a1, FieldEffect a2);
 int BattleField_CheckImprisonCore(BattleField* a1, PokeCon* a2, BattleMon* a3, int a4);
 
 // SetMoveCondition definitions
@@ -9109,12 +9196,60 @@ b32 GFL_SndIsPlaying(SoundResID sndId);
 int sub_2163EE0(void);
 void sub_2198530(int a1, HeapID heapId);
 
+// Field Effect definitions
+u8 Condition_GetMonID(ConditionData a1);
+BattleEventItem* j_j_FieldEffectEvent_AddItem(FieldEffect fieldEffect, int a2, ConditionData conditionData, int a4);
+int BattleField_AddDependPokeCore(BattleField* a1, int a2, int a3);
+void BattleField_ClearFactorWork(BattleField* battleField, FieldEffect fieldEffect);
+ConditionData Condition_MakeNull();
+void Condition_SetMonID(ConditionData* result, int a2);
+void ServerControl_SortBySpeed(ServerFlow* a1, PokeSet* a2);
+unsigned int ServerControl_TurnCheck_CommSupport(ServerFlow* a1);
+int ServerControl_TurnCheckWeather(ServerFlow* a1, PokeSet* a2);
+int ServerControl_TurnCheckSub(ServerFlow* r0_0, PokeSet* a2, BattleEventType a3);
+int ServerControl_TurnCheckCondition(ServerFlow* a1, PokeSet* a2);
+void ServerControl_TurnCheckSide(ServerFlow* a1);
+void ServerControl_TurnCheckField(ServerFlow* a1);
+void j_PokeSet_SeekStart(PokeSet* a1);
+BattleMon* j_PokeSet_SeekNext(PokeSet* a1);
+void sub_21A8104(ServerFlow* a1);
+void BattleEvent_RemoveIsolatedItems();
+int BattleField_TurnCheckWeather();
+void ServerControl_ChangeWeatherAfter(ServerFlow* a1, int a2);
+bool BattleMon_GetConditionFlag(BattleMon* a1, ConditionFlag a2);
+int CalcWeatherDamage(BattleMon* a1, int a2);
+int ServerEvent_CheckWeatherReaction(ServerFlow* serverFlow, BattleMon* battleMon, int weather, int weatherDamage);
+void ServerDisplay_WeatherDamage(ServerFlow* a1, BattleMon* r1_0, int a3, int a4);
+void ServerControl_ViewEffect(ServerFlow* a1, int a2, int a3, int a4, int a5, unsigned __int16 a6);
+bool ServerControl_CheckFloating(ServerFlow* serverFlow, BattleMon* battleMon, int a3);
+bool BattleMon_IsFullHP(BattleMon* a1);
+bool ServerControl_ChangeWeatherCheck(ServerFlow* serverFlow, int weather, int turns);
+void ServerControl_ChangeWeatherCore(ServerFlow* serverFlow, int weather, int turns);
+Weather GetMoveWeather(int moveID);
+int ServerEvent_IncreaseMoveWeatherTurns(ServerFlow* serverFlow, int weather, BattleMon* attackingMon);
+int ServerControl_ChangeWeather(ServerFlow* serverFlow, int weather, int turns);
+void ServerEvent_CallFieldEffect(ServerFlow* a1, BattleMon* a2, int a3);
+void ServerEvent_NotifyAirLock(ServerFlow* a1);
+int ServerControl_FieldEffectCore(ServerFlow* serverFlow, int a2, ConditionData conditionData, int a4);
+int BattleField_RemoveEffect(int a1);
+void ServerControl_FieldEffectEnd(ServerFlow* serverFlow, BattleFieldEffect fieldEffect);
+u8 Condition_GetTurnMax(ConditionData a1);
+int Handler_GetBattleTerrain(ServerFlow* a1);
+int Handler_ReqMoveTargetAuto(ServerFlow* a1, int a2, int a3);
+int PokeTypePair_MakeMonotype(__int16 a1);
+int BattleMon_CanBattle(BattleMon* a1);
+int ServerControl_HideTurnCancel(int a1, BattleMon* a2, int a3);
+int ServerEvent_CheckFloating(ServerFlow* a1, BattleMon* a2, int a3);
+void BattleField_TurnCheckCore(BattleField* battleField, int(*callback)(FieldEffect, ServerFlow*), ServerFlow* serverFlow);
+
 extern u32 g_GameBeaconSys;
 extern SystemUI* g_SystemUI;
 extern MsgData* g_PMLSpeciesNamesResident;
 extern BGSysLCDConfig cfg;
-#define GAME_DATA *(GameData**)(g_GameBeaconSys + 4)
 extern short g_GFLStrTerminator;
+extern BattleSideManager SideStatus;
+
+#define GAME_DATA *(GameData**)(g_GameBeaconSys + 4)
 
 bool IsEqual(int a1, int a2)
 {

@@ -164,7 +164,7 @@ bool IsModifyItemMove(MoveID moveID, ItemID heldItem)
 
 bool CommonItemListCheck(ItemID itemID, ITEM_ID* itemList, int listSize)
 {
-    if (BattleField_CheckEffect(EFFECT_MAGIC_ROOM))
+    if (BattleField_CheckEffect(FLDEFF_MAGIC_ROOM))
         return false;
 
     for (u16 i = 0; i < listSize; ++i)
@@ -178,7 +178,7 @@ bool DoesItemPreventStatusMoveUse(ItemID itemID)
 }
 bool DoesItemPreventContact(ItemID itemID, MoveID moveID)
 {
-    if (BattleField_CheckEffect(EFFECT_MAGIC_ROOM))
+    if (BattleField_CheckEffect(FLDEFF_MAGIC_ROOM))
         return false;
 
     for (u16 i = 0; i < ARRAY_COUNT(ItemsThatPreventContact); ++i)
@@ -232,112 +232,907 @@ bool IsIntimidated(AbilID attackerAbility)
     return false;
 }
 
-#if ADD_CRIT_CHANGES
-// CRIT CHANGES
-int THUMB_BRANCH_ServerEvent_CalcDamage(ServerFlow* a1, BattleMon* attackingMon, BattleMon* defendingMon, MoveParam* moveParam, 
-    int typeEffectiveness,int targetDmgRatio, int criticalFlag, int battleDebugMode, _WORD* destDamage)
+// FIELD EFFECT EXPANSION
+struct BattleFieldExt
 {
-    int attackingSlot; // r0
-    int defendingSlot; // r0
-    int defense; // r7
-    unsigned __int8 level; // r0
-    int baseDamage; // r0
-    unsigned int damage; // r7
-    int Weather; // r0
-    int weatherDmgRatio; // r1
-    int damageRoll; // r0
-    PokeType moveType; // r2
-    int v22; // r0
-    int damageAfterType; // r4
-    int damageRatio; // r4
-    int damageAfterProc2; // r0
-    u32 finalDamage; // [sp+8h] [bp-28h]
-    int isFixedDamage; // [sp+Ch] [bp-24h]
-    int Category; // [sp+10h] [bp-20h]
-    int power; // [sp+14h] [bp-1Ch]
-    int attack; // [sp+18h] [bp-18h]
+    int terrain;
+    int terrainTurns;
+    void* battleEventItems[8];
+    ConditionData conditionData[8];
+    u32 turnCount[8];
+    u32 dependPokeID[8][6];
+    u32 dependPokeCount[8];
+    u32 effectEnableFlags[8];
+};
+BattleFieldExt battleFieldExt;
+#define BATTLEFIELD_EXT (BattleField*)&battleFieldExt
 
-    Category = PML_MoveGetCategory(moveParam->MoveID);
-    isFixedDamage = 0;
+int BattleField_GetTerrain()
+{
+    return battleFieldExt.terrain;
+}
+void BattleField_SetTerrain(int terrain, int turns)
+{
+    battleFieldExt.terrain = terrain;
+    battleFieldExt.terrainTurns = turns;
+}
+void BattleField_EndTerrain()
+{
+    battleFieldExt.terrain = 0;
+    battleFieldExt.terrainTurns = 0;
+}
+int BattleField_GetTerrainTurns()
+{
+    return battleFieldExt.terrainTurns;
+}
+
+int TerrainPowerMod(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, int terrain, int type)
+{
+    switch (terrain)
+    {
+    case TERRAIN_ELECTRIC:
+        if (!ServerControl_CheckFloating(serverFlow, attackingMon, 1))
+            if (type == TYPE_ELEC)
+                return 5325;
+        break;
+    case TERRAIN_GRASSY:
+        if (!ServerControl_CheckFloating(serverFlow, attackingMon, 1))
+            if (type == TYPE_GRASS)
+                return 5325;
+        break;
+    case TERRAIN_MISTY:
+        if (!ServerControl_CheckFloating(serverFlow, defendingMon, 1)) // check the defender
+            if (type == TYPE_DRAGON)
+                return 2048;
+        break;
+    case TERRAIN_PSYCHIC:
+        if (!ServerControl_CheckFloating(serverFlow, attackingMon, 1))
+            if (type == TYPE_PSY)
+                return 5325;
+        break;
+    }
+    return 4096;
+}
+
+int ServerEvent_IncreaseMoveTerrainTurns(ServerFlow* serverFlow, int terrain, int attackingSlot)
+{
     BattleEventVar_Push();
-    BattleEventVar_SetConstValue(VAR_TYPE_EFFECTIVENESS, typeEffectiveness);
-    attackingSlot = BattleMon_GetID(attackingMon);
-    BattleEventVar_SetConstValue(VAR_ATTACKING_MON, attackingSlot);
-    defendingSlot = BattleMon_GetID(defendingMon);
-    BattleEventVar_SetConstValue(VAR_DEFENDING_MON, defendingSlot);
-    BattleEventVar_SetConstValue(VAR_CRITICAL_FLAG, criticalFlag);
-    BattleEventVar_SetConstValue(VAR_MOVE_TYPE, moveParam->moveType);
-    BattleEventVar_SetConstValue(VAR_MOVE_ID, moveParam->MoveID);
-    BattleEventVar_SetConstValue(VAR_MOVE_CATEGORY, Category);
-    BattleEventVar_SetValue(VAR_FIXED_DAMAGE, 0);
-    BattleEvent_CallHandlers(a1, EVENT_MOVE_DAMAGE_PROCESSING_1);
-    finalDamage = BattleEventVar_GetValue(VAR_FIXED_DAMAGE);
-    if (finalDamage)
-    {
-        isFixedDamage = 1;
-    }
-    else
-    {
-        power = ServerEvent_GetMovePower(a1, attackingMon, defendingMon, moveParam);
-        attack = ServerEvent_GetAttackPower(a1, attackingMon, defendingMon, moveParam, criticalFlag);
-        defense = ServerEvent_GetTargetDefenses(a1, attackingMon, defendingMon, moveParam, criticalFlag);
-        level = BattleMon_GetValue(attackingMon, VALUE_LEVEL);
-        baseDamage = CalcBaseDamage(power, attack, level, defense);
-        damage = baseDamage;
-        if (targetDmgRatio != 4096)
-        {
-            damage = fixed_round(baseDamage, targetDmgRatio);
-        }
-        Weather = ServerEvent_GetWeather(a1);
-        weatherDmgRatio = WeatherPowerMod(Weather, moveParam->moveType);
-        if (weatherDmgRatio != 4096)
-        {
-            damage = fixed_round(damage, weatherDmgRatio);
-        }
-        if (criticalFlag)
-        {
-            damage = (int)((float)damage * CRIT_DMG_BOOST);
-        }
-        if (!MainModule_GetDebugFlag() && sub_21AE34C(a1))
-        {
-            if (battleDebugMode)
-            {
-                damageRoll = 85;
-            }
-            else
-            {
-                damageRoll = (100 - BattleRandom(16u));
-            }
-            damage = damageRoll * damage / 100;
-        }
-        moveType = (PokeType)moveParam->moveType;
-        if (moveType != TYPE_NULL)
-        {
-            v22 = ServerEvent_SameTypeAttackBonus(a1, attackingMon, moveType);
-            damage = fixed_round(damage, v22);
-        }
-        damageAfterType = TypeEffectivenessPowerMod(damage, typeEffectiveness);
-        if (Category == 1
-            && BattleMon_GetStatus(attackingMon) == CONDITION_BURN
-            && BattleMon_GetValue(attackingMon, VALUE_EFFECTIVE_ABILITY) != ABIL062_GUTS)
-        {
-            damageAfterType = 50 * damageAfterType / 100u;
-        }
-        if (!damageAfterType)
-        {
-            damageAfterType = 1;
-        }
-        BattleEventVar_SetMulValue(VAR_RATIO, 4096, 41, 0x20000);
-        BattleEventVar_SetValue(VAR_DAMAGE, damageAfterType);
-        BattleEvent_CallHandlers(a1, EVENT_MOVE_DAMAGE_PROCESSING_2);
-        damageRatio = BattleEventVar_GetValue(VAR_RATIO);
-        damageAfterProc2 = BattleEventVar_GetValue(VAR_DAMAGE);
-        LOWORD(finalDamage) = fixed_round(damageAfterProc2, damageRatio);
-    }
-    BattleEvent_CallHandlers(a1, EVENT_MOVE_DAMAGE_PROCESSING_END);
+    SET_UP_NEW_EVENT;
+    BattleEventVar_SetConstValue(VAR_WEATHER, terrain);
+    BattleEventVar_SetConstValue(NEW_VAR_ATTACKING_MON, attackingSlot);
+    BattleEventVar_SetValue(VAR_EFFECT_TURN_COUNT, 0);
+    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_TERRAIN_TURN_COUNT);
+    int turnCount = BattleEventVar_GetValue(VAR_EFFECT_TURN_COUNT);
     BattleEventVar_Pop();
-    *destDamage = finalDamage;
-    return isFixedDamage;
+    return turnCount;
+}
+int ServerEvent_ChangeTerrain(ServerFlow* serverFlow, int terrain) 
+{
+    bool failFlag = 0;
+
+    PokeSet* pokeSet = &serverFlow->pokeSet_1A68;
+    j_PokeSet_SeekStart(pokeSet);
+    for (BattleMon* currentMon = j_PokeSet_SeekNext(pokeSet); currentMon; currentMon = j_PokeSet_SeekNext(pokeSet))
+    {
+        int v4 = HEManager_PushState((unsigned int*)&serverFlow->HEManager);
+
+        if (!BattleMon_IsFainted(currentMon))
+        {
+            BattleEventVar_Push();
+            SET_UP_NEW_EVENT;
+            int currentSlot = BattleMon_GetID(currentMon);
+            BattleEventVar_SetConstValue(NEW_VAR_MON_ID, currentSlot);
+            BattleEventVar_SetConstValue(VAR_WEATHER, terrain);
+            BattleEventVar_SetRewriteOnceValue(VAR_MOVE_FAIL_FLAG, 0);
+            BattleEvent_CallHandlers(serverFlow, EVENT_TERRAIN_CHANGE);
+            failFlag = BattleEventVar_GetValue(VAR_MOVE_FAIL_FLAG);
+            if (failFlag)
+            {
+                BattleEvent_CallHandlers(serverFlow, EVENT_TERRAIN_CHANGE_FAIL);
+            }
+            BattleEventVar_Pop();
+        }
+
+        HEManager_PopState((unsigned int*)&serverFlow->HEManager, v4);
+    }
+
+    return !failFlag;
+}
+void ServerEvent_ChangeTerrainAfter(ServerFlow* serverFlow, int terrain)
+{
+    PokeSet* pokeSet = &serverFlow->pokeSet_1A68;
+    j_PokeSet_SeekStart(pokeSet);
+    for (BattleMon* currentMon = j_PokeSet_SeekNext(pokeSet); currentMon; currentMon = j_PokeSet_SeekNext(pokeSet))
+    {
+        int v4 = HEManager_PushState((unsigned int*)&serverFlow->HEManager);
+
+        if (!BattleMon_IsFainted(currentMon))
+        {
+            BattleEventVar_Push();
+            SET_UP_NEW_EVENT;
+            int currentSlot = BattleMon_GetID(currentMon);
+            BattleEventVar_SetConstValue(NEW_VAR_MON_ID, currentSlot);
+            BattleEventVar_SetConstValue(VAR_WEATHER, terrain);
+            BattleEvent_CallHandlers(serverFlow, EVENT_AFTER_TERRAIN_CHANGE);
+            BattleEventVar_Pop();
+        }
+
+        HEManager_PopState((unsigned int*)&serverFlow->HEManager, v4);
+    }
+}
+int ServerEvent_GetTerrain(ServerFlow* serverFlow)
+{
+    BattleEventVar_Push();
+    SET_UP_NEW_EVENT;
+    BattleEventVar_SetRewriteOnceValue(VAR_MOVE_FAIL_FLAG, 0);
+    BattleEvent_CallHandlers(serverFlow, EVENT_TERRAIN_CHECK);
+    int failFlag = BattleEventVar_GetValue(VAR_MOVE_FAIL_FLAG);
+    BattleEventVar_Pop();
+    if (failFlag)
+        return 0;
+    return BattleField_GetTerrain();
+}
+void ServerEvent_GroundedByGravity(ServerFlow* serverFlow, BattleMon* battleMon)
+{
+    BattleEventVar_Push();
+    SET_UP_NEW_EVENT;
+    int pokemonSlot = BattleMon_GetID(battleMon);
+    BattleEventVar_SetConstValue(NEW_VAR_MON_ID, pokemonSlot);
+    BattleEvent_CallHandlers(serverFlow, EVENT_GROUNDED_BY_GRAVITY);
+    BattleEventVar_Pop();
+}
+
+bool ServerControl_ChangeTerrainCheck(ServerFlow* serverFlow, int terrain, int turns)
+{
+    if (terrain > TERRAIN_PSYCHIC)
+        return 0;
+
+    return terrain != BattleField_GetTerrain() || turns == 255 && BattleField_GetTerrainTurns() != 255;
+}
+int ServerControl_ChangeTerrain(ServerFlow* serverFlow, int terrain, int turns)
+{
+    if (!ServerControl_ChangeTerrainCheck(serverFlow, terrain, turns))
+        return 0;
+
+    if (!ServerEvent_ChangeTerrain(serverFlow, terrain))
+        return 0;
+
+    BattleField_SetTerrain(terrain, turns);
+    return 1;
+}
+
+BattleEventHandlerTableEntry* EventAddFieldWeather(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D7C0;
+}
+BattleEventHandlerTableEntry* EventAddFieldTrickRoom(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D7B8;
+}
+BattleEventHandlerTableEntry* EventAddFieldGravity(int* a1)
+{
+    *a1 = 2;
+    return (BattleEventHandlerTableEntry*)0x0689D7C8;
+}
+BattleEventHandlerTableEntry* EventAddFieldImprison(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D7A0;
+}
+BattleEventHandlerTableEntry* EventAddFieldWaterSport(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D7A8;
+}
+BattleEventHandlerTableEntry* EventAddFieldMudSport(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D798;
+}
+BattleEventHandlerTableEntry* EventAddFieldWonderRoom(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D7B0;
+}
+BattleEventHandlerTableEntry* EventAddFieldMagicRoom(int* a1)
+{
+    *a1 = 1;
+    return (BattleEventHandlerTableEntry*)0x0689D790;
+}
+
+
+// GENERAL TERRAIN
+void HandlerTerrainPreventStatus(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    int terrain = BattleField_GetTerrain();
+    if (terrain != TERRAIN_ELECTRIC && terrain != TERRAIN_MISTY)
+        return;
+
+    BattleMon* currentMon = Handler_GetBattleMon(serverFlow, BattleEventVar_GetValue(VAR_DEFENDING_MON));
+    if (!ServerControl_CheckFloating(serverFlow, currentMon, 1))
+    {
+        if (terrain == TERRAIN_ELECTRIC)
+        {
+            if (BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_SLEEP ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_YAWN)
+            {
+                *work = BattleEventVar_RewriteValue(VAR_MOVE_FAIL_FLAG, 1);
+            }
+        }
+        else // MISTY TERRAIN
+        {
+            if (BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_PARALYSIS ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_SLEEP ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_FREEZE ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_BURN ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_POISON ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_CONFUSION ||
+                BattleEventVar_GetValue(VAR_CONDITION_ID) == CONDITION_YAWN)
+            {
+                *work = BattleEventVar_RewriteValue(VAR_MOVE_FAIL_FLAG, 1);
+            }
+        }
+    }
+}
+void HandlerTerrainStatusFailMessage(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    int terrain = BattleField_GetTerrain();
+    if (terrain != TERRAIN_ELECTRIC && terrain != TERRAIN_MISTY)
+        return;
+
+    if (*work)
+    {
+        short msgID = BATTLE_ELECTRIC_TERRAIN_STATUS_MSGID;
+        if (terrain == TERRAIN_MISTY)
+            msgID = BATTLE_MISTY_TERRAIN_STATUS_MSGID;
+
+        int defendingSlot = BattleEventVar_GetValue(VAR_DEFENDING_MON);
+        HandlerParam_Message* v6 = (HandlerParam_Message*)BattleHandler_PushWork(serverFlow, EFFECT_MESSAGE, 31);
+        BattleHandler_StrSetup(&v6->str, 2u, msgID);
+        BattleHandler_AddArg(&v6->str, defendingSlot);
+        BattleHandler_PopWork(serverFlow, v6);
+    }
+}
+// ELECTRIC TERRAIN
+void CommonElectricTerrainCureStatus(ServerFlow* serverFlow, int pokemonSlot)
+{
+    HandlerParam_CureCondition* v7;
+
+    BattleMon* currentMon = Handler_GetBattleMon(serverFlow, pokemonSlot);
+    if (BattleMon_CheckIfMoveCondition(currentMon, CONDITION_SLEEP))
+    {
+        if (!ServerControl_CheckFloating(serverFlow, currentMon, 1))
+        {
+            v7 = (HandlerParam_CureCondition*)BattleHandler_PushWork(serverFlow, EFFECT_CURE_STATUS, pokemonSlot);
+            v7->sickCode = CONDITION_SLEEP;
+            v7->poke_cnt = 1;
+            v7->pokeID[0] = pokemonSlot;
+            DPRINT("TERRAIN CURE\n");
+            BattleHandler_PopWork(serverFlow, v7);
+        }
+    }
+}
+void HandlerElectricTerrainCheckSleep(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    DPRINT("HandlerElectricTerrainEndSleep\n");
+    if (BattleField_GetTerrain() != TERRAIN_ELECTRIC)
+        return;
+
+    if (pokemonSlot == BattleEventVar_GetValue(VAR_MON_ID))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, pokemonSlot);
+        if (!ServerControl_CheckFloating(serverFlow, currentMon, 1))
+        {
+            BattleEventVar_RewriteValue(VAR_MOVE_FAIL_FLAG, 1);
+        }
+    }
+}
+void HandlerElectricTerrainTerrainChange(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (IS_NOT_NEW_EVENT)
+        return;
+
+    if (BattleField_GetTerrain() != TERRAIN_ELECTRIC)
+        return;
+
+    CommonElectricTerrainCureStatus(serverFlow, BattleEventVar_GetValue(NEW_VAR_MON_ID));
+}
+void HandlerElectricTerrainSwitchIn(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (BattleField_GetTerrain() != TERRAIN_ELECTRIC)
+        return;
+
+    CommonElectricTerrainCureStatus(serverFlow, BattleEventVar_GetValue(VAR_MON_ID));
+}
+void HandlerElectricTerrainActProcEnd(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (BattleField_GetTerrain() != TERRAIN_ELECTRIC)
+        return;
+
+    CommonElectricTerrainCureStatus(serverFlow, BattleEventVar_GetValue(VAR_MON_ID));
+}
+void HandlerElectricTerrainFloatingChange(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (BattleField_GetTerrain() != TERRAIN_ELECTRIC)
+        return;
+
+    CommonElectricTerrainCureStatus(serverFlow, BattleEventVar_GetValue(VAR_MON_ID));
+}
+void HandlerElectricTerrainFloatingChangeNEW(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (IS_NOT_NEW_EVENT)
+        return;
+
+    if (BattleField_GetTerrain() != TERRAIN_ELECTRIC)
+        return;
+
+    CommonElectricTerrainCureStatus(serverFlow, BattleEventVar_GetValue(NEW_VAR_MON_ID));
+}
+// GRASSY TERRAIN
+void HandlerGrassyTerrainHeal(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (BattleField_GetTerrain() != TERRAIN_GRASSY)
+        return;
+
+    HandlerParam_RecoverHP* v6;
+
+    int currentSlot = BattleEventVar_GetValue(VAR_MON_ID);
+    BattleMon* currentMon = Handler_GetBattleMon(serverFlow, currentSlot);
+    if (!ServerControl_CheckFloating(serverFlow, currentMon, 1))
+    {
+        if (!BattleMon_IsFullHP(currentMon))
+        {
+            v6 = (HandlerParam_RecoverHP*)BattleHandler_PushWork(serverFlow, EFFECT_RECOVER_HP, currentSlot);
+            v6->pokeID = currentSlot;
+            v6->recoverHP = DivideMaxHPZeroCheck(currentMon, 16);
+            BattleHandler_StrSetup(&v6->exStr, 2u, 914);
+            BattleHandler_AddArg(&v6->exStr, currentSlot);
+            int SubID = BattleEventItem_GetSubID(a1);
+            BattleHandler_AddArg(&v6->exStr, SubID);
+            BattleHandler_PopWork(serverFlow, v6);
+        }
+    }
+}
+void HandlerGrassyTerrainQuakeMoves(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (BattleField_GetTerrain() != TERRAIN_GRASSY)
+        return;
+
+    if (pokemonSlot == BattleEventVar_GetValue(VAR_DEFENDING_MON))
+    {
+        int moveID = BattleEventVar_GetValue(VAR_MOVE_ID);
+        if (moveID == MOVE089_EARTHQUAKE || 
+            moveID == MOVE222_MAGNITUDE || 
+            moveID == MOVE523_BULLDOZE)
+        {
+            BattleMon* defendingMon = Handler_GetBattleMon(serverFlow, pokemonSlot);
+            if (!ServerControl_CheckFloating(serverFlow, defendingMon, 1))
+            {
+                int power = BattleEventVar_GetValue(VAR_MOVE_POWER);
+                BattleEventVar_RewriteValue(VAR_MOVE_POWER, power / 2);
+            }
+        }
+    }
+}
+// MISTY TERRAIN (all in general)
+// PSYCHIC TERRAIN
+void HandlerPsychicTerrainPreventPrio(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (BattleField_GetTerrain() != TERRAIN_PSYCHIC)
+        return;
+
+    int currentMon = BattleEventVar_GetValue(VAR_DEFENDING_MON);
+    DPRINTF("PREVENT PRIO -> TERRAIN: %d | ATTACKER: %d | DEFENDER: %d\n", BattleField_GetTerrain(), BattleEventVar_GetValue(VAR_ATTACKING_MON), currentMon);
+    if (currentMon == BattleEventVar_GetValue(VAR_ATTACKING_MON))
+        return;
+
+    BattleMon* defendingMon = Handler_GetBattleMon(serverFlow, currentMon);
+    if (!ServerControl_CheckFloating(serverFlow, defendingMon, 1))
+    {
+        ActionOrderWork* action_order = serverFlow->actionOrderWork;
+        u16 orderIdx = 0;
+    
+        BattleMon* attackingMon = Handler_GetBattleMon(serverFlow, BattleEventVar_GetValue(VAR_ATTACKING_MON));
+        for (; orderIdx < 6; ++orderIdx)
+            if (action_order[orderIdx].battleMon == attackingMon)
+                break;
+    
+        int priority = (action_order[orderIdx].field_8 >> 16) & 0x3FFFFF;
+        priority -= 7;
+        DPRINTF("PRIO: %d\n", priority);
+        int special_priority = ((action_order[orderIdx].field_8 >> 13) & 0x7); // special priority takes into account item & ability prio boosts (1 = no added prio)
+        special_priority -= 1;
+        DPRINTF("SPECIAL PRIO: %d\n", special_priority);
+        priority += special_priority;
+    
+        if (priority > 0)
+            BattleEventVar_RewriteValue(VAR_NO_EFFECT_FLAG, 1);
+    }
+}
+BattleEventHandlerTableEntry FieldTerrainHandlers[] = {
+    // GENERAL TERRAIN
+    {EVENT_ADD_CONDITION_CHECK_FAIL, HandlerTerrainPreventStatus},
+    {EVENT_ADD_CONDITION_FAIL, HandlerTerrainStatusFailMessage},
+    // ELECTRIC TERRAIN
+    {EVENT_CHECK_SLEEP, HandlerElectricTerrainCheckSleep},
+    {EVENT_AFTER_TERRAIN_CHANGE, HandlerElectricTerrainTerrainChange},
+    {EVENT_SWITCH_IN, HandlerElectricTerrainSwitchIn},
+    {EVENT_ACTION_PROCESSING_END, HandlerElectricTerrainActProcEnd},
+    {EVENT_ITEM_REWRITE_DONE, HandlerElectricTerrainFloatingChange},
+    {EVENT_AFTER_ABILITY_CHANGE, HandlerElectricTerrainFloatingChange},
+    {EVENT_GROUNDED_BY_GRAVITY, HandlerElectricTerrainFloatingChangeNEW},
+    // GRASSY TERRAIN
+    {EVENT_TURN_CHECK_BEGIN, HandlerGrassyTerrainHeal},
+    {EVENT_MOVE_BASE_POWER, HandlerGrassyTerrainQuakeMoves},
+    // MISTY TERRAIN (all in general)
+    // PSYCHIC TERRAIN
+    {EVENT_ABILITY_CHECK_NO_EFFECT, HandlerPsychicTerrainPreventPrio},
+};
+BattleEventHandlerTableEntry* EventAddFieldTerrain(int* a1)
+{
+    *a1 = ARRAY_COUNT(FieldTerrainHandlers);
+    return FieldTerrainHandlers;
+}
+
+FieldEffectEventAddTable FieldEffectEventAddTableExt[] = {
+    {FLDEFF_WEATHER, EventAddFieldWeather},
+    {FLDEFF_TRICK_ROOM, EventAddFieldTrickRoom},
+    {FLDEFF_GRAVITY, EventAddFieldGravity},
+    {FLDEFF_IMPRISON, EventAddFieldImprison},
+    {FLDEFF_WATER_SPORT, EventAddFieldWaterSport},
+    {FLDEFF_MUD_SPORT, EventAddFieldMudSport},
+    {FLDEFF_WONDER_ROOM, EventAddFieldWonderRoom},
+    {FLDEFF_MAGIC_ROOM, EventAddFieldMagicRoom},
+    {FLDEFF_MAGIC_ROOM, EventAddFieldMagicRoom},
+#if ADD_NEW_ITEMS
+    {(FieldEffect)FLDEFF_TERRAIN, EventAddFieldTerrain},
+#endif
+};
+
+#if ADD_NEW_ITEMS
+
+BattleEventItem* THUMB_BRANCH_j_j_FieldEffectEvent_AddItem(FieldEffect fieldEffect, int a2, ConditionData conditionData, int a4)
+{
+    int enventFuncAmount[5];
+    enventFuncAmount[1] = a4;
+
+    for (u16 fieldEffectIdx = 0; fieldEffectIdx < ARRAY_COUNT(FieldEffectEventAddTableExt); ++fieldEffectIdx)
+    {
+        if (fieldEffect == FieldEffectEventAddTableExt[fieldEffectIdx].effect)
+        {
+            BattleEventHandlerTableEntry* battleEventEntry = FieldEffectEventAddTableExt[fieldEffectIdx].func(enventFuncAmount);
+            BattleEventItem* result = BattleEvent_AddItem(EVENTITEM_FIELD, fieldEffect, EVENTPRI_FIELD_DEFAULT, 0, a2, battleEventEntry, enventFuncAmount[0]);
+            return result;
+        }
+    }
+    return nullptr;
+}
+
+void THUMB_BRANCH_BattleField_InitCore(BattleField* battleField, Weather weather)
+{
+    for (int currentEffect = FLDEFF_WEATHER; currentEffect < DEFAULT_FIELD_EFFECT_AMOUNT; ++currentEffect)
+    {
+        BattleField_ClearFactorWork(battleField, (FieldEffect)currentEffect);
+    }
+    battleField->weather = weather;
+    battleField->weatherTurns = 255;
+
+    for (int currentEffect = FLDEFF_TERRAIN; currentEffect < FIELD_EFFECT_AMOUNT; ++currentEffect)
+    {
+        BattleField_ClearFactorWork(battleField, (FieldEffect)currentEffect);
+    }
+    battleFieldExt.terrain = 0; // TODO: Pre set terrain in battle, maybe... if its done in this function
+    battleFieldExt.terrainTurns = 255;
+}
+
+void THUMB_BRANCH_BattleField_ClearFactorWork(BattleField* battleField, FieldEffect fieldEffect)
+{
+    BattleField* currBattleField = battleField;
+    FieldEffect currFieldEffect = fieldEffect;
+    if (fieldEffect >= DEFAULT_FIELD_EFFECT_AMOUNT)
+    {
+        currBattleField = BATTLEFIELD_EXT;
+        currFieldEffect = (FieldEffect)(fieldEffect - DEFAULT_FIELD_EFFECT_AMOUNT);
+    }
+
+    currBattleField->battleEventItems[currFieldEffect] = 0;
+
+    currBattleField->conditionData[currFieldEffect] = Condition_MakeNull();
+    currBattleField->turnCount[currFieldEffect] = 0;
+    currBattleField->dependPokeCount[currFieldEffect] = 0;
+    currBattleField->effectEnableFlags[currFieldEffect] = 0;
+
+    int currentPoke = 0;
+    while (currentPoke < 6)
+    {
+        currBattleField->dependPokeID[currFieldEffect][currentPoke] = 31;
+        ++currentPoke;
+    }
+}
+
+int THUMB_BRANCH_BattleField_AddEffectCore(BattleField* battleField, FieldEffect fieldEffect, ConditionData conditionData, int a4)
+{
+    BattleField* currBattleField = battleField;
+    FieldEffect currFieldEffect = fieldEffect;
+    if (fieldEffect >= DEFAULT_FIELD_EFFECT_AMOUNT)
+    {
+        currBattleField = BATTLEFIELD_EXT;
+        currFieldEffect = (FieldEffect)(fieldEffect - DEFAULT_FIELD_EFFECT_AMOUNT);
+    }
+
+    if (currBattleField->effectEnableFlags[currFieldEffect])
+        return 0;
+
+    if (a4)
+    {
+        BattleEventItem* effectEvent = j_j_FieldEffectEvent_AddItem(fieldEffect, 0, conditionData, a4);
+        currBattleField->battleEventItems[currFieldEffect] = effectEvent;
+        if (!effectEvent)
+            return 0;
+    }
+
+    currBattleField->effectEnableFlags[currFieldEffect] = 1;
+    currBattleField->conditionData[currFieldEffect] = conditionData;
+    currBattleField->turnCount[currFieldEffect] = 0;
+    currBattleField->dependPokeCount[currFieldEffect] = 0;
+
+    int currentPoke = 0;
+    while (currentPoke < 6)
+    {
+        currBattleField->dependPokeID[currFieldEffect][currentPoke] = 31;
+        ++currentPoke;
+    }
+
+    int pokemonSlot = Condition_GetMonID(conditionData);
+    if (pokemonSlot != 31)
+    {
+        BattleField_AddDependPokeCore(battleField, fieldEffect, pokemonSlot);
+    }
+    return 1;
+}
+
+int THUMB_BRANCH_BattleField_RemoveEffectCore(BattleField* battleField, FieldEffect fieldEffect)
+{
+    if (!BattleField_CheckFieldEffectCore(battleField, fieldEffect))
+        return 0;
+
+    BattleField* currBattleField = battleField;
+    FieldEffect currFieldEffect = fieldEffect;
+    if (fieldEffect >= DEFAULT_FIELD_EFFECT_AMOUNT)
+    {
+        currBattleField = BATTLEFIELD_EXT;
+        currFieldEffect = (FieldEffect)(fieldEffect - DEFAULT_FIELD_EFFECT_AMOUNT);
+    }
+
+    BattleEventItem* battleEventItems = currBattleField->battleEventItems[currFieldEffect];
+    if (battleEventItems)
+    {
+        BattleEventItem_Remove(battleEventItems);
+        currBattleField->battleEventItems[currFieldEffect] = 0;
+    }
+    BattleField_ClearFactorWork(battleField, fieldEffect);
+
+    return 1;
+}
+
+int THUMB_BRANCH_BattleField_AddDependPokeCore(BattleField* battleField, FieldEffect fieldEffect, int pokemonSlot)
+{
+    BattleField* currBattleField = battleField;
+    FieldEffect currFieldEffect = fieldEffect;
+    if (fieldEffect >= DEFAULT_FIELD_EFFECT_AMOUNT)
+    {
+        currBattleField = BATTLEFIELD_EXT;
+        currFieldEffect = (FieldEffect)(fieldEffect - DEFAULT_FIELD_EFFECT_AMOUNT);
+    }
+
+    if (BattleField_CheckFieldEffectCore(battleField, fieldEffect))
+    {
+        u32 pokeCount = currBattleField->dependPokeCount[currFieldEffect];
+        if (pokeCount < 6)
+        {
+            int currentPoke = 0;
+            if (!pokeCount)
+            {
+                currBattleField->dependPokeID[currFieldEffect][pokeCount] = pokemonSlot;
+                currBattleField->dependPokeCount[currFieldEffect]++;
+                return 1;
+            }
+            while (pokemonSlot != currBattleField->dependPokeID[currFieldEffect][currentPoke])
+            {
+                if (++currentPoke >= pokeCount)
+                {
+                    currBattleField->dependPokeID[currFieldEffect][pokeCount] = pokemonSlot;
+                    currBattleField->dependPokeCount[currFieldEffect]++;
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+void THUMB_BRANCH_BattleField_RemoveDependPokeEffectCore(BattleField* battleField, int pokemonSlot)
+{
+    for (int currentEffect = FLDEFF_WEATHER; currentEffect < 8; ++currentEffect)
+    {
+        if (BattleField_CheckFieldEffectCore(battleField, (FieldEffect)currentEffect))
+        {
+            if (battleField->dependPokeCount[currentEffect])
+            {
+                int currentPoke = 0;
+                while (pokemonSlot != battleField->dependPokeID[currentEffect][currentPoke]) // find slot to remove
+                {
+                    if (++currentPoke >= battleField->dependPokeCount[currentEffect])
+                    {
+                        return;
+                    }
+                }
+
+                for (; currentPoke < 5; ++currentPoke) // move back slots after removed slot by one
+                {
+                    battleField->dependPokeID[currentEffect][currentPoke] = battleField->dependPokeID[currentEffect][currentPoke + 1];
+                }
+                battleField->dependPokeID[currentEffect][currentPoke] = 31; // set last slot to null
+                --battleField->dependPokeCount[currentEffect]; // remove 1 from the total count
+
+                u32 pokeCount = battleField->dependPokeCount[currentEffect];
+                if (pokeCount == 0) // remove field effect if the count is empty
+                {
+                    BattleEventItem* battleEventItems = battleField->battleEventItems[currentEffect];
+                    if (battleEventItems)
+                    {
+                        BattleEventItem_Remove(battleEventItems);
+                        battleField->battleEventItems[currentEffect] = 0;
+                    }
+                    BattleField_ClearFactorWork(battleField, (FieldEffect)currentEffect);
+                }
+                else
+                {
+                    int condPokemonSlot = Condition_GetMonID(battleField->conditionData[currentEffect]);
+                    if (pokemonSlot == condPokemonSlot) // if the condition mon id is the one removed, set it to the first available mon
+                    {
+                        Condition_SetMonID(&battleField->conditionData[currentEffect], battleField->dependPokeID[currentEffect][0]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+u32 THUMB_BRANCH_BattleField_CheckFieldEffectCore(BattleField* battleField, FieldEffect fieldEffect)
+{
+    if (fieldEffect >= DEFAULT_FIELD_EFFECT_AMOUNT)
+        return battleFieldExt.effectEnableFlags[fieldEffect - DEFAULT_FIELD_EFFECT_AMOUNT];
+
+    return battleField->effectEnableFlags[fieldEffect];
+}
+
+bool serverCommandFlag = false;
+int THUMB_BRANCH_ServerCommand_TurnCheckField(int a1)
+{
+    serverCommandFlag = true;
+    BattleField_TurnCheckCore(*(BattleField**)(a1 + 52), 0, 0);
+    serverCommandFlag = false;
+    return 1;
+}
+void THUMB_BRANCH_BattleField_TurnCheckCore(BattleField* battleField, int(* callback)(FieldEffect, ServerFlow*), ServerFlow* serverFlow)
+{
+    for (int currentEffect = 1; currentEffect < FIELD_EFFECT_AMOUNT; ++currentEffect)
+    {
+        if (BattleField_CheckFieldEffectCore(battleField, (FieldEffect)currentEffect))
+        {
+            BattleField* currBattleField = battleField;
+            FieldEffect currFieldEffect = (FieldEffect)currentEffect;
+            if (currentEffect >= DEFAULT_FIELD_EFFECT_AMOUNT)
+            {
+                currBattleField = BATTLEFIELD_EXT;
+                currFieldEffect = (FieldEffect)(currentEffect - DEFAULT_FIELD_EFFECT_AMOUNT);
+            }
+
+            u32 turnMax = Condition_GetTurnMax(currBattleField->conditionData[currFieldEffect]);
+            if (turnMax)
+            {
+                u32 turnCount = currBattleField->turnCount[currFieldEffect];
+                if (currentEffect < DEFAULT_FIELD_EFFECT_AMOUNT || !serverCommandFlag)
+                    turnCount += 1;
+
+                currBattleField->turnCount[currFieldEffect] = turnCount;
+                if (currentEffect == FLDEFF_TERRAIN)
+                {
+                    if (battleFieldExt.terrainTurns == 255)
+                        continue; // ignore turns if terrain is permanent
+
+                    battleFieldExt.terrainTurns = turnCount; // update terrain turns
+                }
+                
+                if (turnCount >= turnMax)
+                {
+                    if (currentEffect == FLDEFF_TERRAIN)
+                    {
+                        BattleField_EndTerrain(); // remove terrain data
+                        ServerEvent_ChangeTerrain(serverFlow, TERRAIN_NULL);
+                    }
+
+                    BattleEventItem* events = currBattleField->battleEventItems[currFieldEffect];
+                    if (events)
+                    {
+                        BattleEventItem_Remove(events);
+                        currBattleField->battleEventItems[currFieldEffect] = 0;
+                    }
+                    BattleField_ClearFactorWork(battleField, (FieldEffect)currentEffect);
+                    if (callback)
+                    {
+                        callback((FieldEffect)currentEffect, serverFlow);
+                    }
+                }
+            }
+        }
+    }
+}
+
+int THUMB_BRANCH_BattleHandler_AddFieldEffect(ServerFlow* serverFlow, HandlerParam_AddFieldEffect* params)
+{
+    u8 prevTerrain = TERRAIN_NULL;
+    u8 terrain = params->field_D;
+    int pokemonSlot = params->header.flags << 19 >> 27;
+
+    if (params->effect == FLDEFF_TERRAIN)
+    {
+        prevTerrain = BattleField_GetTerrain();
+        u8 turns = Condition_GetTurnMax(params->cond);
+
+        u8 extraTurns = ServerEvent_IncreaseMoveTerrainTurns(serverFlow, terrain, pokemonSlot);
+        if (extraTurns)
+        {
+            turns += extraTurns;
+            params->cond = Condition_MakeTurn(turns);
+        }
+
+        if (!ServerControl_ChangeTerrain(serverFlow, terrain, turns))
+        {
+            return 0;
+        }
+    }
+
+    if (!prevTerrain && !ServerControl_FieldEffectCore(serverFlow, params->effect, params->cond, params->fAddDependPoke))
+    {
+        return 0;
+    }
+
+    if (params->effect == FLDEFF_TERRAIN)
+    {
+        int moveID = 0;
+        switch (params->field_D)
+        {
+        case TERRAIN_ELECTRIC:
+            moveID = ELECTRIC_TERRAIN_MOVE_ANIM;
+            break;
+        case TERRAIN_GRASSY:
+            moveID = GRASSY_TERRAIN_MOVE_ANIM;
+            break;
+        case TERRAIN_MISTY:
+            moveID = MISTY_TERRAIN_MOVE_ANIM;
+            break;
+        case TERRAIN_PSYCHIC:
+            moveID = PSYCHIC_TERRAIN_MOVE_ANIM;
+            break;
+        }
+        int pokePos = MainModule_PokeIDToPokePos(serverFlow->mainModule, serverFlow->pokeCon, pokemonSlot);
+        ServerDisplay_AddCommon(serverFlow->serverCommandQueue, 48, pokePos, pokePos, moveID, 0, 0);
+    }
+
+    BattleHandler_SetString(serverFlow, &params->exStr);
+
+    if (params->effect == FLDEFF_TERRAIN)
+    {
+        ServerEvent_ChangeTerrainAfter(serverFlow, terrain);
+    }
+
+    return 1;
+}
+
+int THUMB_BRANCH_BattleHandler_RemoveFieldEffect(ServerFlow* serverFlow, HandlerParam_RemoveFieldEffect* params)
+{
+    if (params->effect == FLDEFF_TERRAIN)
+    {
+        BattleField_EndTerrain();
+    }
+    if (!BattleField_RemoveEffect(params->effect))
+    {
+        return 0;
+    }
+    ServerControl_FieldEffectEnd(serverFlow, params->effect);
+    return 1;
+}
+
+void THUMB_BRANCH_ServerControl_FieldEffectEnd(ServerFlow* serverFlow, BattleFieldEffect fieldEffect)
+{
+    int msgID = -1;
+    DPRINTF("END FIELD EFFECT: %d\n", fieldEffect);
+    if (fieldEffect <= FLDEFF_TERRAIN)
+    {
+        switch (fieldEffect)
+        {
+        case FLDEFF_TRICK_ROOM:
+            msgID = 116;
+            break;
+        case FLDEFF_GRAVITY:
+            msgID = 118;
+            break;
+        case FLDEFF_WONDER_ROOM:
+            msgID = 179;
+            break;
+        case FLDEFF_MAGIC_ROOM:
+            msgID = 181;
+            break;
+        case FLDEFF_TERRAIN:
+            msgID = BATTLE_TERRAIN_END_MSGID;
+            break;
+        default:
+            break;
+        }
+    }
+    DPRINTF("MSG ID: %d\n", msgID);
+    if (msgID >= 0)
+    {
+        ServerDisplay_AddMessageImpl(serverFlow->serverCommandQueue, 90, msgID, 0xFFFF0000);
+    }
+    ServerDisplay_AddCommon(serverFlow->serverCommandQueue, 36, fieldEffect);
+    if (fieldEffect == EFFECT_MAGIC_ROOM)
+    {
+        ServerControl_SortBySpeed(serverFlow, serverFlow->PokeSetTemp);
+        j_PokeSet_SeekStart(serverFlow->PokeSetTemp);
+        for (BattleMon* currentMon = j_PokeSet_SeekNext(serverFlow->PokeSetTemp);
+            currentMon;
+            currentMon = j_PokeSet_SeekNext(serverFlow->PokeSetTemp))
+        {
+            if (BattleMon_CanBattle(currentMon))
+            {
+                ServerControl_CheckItemReaction(serverFlow, currentMon, 0);
+            }
+        }
+    }
+}
+
+int THUMB_BRANCH_BattleHandler_GravityCheck(ServerFlow* serverFlow, HandlerParam_Header* params)
+{
+    u8 pokemonIDs[8];
+    short pokePos = MainModule_PokeIDToPokePos(serverFlow->mainModule, serverFlow->pokeCon, params->flags << 19 >> 27);
+    int pokeCount = Handler_ExpandPokeID(serverFlow, pokePos | 0x800, pokemonIDs);
+    for (int i = 0; i < pokeCount; i = ++i)
+    {
+        BattleMon* battleMon = PokeCon_GetBattleMon(serverFlow->pokeCon, pokemonIDs[i]);
+        bool grounded = false;
+        if (BattleMon_GetConditionFlag(battleMon, CONDITIONFLAG_FLY))
+        {
+            ServerControl_HideTurnCancel((int)serverFlow, battleMon, 3);
+            grounded = true;
+        }
+        if (ServerEvent_CheckFloating(serverFlow, battleMon, 1))
+        {
+            grounded = true;
+        }
+        if (BattleMon_CheckIfMoveCondition(battleMon, CONDITION_FLOATING))
+        {
+            ServerControl_CureCondition(serverFlow, battleMon, CONDITION_FLOATING, 0);
+            grounded = true;
+        }
+        if (BattleMon_CheckIfMoveCondition(battleMon, CONDITION_TELEKINESIS))
+        {
+            ServerControl_CureCondition(serverFlow, battleMon, CONDITION_TELEKINESIS, 0);
+            grounded = true;
+        }
+        if (grounded)
+        {
+            ServerDisplay_AddMessageImpl(serverFlow->serverCommandQueue, 91, 1083, pokemonIDs[i], -65536);
+            DPRINT("GRAVITY TEXT\n");
+            ServerEvent_GroundedByGravity(serverFlow, battleMon);
+        }
+    }
+    return 1;
 }
 #endif
 
@@ -345,15 +1140,6 @@ int THUMB_BRANCH_ServerEvent_CalcDamage(ServerFlow* a1, BattleMon* attackingMon,
 // Accessing the Sife Effect functions crashed the game so I rewrote the whole system
 // Thats why I branch the 2 access points to create a Side Effect BattleItem (BattleHandler_AddSideEffect & ItemEffect_StatusGuard) 
 // and build from there
-struct BattleSideStatus
-{
-    BattleSideCondition Conditions[DEFAULT_SIDE_CONDITION_AMOUNT];
-};
-struct BattleSideManager
-{
-    BattleSideStatus Sides[2];
-};
-extern BattleSideManager SideStatus;
 BattleSideManager SideStatusExt;
 u8 removeSideEffExtFlags;
 
@@ -828,18 +1614,6 @@ void THUMB_BRANCH_ServerControl_TurnCheckSide(ServerFlow* a1)
     }
 }
 
-bool GetSideFromOpposingMonID(unsigned int a1);
-void CommonCreateSideEffect(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work, u8 opposingSide, SideEffect effect, ConditionData condData, u16 msgID);
-void THUMB_BRANCH_HandlerStealthRock(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work)
-{
-    ConditionData permanent;
-    u8 opposingSide;
-
-    permanent = Condition_MakePermanent();
-    opposingSide = GetSideFromOpposingMonID(currentSlot);
-    CommonCreateSideEffect(a1, serverFlow, currentSlot, work, opposingSide, (SideEffect)SIDEEFF_STICKY_WEB, *&permanent, 156);
-}
-
 int THUMB_BRANCH_BattleHandler_RemoveSideEffectCore(ServerFlow* serverFlow, HandlerParam_RemoveSideEffect* params)
 {
     unsigned int flagIdx;
@@ -901,7 +1675,7 @@ u8 ServerEvent_ChangeAbilityCheckFail(ServerFlow* a1, int pokemonSlot, int prevA
 
 
 // OVL_167
-
+#if ADD_NEW_ITEMS
 void THUMB_BRANCH_HandlerIntimidate(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
 {
     u8* TempWork; // r4
@@ -919,7 +1693,6 @@ void THUMB_BRANCH_HandlerIntimidate(BattleEventItem* a1, ServerFlow* serverFlow,
         v6 = Handler_ExpandPokeID(serverFlow, ExistFrontPokePos | 0x100, TempWork);
         if (v6)
         {
-            SetIntimidateFlag(true);
 
             BattleHandler_PushRun(serverFlow, EFFECT_ABILITY_POPUP_ADD, pokemonSlot);
             v7 = (HandlerParam_ChangeStatStage*)BattleHandler_PushWork(serverFlow, EFFECT_CHANGE_STAT_STAGE, pokemonSlot);
@@ -933,10 +1706,11 @@ void THUMB_BRANCH_HandlerIntimidate(BattleEventItem* a1, ServerFlow* serverFlow,
                 v10 = (char*)v7 + v8++;
             }
 
+            SetIntimidateFlag(true);
             BattleHandler_PopWork(serverFlow, v7);
-            BattleHandler_PushRun(serverFlow, EFFECT_ABILITY_POPUP_REMOVE, pokemonSlot);
-
             SetIntimidateFlag(false);
+
+            BattleHandler_PushRun(serverFlow, EFFECT_ABILITY_POPUP_REMOVE, pokemonSlot);
         }
     }
 }
@@ -1082,6 +1856,7 @@ void THUMB_BRANCH_HandlerDrySkinWeather(BattleEventItem* a1, ServerFlow* serverF
         }
     }
 }
+
 
 // Utility Umbrella weather checks (Flower Gift)
 BattleEventHandlerTableEntry FlowerGiftHandlers[] = {
@@ -1545,11 +2320,11 @@ bool THUMB_BRANCH_HandlerMoldBreakerSkipCheck(BattleEventItem* a1, ServerFlow* s
     }
     return 0;
 }
-
+#endif
 
 // MOVE EXPANSION
 // NEW
-
+#if ADD_NEW_ITEMS
 void HandlerRagePowderBaitTarget(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
 {
     BattleStyle battleStyle = Handler_GetBattleStyle((int)serverFlow);
@@ -1591,6 +2366,7 @@ BattleEventHandlerTableEntry* EventAddRagePowder(int* a1)
     *a1 = ARRAY_COUNT(RagePowderHandlers);
     return RagePowderHandlers;
 }
+#endif
 
 // --- DATA ---
 
@@ -1800,7 +2576,11 @@ MoveEventAddTable ExtMoveEventAddTable[] = {
 {MOVE357_MIRACLE_EYE, EventAddMiracleEye},
 {MOVE074_GROWTH, EventAddGrowth},
 {MOVE474_VENOSHOCK, EventAddVenoshock},
+#if ADD_NEW_ITEMS
 {MOVE476_RAGE_POWDER, EventAddRagePowder},
+#else
+{MOVE476_RAGE_POWDER, EventAddFollowMe},
+#endif
 {MOVE487_SOAK, EventAddSoak},
 {MOVE493_SIMPLE_BEAM, EventAddSimpleBeam},
 {MOVE494_ENTRAINMENT, EventAddEntrainment},
@@ -1854,13 +2634,12 @@ MoveEventAddTable ExtMoveEventAddTable[] = {
 {MOVE520_GRASS_PLEDGE, EventAddWaterPledge},
 {MOVE558_FUSION_FLARE, EventAddFusionFlare},
 {MOVE559_FUSION_BOLT, EventAddFusionFlare},
-
 };
 
 // FUNCTIONS
 
 // OVL_167
-
+#if ADD_NEW_ITEMS
 // Utility Umbrella weather checks
 void THUMB_BRANCH_HandlerMorningSun(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
 {
@@ -2023,6 +2802,7 @@ void THUMB_BRANCH_HandlerWeatherBallPower(BattleEventItem* a1, ServerFlow* serve
         BattleEventVar_RewriteValue(VAR_MOVE_POWER, 2 * movePower);
     }
 }
+#endif
 
 // Sticy Web removal
 void THUMB_BRANCH_HandlerRapidSpin(BattleEventItem* a1, ServerFlow* serverFlow, int currentSlot, int* work)
@@ -2147,6 +2927,300 @@ void THUMB_BRANCH_HandlerDefog(BattleEventItem* a1, ServerFlow* serverFlow, int 
     }
 }
 
+#if ADD_NEW_ITEMS
+// Electric & Misty Terrain fail
+void THUMB_BRANCH_HandlerRestCheckFail(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (pokemonSlot == BattleEventVar_GetValue(VAR_MON_ID) && !BattleEventVar_GetValue(VAR_FAIL_CAUSE))
+    {
+        BattleMon* currentMon = Handler_GetBattleMon(serverFlow, pokemonSlot);
+        if (BattleMon_CheckIfMoveCondition(currentMon, CONDITION_SLEEP))
+        {
+            BattleEventVar_RewriteValue(VAR_FAIL_CAUSE, MOVEFAIL_OTHER);
+        }
+        else if (BattleMon_CheckIfMoveCondition(currentMon, CONDITION_HEALBLOCK))
+        {
+            BattleEventVar_RewriteValue(VAR_FAIL_CAUSE, MOVEFAIL_HEALBLOCK);
+        }
+        else if (BattleMon_IsFullHP(currentMon))
+        {
+            BattleEventVar_RewriteValue(VAR_FAIL_CAUSE, MOVEFAIL_HPFULL);
+        }
+        else if ((BattleField_GetTerrain() == TERRAIN_ELECTRIC || BattleField_GetTerrain() == TERRAIN_MISTY) &&
+            !ServerControl_CheckFloating(serverFlow, currentMon, 1))
+        {
+            BattleEventVar_RewriteValue(VAR_FAIL_CAUSE, MOVEFAIL_OTHER); // TODO: Create custo move fail, maybe?
+        }
+        else
+        {
+            int currentAbility = BattleMon_GetValue(currentMon, VALUE_EFFECTIVE_ABILITY);
+            if (currentAbility == ABIL015_INSOMNIA || currentAbility == ABIL072_VITAL_SPIRIT)
+            {
+                BattleEventVar_RewriteValue(VAR_FAIL_CAUSE, MOVEFAIL_INSOMNIA);
+            }
+        }
+    }
+}
+
+// Terrain afected moves
+void THUMB_BRANCH_HandlerNaturePower(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    if (pokemonSlot == BattleEventVar_GetValue(VAR_MON_ID))
+    {
+        int newMoveID = 0;
+
+        int terrain = BattleField_GetTerrain();
+        switch (terrain)
+        {
+        case TERRAIN_ELECTRIC:
+            newMoveID = MOVE085_THUNDERBOLT;
+            break;
+        case TERRAIN_GRASSY:
+            newMoveID = MOVE412_ENERGY_BALL;
+            break;
+        case TERRAIN_MISTY:
+            newMoveID = MOVE094_PSYCHIC; // TODO: SWITCH TO MOONBLAST
+            break;
+        case TERRAIN_PSYCHIC:
+            newMoveID = MOVE094_PSYCHIC;
+            break;
+        default:
+        {
+            int battleGround = Handler_GetBattleTerrain(serverFlow);
+            switch (battleGround)
+            {
+            case 0u:
+            case 5u:
+                newMoveID = MOVE402_SEED_BOMB;
+                break;
+            case 1u:
+            case 2u:
+            case 3u:
+            case 8u:
+            case 15u:
+            case 17u:
+                newMoveID = MOVE089_EARTHQUAKE;
+                break;
+            case 4u:
+            case 14u:
+            case 16u:
+            case 18u:
+                newMoveID = MOVE161_TRI_ATTACK;
+            case 6u:
+            case 11u:
+            case 12u:
+                newMoveID = MOVE056_HYDRO_PUMP;
+                break;
+            case 7u:
+                newMoveID = MOVE059_BLIZZARD;
+                break;
+            case 9u:
+                newMoveID = MOVE426_MUD_BOMB;
+                break;
+            case 10u:
+                newMoveID = MOVE157_ROCK_SLIDE;
+                break;
+            case 13u:
+                newMoveID = MOVE058_ICE_BEAM;
+                break;
+            default:
+                newMoveID = MOVE161_TRI_ATTACK;
+                break;
+            }
+        }
+            break;
+        }
+
+        int v7 = Handler_ReqMoveTargetAuto(serverFlow, pokemonSlot, newMoveID);
+        BattleEventVar_RewriteValue(VAR_MOVE_ID, newMoveID);
+        BattleEventVar_RewriteValue(VAR_POKE_POS, v7);
+    }
+}
+int THUMB_BRANCH_CommonSecretPowerGetParams(ServerFlow* serverFlow, u8* effectPtr, u8* changeAmountPtr)
+{
+    u8 effect;
+    u8 changeAmount;
+    int result;
+
+    int newMoveID = 0;
+
+    int terrain = BattleField_GetTerrain();
+    switch (terrain)
+    {
+    case TERRAIN_ELECTRIC:
+        effect = SCTPOWEFF_ADD_COND;
+        changeAmount = CONDITION_PARALYSIS;
+        result = 0;
+        break;
+    case TERRAIN_GRASSY:
+        effect = SCTPOWEFF_ADD_COND;
+        changeAmount = CONDITION_SLEEP;
+        result = 7;
+        break;
+    case TERRAIN_MISTY:
+        effect = SCTPOWEFF_LOWER_STAT;
+        changeAmount = STATSTAGE_SPECIAL_ATTACK;
+        result = 5;
+        break;
+    case TERRAIN_PSYCHIC:
+        effect = SCTPOWEFF_LOWER_STAT;
+        changeAmount = STATSTAGE_SPEED;
+        result = 2;
+        break;
+    default:
+    {
+        int battleGround = Handler_GetBattleTerrain(serverFlow);
+        if (IsEqual(battleGround, 0) ||
+            IsEqual(battleGround, 5))
+        {
+            effect = SCTPOWEFF_ADD_COND;
+            changeAmount = CONDITION_SLEEP;
+            result = 7;
+        }
+        else if (IsEqual(battleGround, 1) ||
+            IsEqual(battleGround, 2) ||
+            IsEqual(battleGround, 3) ||
+            IsEqual(battleGround, 8) ||
+            IsEqual(battleGround, 15) ||
+            IsEqual(battleGround, 17))
+        {
+            effect = SCTPOWEFF_LOWER_STAT;
+            changeAmount = STATSTAGE_ACCURACY;
+            result = 1;
+        }
+        else if (IsEqual(battleGround, 6) ||
+            IsEqual(battleGround, 11) ||
+            IsEqual(battleGround, 12))
+        {
+            effect = SCTPOWEFF_LOWER_STAT;
+            changeAmount = STATSTAGE_ATTACK;
+            result = 5;
+        }
+        else if (IsEqual(battleGround, 7) ||
+            IsEqual(battleGround, 13))
+        {
+            effect = SCTPOWEFF_ADD_COND;
+            changeAmount = CONDITION_FREEZE;
+            if (battleGround == 7)
+            {
+                result = 3;
+            }
+            else
+            {
+                result = 4;
+            }
+        }
+        else if (IsEqual(battleGround, 9))
+        {
+            effect = SCTPOWEFF_LOWER_STAT;
+            changeAmount = STATSTAGE_SPEED;
+            result = 2;
+        }
+        else if (IsEqual(battleGround, 10) ||
+            IsEqual(battleGround, 19))
+        {
+            effect = SCTPOWEFF_FLINCH;
+            changeAmount = 0;
+            result = 6;
+        }
+        else
+        {
+            effect = SCTPOWEFF_ADD_COND;
+            changeAmount = CONDITION_PARALYSIS;
+            result = 0;
+        }
+    }
+    break;
+    }
+
+    if (effectPtr)
+    {
+        *effectPtr = effect;
+    }
+    if (changeAmountPtr)
+    {
+        *changeAmountPtr = changeAmount;
+    }
+    return result;
+}
+void THUMB_BRANCH_HandlerCamouflage(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work)
+{
+    HandlerParam_ChangeType* v9;
+
+    if (pokemonSlot == BattleEventVar_GetValue(VAR_ATTACKING_MON))
+    {
+        u16 pokeType = TYPE_NORMAL;
+
+        int terrain = BattleField_GetTerrain();
+        switch (terrain)
+        {
+        case TERRAIN_ELECTRIC:
+            pokeType = TYPE_ELEC;
+            break;
+        case TERRAIN_GRASSY:
+            pokeType = TYPE_GRASS;
+            break;
+        case TERRAIN_MISTY:
+            pokeType = TYPE_NORMAL; // TODO: SWITCH TO FAIRY
+            break;
+        case TERRAIN_PSYCHIC:
+            pokeType = TYPE_PSY;
+            break;
+        default:
+        {
+            int battleGround = Handler_GetBattleTerrain(serverFlow);
+            if (IsEqual(battleGround, 0) || 
+                IsEqual(battleGround, 5))
+            {
+                pokeType = TYPE_GRASS;
+            }
+            else if (IsEqual(battleGround, 1) ||
+                IsEqual(battleGround, 2) || 
+                IsEqual(battleGround, 3) ||
+                IsEqual(battleGround, 8) || 
+                IsEqual(battleGround, 9) ||
+                IsEqual(battleGround, 15) || 
+                IsEqual(battleGround, 17))
+            {
+                pokeType = TYPE_GROUND;
+            }
+            else if (IsEqual(battleGround, 6) ||
+                IsEqual(battleGround, 11) ||
+                IsEqual(battleGround, 12))
+            {
+                pokeType = TYPE_WATER;
+            }
+            else if (IsEqual(battleGround, 7) ||
+                IsEqual(battleGround, 13))
+            {
+                pokeType = TYPE_ICE;
+            }
+            else if (IsEqual(battleGround, 10) ||
+                IsEqual(battleGround, 19))
+            {
+                pokeType = TYPE_ROCK;
+            }
+            else
+            {
+                pokeType = TYPE_NORMAL;
+            }
+        }
+        break;
+        }
+
+        int monotype = PokeTypePair_MakeMonotype(pokeType);
+        BattleMon* battleMon = Handler_GetBattleMon(serverFlow, pokemonSlot);
+        if (monotype != BattleMon_GetPokeType(battleMon))
+        {
+            v9 = (HandlerParam_ChangeType*)BattleHandler_PushWork(serverFlow, EFFECT_CHANGE_TYPE, pokemonSlot);
+            v9->next_type = monotype;
+            v9->pokeID = pokemonSlot;
+            BattleHandler_PopWork(serverFlow, v9);
+        }
+    }
+}
+#endif
+
 // Function that adds events when moves have them
 int THUMB_BRANCH_MoveEvent_AddItem(BattleMon* battleMon, int moveID, int subPriority)
 {
@@ -2180,6 +3254,7 @@ int THUMB_BRANCH_MoveEvent_AddItem(BattleMon* battleMon, int moveID, int subPrio
     return 1;
 }
 
+#if ADD_NEW_ITEMS
 // Called whenever an attack redirects (calls all EVENT_REDIRECT_TARGET handlers)
 int THUMB_BRANCH_ServerEvent_RedirectTarget(ServerFlow* a1, BattleMon* a2, unsigned __int16* a3, int a4)
 {
@@ -2263,7 +3338,7 @@ int THUMB_BRANCH_IsUnselectableMove(BtlClientWk* client, BattleMon* pokemon, int
                 // Output a different message when the item is the cause
                 if (DoesItemPreventStatusMoveUse(BattleMon_GetHeldItem(pokemon)))
                 {
-                    Btlv_StringParam_Setup(strparam, 2, BATTLE_ASSAULTVEST_MSGID);
+                    Btlv_StringParam_Setup(strparam, 1, BATTLE_ASSAULTVEST_MSGID);
                     int pokemonID = BattleMon_GetID(pokemon);
                     int itemID = BattleMon_GetHeldItem(pokemon);
                     Btlv_StringParam_AddArg(strparam, pokemonID);
@@ -2315,7 +3390,7 @@ int THUMB_BRANCH_IsUnselectableMove(BtlClientWk* client, BattleMon* pokemon, int
             }
             return 1;
         }
-        if (BattleField_CheckFieldEffectCore(client->battleField, EFFECT_IMPRISON)
+        if (BattleField_CheckFieldEffectCore(client->battleField, FLDEFF_IMPRISON)
             && BattleField_CheckImprisonCore(client->battleField, client->pokeCon, pokemon, move))
         {
             if (strparam)
@@ -2327,7 +3402,7 @@ int THUMB_BRANCH_IsUnselectableMove(BtlClientWk* client, BattleMon* pokemon, int
             }
             return 1;
         }
-        if (BattleField_CheckFieldEffectCore(client->battleField, EFFECT_GRAVITY)
+        if (BattleField_CheckFieldEffectCore(client->battleField, FLDEFF_GRAVITY)
             && getMoveFlag(move, FLAG_GROUNDED_BY_GRAVITY))
         {
             if (strparam)
@@ -2416,164 +3491,9 @@ int THUMB_BRANCH_ServerEvent_BypassAccuracyCheck(ServerFlow* serverFlow, BattleM
     }
     return isAlwaysHit;
 }
+#endif
 
-// Called to calculate a moves damage
-int THUMB_BRANCH_SAFESTACK_ServerEvent_CalcDamage(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, MoveParam* moveParam, int typeEffectiveness, int targetDmgRatio, int criticalFlag, int battleDebugMode, _WORD* destDamage)
-{
-    int ret = 0;
-
-    int moveCategory = PML_MoveGetCategory(moveParam->MoveID);
-    BattleEventVar_Push();
-    BattleEventVar_SetConstValue(VAR_TYPE_EFFECTIVENESS, typeEffectiveness);
-    int attackingSlot = BattleMon_GetID(attackingMon);
-    BattleEventVar_SetConstValue(VAR_ATTACKING_MON, attackingSlot);
-    int defendingSlot = BattleMon_GetID(defendingMon);
-    BattleEventVar_SetConstValue(VAR_DEFENDING_MON, defendingSlot);
-    BattleEventVar_SetConstValue(VAR_CRITICAL_FLAG, criticalFlag);
-    BattleEventVar_SetConstValue(VAR_MOVE_TYPE, moveParam->moveType);
-    BattleEventVar_SetConstValue(VAR_MOVE_ID, moveParam->MoveID);
-    BattleEventVar_SetConstValue(VAR_MOVE_CATEGORY, moveCategory);
-    BattleEventVar_SetValue(VAR_FIXED_DAMAGE, 0);
-    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_1);
-    u32 finalDamage = BattleEventVar_GetValue(VAR_FIXED_DAMAGE);
-    if (finalDamage)
-    {
-        ret = 1;
-    }
-    else
-    {
-        int movePower = ServerEvent_GetMovePower(serverFlow, attackingMon, defendingMon, moveParam);
-        int attack = ServerEvent_GetAttackPower(serverFlow, attackingMon, defendingMon, moveParam, criticalFlag);
-        int defense = ServerEvent_GetTargetDefenses(serverFlow, attackingMon, defendingMon, moveParam, criticalFlag);
-        u8 level = BattleMon_GetValue(attackingMon, VALUE_LEVEL);
-        int baseDamage = CalcBaseDamage(movePower, attack, level, defense);
-        int damage = baseDamage;
-        if (targetDmgRatio != 4096)
-        {
-            damage = fixed_round(baseDamage, targetDmgRatio);
-        }
-        int weather = ServerEvent_GetWeather(serverFlow);
-
-        int weatherDmgRatio = 4096;
-        if (weather == WEATHER_SUN || weather == WEATHER_RAIN)
-        {
-            if (!DoesItemPreventWeatherEffects(BattleMon_GetHeldItem(defendingMon))) // dont change damage when holding Utility Umbrella
-            {
-                weatherDmgRatio = WeatherPowerMod(weather, moveParam->moveType);
-            }
-        }
-
-        if (weatherDmgRatio != 4096)
-        {
-            damage = fixed_round(damage, weatherDmgRatio);
-        }
-        if (criticalFlag)
-        {
-            damage *= 2;
-        }
-        if (!MainModule_GetDebugFlag() && sub_21AE34C(serverFlow))
-        {
-            int damageRoll;
-            if (battleDebugMode)
-            {
-                damageRoll = 85;
-            }
-            else
-            {
-                damageRoll = (100 - BattleRandom(16u));
-            }
-            damage = damageRoll * damage / 100u;
-        }
-        PokeType moveType = (PokeType)moveParam->moveType;
-        if (moveType != TYPE_NULL)
-        {
-            int stab = ServerEvent_SameTypeAttackBonus(serverFlow, attackingMon, moveType);
-            damage = fixed_round(damage, stab);
-        }
-        int effectivenessDmgMod = TypeEffectivenessPowerMod(damage, typeEffectiveness);
-        if (moveCategory == CATEGORY_PHYSICAL
-            && BattleMon_GetStatus(attackingMon) == CONDITION_BURN
-            && BattleMon_GetValue(attackingMon, VALUE_EFFECTIVE_ABILITY) != ABIL062_GUTS)
-        {
-            effectivenessDmgMod = 50 * effectivenessDmgMod / 100u;
-        }
-        if (!effectivenessDmgMod)
-        {
-            effectivenessDmgMod = 1;
-        }
-        BattleEventVar_SetMulValue(VAR_RATIO, 4096, 41, 0x20000);
-        BattleEventVar_SetValue(VAR_DAMAGE, effectivenessDmgMod);
-        BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_2);
-        int procDmgRatio = BattleEventVar_GetValue(VAR_RATIO);
-        int procDamage = BattleEventVar_GetValue(VAR_DAMAGE);
-        LOWORD(finalDamage) = fixed_round(procDamage, procDmgRatio);
-    }
-    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_END);
-    BattleEventVar_Pop();
-    *destDamage = finalDamage;
-    return ret;
-}
-
-// Called to check if a status condition should fail
-int THUMB_BRANCH_AddConditionCheckFailOverwrite(ServerFlow* serverFlow, BattleMon* battleMon, MoveCondition condition, int a4, char a5)
-{
-    int pokemonTypePair = BattleMon_GetPokeType(battleMon);
-
-    if (BattleMon_CheckIfMoveCondition(battleMon, condition) && a5 != 2)
-    {
-        return 1;
-    }
-    if (condition < CONDITION_CONFUSION && BattleMon_GetStatus(battleMon) && !a5)
-    {
-        return 3;
-    }
-    if (ServerEvent_GetWeather(serverFlow) == WEATHER_SUN && condition == CONDITION_FREEZE)
-    {
-        if (!DoesItemPreventWeatherEffects(BattleMon_GetHeldItem(battleMon))) // dont block freeze when holding Utility Umbrella
-        {
-            return 3;
-        }
-    }
-    if (condition == CONDITION_POISON)
-    {
-        if (PokeTypePair_HasType(pokemonTypePair, TYPE_STEEL) || PokeTypePair_HasType(pokemonTypePair, TYPE_POISON))
-        {
-            return 2;
-        }
-    }
-    if (condition == CONDITION_BURN)
-    {
-        if (PokeTypePair_HasType(pokemonTypePair, TYPE_FIRE))
-        {
-            return 2;
-        }
-    }
-    if (condition == CONDITION_FREEZE)
-    {
-        if (PokeTypePair_HasType(pokemonTypePair, TYPE_ICE))
-        {
-            return 2;
-        }
-    }
-    if (condition == CONDITION_LEECHSEED)
-    {
-        if (PokeTypePair_HasType(pokemonTypePair, TYPE_GRASS))
-        {
-            return 2;
-        }
-    }
-    if (condition == CONDITION_YAWN && BattleMon_GetStatus(battleMon))
-    {
-        return 3;
-    }
-    if (condition == CONDITION_GASTROACID && BattleMon_GetValue(battleMon, VALUE_ABILITY) == ABIL121_MULTITYPE)
-    {
-        return 3;
-    }
-    return 0;
-}
-
-
+#if ADD_NEW_ITEMS
 // ITEM EXPANSION
 // NEW
 
@@ -3076,7 +3996,7 @@ BattleEventHandlerTableEntry* EventAddBlunderPolicy(int* a1)
 // ROOM SERVICE
 void HandlerRoomSeviceFieldCheck(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonSlot, int* work)
 {
-    if (BattleField_CheckEffect(EFFECT_TRICK_ROOM))
+    if (BattleField_CheckEffect(FLDEFF_TRICK_ROOM))
     {
         BattleMon* battleMon = Handler_GetBattleMon(serverFlow, pokemonSlot);
         if (BattleMon_IsStatChangeValid(battleMon, STATSTAGE_SPEED, -1))
@@ -3089,7 +4009,7 @@ void HandlerRoomSeviceUse(BattleEventItem* battleEventItem, ServerFlow* a2, int 
 {
     HandlerParam_ChangeStatStage* speedBoost;
 
-    if (BattleField_CheckEffect(EFFECT_TRICK_ROOM))
+    if (BattleField_CheckEffect(FLDEFF_TRICK_ROOM))
     {
         speedBoost = (HandlerParam_ChangeStatStage*)BattleHandler_PushWork(a2, EFFECT_CHANGE_STAT_STAGE, pokemonSlot);
         speedBoost->poke_cnt = 1;
@@ -3136,19 +4056,18 @@ BattleEventHandlerTableEntry* EventAddAbilityShield(int* a1)
 // CLEAR AMULET
 void HandlerClearAmuletCheck(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonSlot, int* work)
 {
-    CommonStatDropGuardCheck((int)serverFlow, pokemonSlot, work, 8);
+    CommonStatDropGuardCheck(serverFlow, pokemonSlot, work, 8);
 }
 void HandlerClearAmuletMessage(BattleEventItem* battleEventItem, ServerFlow* serverFlow, int pokemonSlot, int* work)
 {
-    HandlerParam_Message* v6;
-
-    if (pokemonSlot == BattleEventVar_GetValue(VAR_MON_ID))
+    if (*work)
     {
-        v6 = (HandlerParam_Message*)BattleHandler_PushWork(serverFlow, EFFECT_MESSAGE, pokemonSlot);
-        BattleHandler_StrSetup(&v6->str, 2u, BARRLE_CLEARAMULET_MSGID);
+        HandlerParam_Message* v6 = (HandlerParam_Message*)BattleHandler_PushWork(serverFlow, EFFECT_MESSAGE, pokemonSlot);
+        BattleHandler_StrSetup(&v6->str, 2u, BATTLE_CLEARAMULET_MSGID);
         BattleHandler_AddArg(&v6->str, pokemonSlot);
         BattleHandler_PopWork(serverFlow, v6);
     }
+    *work = 0;
 }
 BattleEventHandlerTableEntry ClearAmuletHandlers[] = {
     {EVENT_STAT_STAGE_CHANGE_LAST_CHECK, HandlerClearAmuletCheck},
@@ -3321,7 +4240,7 @@ BattleEventHandlerTableEntry* EventAddFairyFeather(int* a1)
     *a1 = ARRAY_COUNT(FairyFeatherHandlers);
     return FairyFeatherHandlers;
 }
-
+#endif
 
 // --- DATA ---
 
@@ -3497,6 +4416,7 @@ ItemEventAddTable ExtItemEventAddTable[] = { // ITEM_EVENT_ADD_TABLE
 {IT0562_DARK_GEM, EventAddDarkGem},
 {IT0563_STEEL_GEM, EventAddSteelGem},
 {IT0564_NORMAL_GEM, EventAddNormalGem},
+#if ADD_NEW_ITEMS
 /*Vanilla End*/
 {IT0639_WEAKNESS_POLICY, EventAddWeaknessPolicy},
 {IT0640_ASSAULT_VEST, EventAddAssaultVest},
@@ -3519,6 +4439,7 @@ ItemEventAddTable ExtItemEventAddTable[] = { // ITEM_EVENT_ADD_TABLE
 {IT1884_PUNCHING_GLOVE, EventAddPunchingGlove},
 {IT1885_COVERT_CLOAK, EventAddCovertCloak},
 {IT2401_FAIRY_FEATHER, EventAddFairyFeather},
+#endif
 }; 
 
 // --- FUNCTIONS ---
@@ -3544,7 +4465,7 @@ int ServerEvent_AccuracyMiss(ServerFlow* serverFlow, BattleMon* attackingMon, Ba
 
 
 // OVL 167
-
+#if ADD_NEW_ITEMS
 // Function that creates the pokemons in battle from the pokemons in the party & trainers
 BattleMon* THUMB_BRANCH_BattleMon_Create(PartyPkm* a1, BattlePartySlot battleSlot, HeapID a3)
 {
@@ -3734,7 +4655,175 @@ int THUMB_BRANCH_ServerControl_AfterSwitchIn(ServerFlow* serverFlow)
 
     return result;
 }
+#endif
 
+// GENERAL PURPOSE
+// Prevents weather boost when holding Utility Umbrella
+// Modifies crit damage boost
+// Calculates terrain damage boost
+int THUMB_BRANCH_SAFESTACK_ServerEvent_CalcDamage(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, MoveParam* moveParam,
+    int typeEffectiveness, int targetDmgRatio, int criticalFlag, int battleDebugMode, _WORD* destDamage)
+{
+    int category = PML_MoveGetCategory(moveParam->MoveID);
+    int isFixedDamage = 0;
+    BattleEventVar_Push();
+    BattleEventVar_SetConstValue(VAR_TYPE_EFFECTIVENESS, typeEffectiveness);
+    int attackingSlot = BattleMon_GetID(attackingMon);
+    BattleEventVar_SetConstValue(VAR_ATTACKING_MON, attackingSlot);
+    int defendingSlot = BattleMon_GetID(defendingMon);
+    BattleEventVar_SetConstValue(VAR_DEFENDING_MON, defendingSlot);
+    BattleEventVar_SetConstValue(VAR_CRITICAL_FLAG, criticalFlag);
+    BattleEventVar_SetConstValue(VAR_MOVE_TYPE, moveParam->moveType);
+    BattleEventVar_SetConstValue(VAR_MOVE_ID, moveParam->MoveID);
+    BattleEventVar_SetConstValue(VAR_MOVE_CATEGORY, category);
+    BattleEventVar_SetValue(VAR_FIXED_DAMAGE, 0);
+    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_1);
+    u32 finalDamage = BattleEventVar_GetValue(VAR_FIXED_DAMAGE);
+    if (finalDamage)
+    {
+        isFixedDamage = 1;
+    }
+    else
+    {
+        int power = ServerEvent_GetMovePower(serverFlow, attackingMon, defendingMon, moveParam);
+        int attack = ServerEvent_GetAttackPower(serverFlow, attackingMon, defendingMon, moveParam, criticalFlag);
+        int defense = ServerEvent_GetTargetDefenses(serverFlow, attackingMon, defendingMon, moveParam, criticalFlag);
+        u8 level = BattleMon_GetValue(attackingMon, VALUE_LEVEL);
+        int baseDamage = CalcBaseDamage(power, attack, level, defense);
+        int damage = baseDamage;
+        if (targetDmgRatio != 4096)
+        {
+            damage = fixed_round(baseDamage, targetDmgRatio);
+        }
+
+        int weather = ServerEvent_GetWeather(serverFlow);
+        int weatherDmgRatio = WeatherPowerMod(weather, moveParam->moveType);
+        if (weatherDmgRatio != 4096)
+        {
+#if ADD_NEW_ITEMS
+            if (!DoesItemPreventWeatherEffects(BattleMon_GetHeldItem(defendingMon))) // dont change damage when holding Utility Umbrella
+                damage = fixed_round(damage, weatherDmgRatio);
+#else
+            damage = fixed_round(damage, weatherDmgRatio);
+#endif 
+        }
+
+        int terrain = ServerEvent_GetTerrain(serverFlow);
+        int terrainDmgRatio = TerrainPowerMod(serverFlow, attackingMon, defendingMon, terrain, moveParam->moveType);
+        if (terrainDmgRatio != 4096)
+        {
+            damage = fixed_round(damage, terrainDmgRatio);
+        }
+
+        if (criticalFlag)
+        {
+#if ADD_CRIT_CHANGES
+            damage = (int)((float)damage * CRIT_DMG_BOOST);
+#else
+            damage *= 2;
+#endif
+        }
+        if (!MainModule_GetDebugFlag() && sub_21AE34C(serverFlow))
+        {
+            int damageRoll = 85;
+            if (!battleDebugMode)
+            {
+                damageRoll = (100 - BattleRandom(16u));
+            }
+            damage = damageRoll * damage / 100;
+        }
+        PokeType moveType = (PokeType)moveParam->moveType;
+        if (moveType != TYPE_NULL)
+        {
+            int stab = ServerEvent_SameTypeAttackBonus(serverFlow, attackingMon, moveType);
+            damage = fixed_round(damage, stab);
+        }
+        int damageAfterType = TypeEffectivenessPowerMod(damage, typeEffectiveness);
+        if (category == CATEGORY_PHYSICAL
+            && BattleMon_GetStatus(attackingMon) == CONDITION_BURN
+            && BattleMon_GetValue(attackingMon, VALUE_EFFECTIVE_ABILITY) != ABIL062_GUTS)
+        {
+            damageAfterType = 50 * damageAfterType / 100u;
+        }
+        if (!damageAfterType)
+        {
+            damageAfterType = 1;
+        }
+        BattleEventVar_SetMulValue(VAR_RATIO, 4096, 41, 0x20000);
+        BattleEventVar_SetValue(VAR_DAMAGE, damageAfterType);
+        BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_2);
+        int damageRatio = BattleEventVar_GetValue(VAR_RATIO);
+        int damageAfterProc2 = BattleEventVar_GetValue(VAR_DAMAGE);
+        LOWORD(finalDamage) = fixed_round(damageAfterProc2, damageRatio);
+    }
+    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_END);
+    BattleEventVar_Pop();
+    *destDamage = finalDamage;
+    return isFixedDamage;
+}
+
+// Called to check if a status condition should fail
+int THUMB_BRANCH_AddConditionCheckFailOverwrite(ServerFlow* serverFlow, BattleMon* battleMon, MoveCondition condition, int a4, char a5)
+{
+    int pokemonTypePair = BattleMon_GetPokeType(battleMon);
+
+    if (BattleMon_CheckIfMoveCondition(battleMon, condition) && a5 != 2)
+    {
+        return 1;
+    }
+    if (condition < CONDITION_CONFUSION && BattleMon_GetStatus(battleMon) && !a5)
+    {
+        return 3;
+    }
+    if (ServerEvent_GetWeather(serverFlow) == WEATHER_SUN && condition == CONDITION_FREEZE)
+    {
+#if ADD_NEW_ITEMS
+        if (!DoesItemPreventWeatherEffects(BattleMon_GetHeldItem(battleMon))) // dont block freeze when holding Utility Umbrella
+        {
+            return 3;
+        }
+#else
+        return 3;
+#endif
+    }
+    if (condition == CONDITION_POISON)
+    {
+        if (PokeTypePair_HasType(pokemonTypePair, TYPE_STEEL) || PokeTypePair_HasType(pokemonTypePair, TYPE_POISON))
+        {
+            return 2;
+        }
+    }
+    if (condition == CONDITION_BURN)
+    {
+        if (PokeTypePair_HasType(pokemonTypePair, TYPE_FIRE))
+        {
+            return 2;
+        }
+    }
+    if (condition == CONDITION_FREEZE)
+    {
+        if (PokeTypePair_HasType(pokemonTypePair, TYPE_ICE))
+        {
+            return 2;
+        }
+    }
+    if (condition == CONDITION_LEECHSEED)
+    {
+        if (PokeTypePair_HasType(pokemonTypePair, TYPE_GRASS))
+        {
+            return 2;
+        }
+    }
+    if (condition == CONDITION_YAWN && BattleMon_GetStatus(battleMon))
+    {
+        return 3;
+    }
+    if (condition == CONDITION_GASTROACID && BattleMon_GetValue(battleMon, VALUE_ABILITY) == ABIL121_MULTITYPE)
+    {
+        return 3;
+    }
+    return 0;
+}
 
 // DYNAMIC SPEED
 #if ADD_DYNAMIC_SPEED
@@ -3851,7 +4940,7 @@ u32 Dynamic_PokeSet_SortBySpeed(ServerFlow* server_flow, ActionOrderWork* action
     {
         u16 fainted_amount = 0;
 
-        u32 isTrickRoom = BattleField_CheckEffect(EFFECT_TRICK_ROOM);
+        u32 isTrickRoom = BattleField_CheckEffect(FLDEFF_TRICK_ROOM);
         u32 speed_stats[6];
         u32 priority[6];
         for (u32 i = first_idx; i < first_idx + poke_amount; ++i)
