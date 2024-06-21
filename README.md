@@ -57,9 +57,17 @@ Known Issues:
 
 ### Crit Damage
   - Crit damage boost reduced from x2 to x1.5
+
+### Terrains and Side Effects
+  - DISCLAIMER: the system is build and the mechanics implemented but without the setup moves or abilities these can't be used (you would have to do that or wait until I or someone else does it)
+  - Expansion to add new Field Effects and new Side Effects
+  - All 4 vanilla terrains added with full fuctionality
+  - Added Sticky Webs side effect as a proof of concept
+  - No background change or custom animations for the terrains yet
     
 ### Work In Progress
-  - Side and Filed effects Expansion (new hazards, weathers and terrains)
+  - Full ability expansion
+  - Add Terrain related items
   - Free space expansion (not doing this, atleast for a while)
 
 ## How to Install
@@ -94,6 +102,7 @@ Some patches need modified narcs either for visual effects or to not crash the g
   - Infinite Repel: a/0/0/2 modification needed (files 63, 64, 481 and 482)
   - Dynamic Speed: No modifications needed
   - Item Expansion: all modifications needed (these contain the changes for Infinite Rare Candy and Infinite Repel, so you will have to manualy change the files 63, 64, 481 and 482 with CTRMap if you want the Item Expansion with out those features)
+  - Terrains: a/0/0/2 modification needed (files 18 and 19)
 To apply this modifications follow this steps (I will use the a002 folder as an example, but all other folders work the same):
   - The name of each folder points to a specific NARC file in the game, so a002 is the a/0/0/2 NARC
   - Once you know the NARC go to the folder of the CTRMap Project and go to the path [CTRMap Project path]/vfs/[narc], in this case [CTRMap Project path]/vfs/a/0/0/2
