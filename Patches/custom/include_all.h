@@ -7780,6 +7780,38 @@ struct SWAN_ALIGNED(4) HandlerParam_ChangeType
     char field_7;
 };
 
+typedef BattleEventHandlerTableEntry* (* AbilityEventAddFunc)(int*);
+
+struct AbilityEventAddTable
+{
+    AbilID ability;
+    AbilityEventAddFunc func;
+};
+
+struct HandlerParam_ForceUseItem
+{
+    HandlerParam_Header header;
+    u8 pokemonSlot;
+    u8 unkn;
+    u16 itemID;
+};
+
+enum MoveCategory
+{
+    CATEGORY_STATUS = 0,
+    CATEGORY_PHYSICAL = 1,
+    CATEGORY_SPECIAL = 2,
+};
+
+enum Weather
+{
+    WEATHER_NULL = 0,
+    WEATHER_SUN = 1,
+    WEATHER_RAIN = 2,
+    WEATHER_HAIL = 3,
+    WEATHER_SANDSTORM = 4,
+};
+
 // BattleHandler_Execute definitions
 BattleMon* PokeCon_GetBattleMonConst(PokeCon* a1, int a2);
 int HEManager_GetUseItemNo(_WORD* a1);
@@ -9241,6 +9273,182 @@ int BattleMon_CanBattle(BattleMon* a1);
 int ServerControl_HideTurnCancel(int a1, BattleMon* a2, int a3);
 int ServerEvent_CheckFloating(ServerFlow* a1, BattleMon* a2, int a3);
 void BattleField_TurnCheckCore(BattleField* battleField, int(*callback)(FieldEffect, ServerFlow*), ServerFlow* serverFlow);
+
+// Ability Expansion definitions
+int AbilityEvent_GetSubPriority(BattleMon* a1);
+BattleEventPriority GetHandlerMainPriority(int* a1);
+BattleEventHandlerTableEntry* EventAddIntimidate(int* a1);
+BattleEventHandlerTableEntry* EventAddClearBody(int* a1);
+BattleEventHandlerTableEntry* EventAddClearBody(int* a1);
+BattleEventHandlerTableEntry* EventAddInnerFocus(int* a1);
+BattleEventHandlerTableEntry* EventAddSteadfast(int* a1);
+BattleEventHandlerTableEntry* EventAddThickFat(int* a1);
+BattleEventHandlerTableEntry* EventAddHyperCutter(int* a1);
+BattleEventHandlerTableEntry* EventAddHugePower(int* a1);
+BattleEventHandlerTableEntry* EventAddHugePower(int* a1);
+BattleEventHandlerTableEntry* EventAddTintedLens(int* a1);
+BattleEventHandlerTableEntry* EventAddSpeedBoost(int* a1);
+BattleEventHandlerTableEntry* EventAddBlaze(int* a1);
+BattleEventHandlerTableEntry* EventAddTorrent(int* a1);
+BattleEventHandlerTableEntry* EventAddOvergrow(int* a1);
+BattleEventHandlerTableEntry* EventAddSwarm(int* a1);
+BattleEventHandlerTableEntry* EventAddGuts(int* a1);
+BattleEventHandlerTableEntry* EventAddSkillLink(int* a1);
+BattleEventHandlerTableEntry* EventAddKeenEye(int* a1);
+BattleEventHandlerTableEntry* EventAddSimple(int* a1);
+BattleEventHandlerTableEntry* EventAddSolidRock(int* a1);
+BattleEventHandlerTableEntry* EventAddSolidRock(int* a1);
+BattleEventHandlerTableEntry* EventAddMarvelScale(int* a1);
+BattleEventHandlerTableEntry* EventAddRivalry(int* a1);
+BattleEventHandlerTableEntry* EventAddLeafGuard(int* a1);
+BattleEventHandlerTableEntry* EventAddDrizzle(int* a1);
+BattleEventHandlerTableEntry* EventAddDrought(int* a1);
+BattleEventHandlerTableEntry* EventAddSandStream(int* a1);
+BattleEventHandlerTableEntry* EventAddSnowWarning(int* a1);
+BattleEventHandlerTableEntry* EventAddAirLock(int* a1);
+BattleEventHandlerTableEntry* EventAddAirLock(int* a1);
+BattleEventHandlerTableEntry* EventAddTechnician(int* a1);
+BattleEventHandlerTableEntry* EventAddOblivious(int* a1);
+BattleEventHandlerTableEntry* EventAddHydration(int* a1);
+BattleEventHandlerTableEntry* EventAddPoisonHeal(int* a1);
+BattleEventHandlerTableEntry* EventAddIceBody(int* a1);
+BattleEventHandlerTableEntry* EventAddRainDish(int* a1);
+BattleEventHandlerTableEntry* EventAddShieldDust(int* a1);
+BattleEventHandlerTableEntry* EventAddAdaptability(int* a1);
+BattleEventHandlerTableEntry* EventAddSereneGrace(int* a1);
+BattleEventHandlerTableEntry* EventAddSolarPower(int* a1);
+BattleEventHandlerTableEntry* EventAddSwiftSwim(int* a1);
+BattleEventHandlerTableEntry* EventAddChlorophyll(int* a1);
+BattleEventHandlerTableEntry* EventAddShedSkin(int* a1);
+BattleEventHandlerTableEntry* EventAddTangledFeet(int* a1);
+BattleEventHandlerTableEntry* EventAddQuickFeet(int* a1);
+BattleEventHandlerTableEntry* EventAddHustle(int* a1);
+BattleEventHandlerTableEntry* EventAddBattleArmor(int* a1);
+BattleEventHandlerTableEntry* EventAddBattleArmor(int* a1);
+BattleEventHandlerTableEntry* EventAddSuperLuck(int* a1);
+BattleEventHandlerTableEntry* EventAddAngerPoint(int* a1);
+BattleEventHandlerTableEntry* EventAddSniper(int* a1);
+BattleEventHandlerTableEntry* EventAddIronFist(int* a1);
+BattleEventHandlerTableEntry* EventAddCompoundEyes(int* a1);
+BattleEventHandlerTableEntry* EventAddRockHead(int* a1);
+BattleEventHandlerTableEntry* EventAddReckless(int* a1);
+BattleEventHandlerTableEntry* EventAddStatic(int* a1);
+BattleEventHandlerTableEntry* EventAddPoisonPoint(int* a1);
+BattleEventHandlerTableEntry* EventAddFlameBody(int* a1);
+BattleEventHandlerTableEntry* EventAddEffectSpore(int* a1);
+BattleEventHandlerTableEntry* EventAddPlusMinus(int* a1);
+BattleEventHandlerTableEntry* EventAddPlusMinus(int* a1);
+BattleEventHandlerTableEntry* EventAddCuteCharm(int* a1);
+BattleEventHandlerTableEntry* EventAddSandVeil(int* a1);
+BattleEventHandlerTableEntry* EventAddSnowCloak(int* a1);
+BattleEventHandlerTableEntry* EventAddTrace(int* a1);
+BattleEventHandlerTableEntry* EventAddNormalize(int* a1);
+BattleEventHandlerTableEntry* EventAddRoughSkin(int* a1);
+BattleEventHandlerTableEntry* EventAddNaturalCure(int* a1);
+BattleEventHandlerTableEntry* EventAddSynchronize(int* a1);
+BattleEventHandlerTableEntry* EventAddDownload(int* a1);
+BattleEventHandlerTableEntry* EventAddSturdy(int* a1);
+BattleEventHandlerTableEntry* EventAddHeatproof(int* a1);
+BattleEventHandlerTableEntry* EventAddUnaware(int* a1);
+BattleEventHandlerTableEntry* EventAddDrySkin(int* a1);
+BattleEventHandlerTableEntry* EventAddVoltAbsorb(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterAbsorb(int* a1);
+BattleEventHandlerTableEntry* EventAddMotorDrive(int* a1);
+BattleEventHandlerTableEntry* EventAddLimber(int* a1);
+BattleEventHandlerTableEntry* EventAddInsomnia(int* a1);
+BattleEventHandlerTableEntry* EventAddInsomnia(int* a1);
+BattleEventHandlerTableEntry* EventAddOwnTempo(int* a1);
+BattleEventHandlerTableEntry* EventAddMagmaArmor(int* a1);
+BattleEventHandlerTableEntry* EventAddWaterVeil(int* a1);
+BattleEventHandlerTableEntry* EventAddImmunity(int* a1);
+BattleEventHandlerTableEntry* EventAddScrappy(int* a1);
+BattleEventHandlerTableEntry* EventAddSoundproof(int* a1);
+BattleEventHandlerTableEntry* EventAddLevitate(int* a1);
+BattleEventHandlerTableEntry* EventAddFlowerGift(int* a1);
+BattleEventHandlerTableEntry* EventAddFlashFire(int* a1);
+BattleEventHandlerTableEntry* EventAddForewarn(int* a1);
+BattleEventHandlerTableEntry* EventAddAnticipation(int* a1);
+BattleEventHandlerTableEntry* EventAddFrisk(int* a1);
+BattleEventHandlerTableEntry* EventAddAftermath(int* a1);
+BattleEventHandlerTableEntry* EventAddRunAway(int* a1);
+BattleEventHandlerTableEntry* EventAddColorChange(int* a1);
+BattleEventHandlerTableEntry* EventAddMoldBreaker(int* a1);
+BattleEventHandlerTableEntry* EventAddTruant(int* a1);
+BattleEventHandlerTableEntry* EventAddLightningRod(int* a1);
+BattleEventHandlerTableEntry* EventAddStormDrain(int* a1);
+BattleEventHandlerTableEntry* EventAddSlowStart(int* a1);
+BattleEventHandlerTableEntry* EventAddDamp(int* a1);
+BattleEventHandlerTableEntry* EventAddWonderGuard(int* a1);
+BattleEventHandlerTableEntry* EventAddStall(int* a1);
+BattleEventHandlerTableEntry* EventAddForecast(int* a1);
+BattleEventHandlerTableEntry* EventAddSuctionCups(int* a1);
+BattleEventHandlerTableEntry* EventAddLiquidOoze(int* a1);
+BattleEventHandlerTableEntry* EventAddKlutz(int* a1);
+BattleEventHandlerTableEntry* EventAddStickyHold(int* a1);
+BattleEventHandlerTableEntry* EventAddPressure(int* a1);
+BattleEventHandlerTableEntry* EventAddMagicGuard(int* a1);
+BattleEventHandlerTableEntry* EventAddBadDreams(int* a1);
+BattleEventHandlerTableEntry* EventAddPickup(int* a1);
+BattleEventHandlerTableEntry* EventAddUnburden(int* a1);
+BattleEventHandlerTableEntry* EventAddStench(int* a1);
+BattleEventHandlerTableEntry* EventAddShadowTag(int* a1);
+BattleEventHandlerTableEntry* EventAddArenaTrap(int* a1);
+BattleEventHandlerTableEntry* EventAddMagnetPull(int* a1);
+BattleEventHandlerTableEntry* EventAddPickpocket(int* a1);
+BattleEventHandlerTableEntry* EventAddSheerForce(int* a1);
+BattleEventHandlerTableEntry* EventAddDefiant(int* a1);
+BattleEventHandlerTableEntry* EventAddDefeatist(int* a1);
+BattleEventHandlerTableEntry* EventAddMultiscale(int* a1);
+BattleEventHandlerTableEntry* EventAddHeavyMetal(int* a1);
+BattleEventHandlerTableEntry* EventAddLightMetal(int* a1);
+BattleEventHandlerTableEntry* EventAddContrary(int* a1);
+BattleEventHandlerTableEntry* EventAddUnnerve(int* a1);
+BattleEventHandlerTableEntry* EventAddCursedBody(int* a1);
+BattleEventHandlerTableEntry* EventAddHealer(int* a1);
+BattleEventHandlerTableEntry* EventAddFriendGuard(int* a1);
+BattleEventHandlerTableEntry* EventAddWeakArmor(int* a1);
+BattleEventHandlerTableEntry* EventAddToxicBoost(int* a1);
+BattleEventHandlerTableEntry* EventAddFlareBoost(int* a1);
+BattleEventHandlerTableEntry* EventAddHarvest(int* a1);
+BattleEventHandlerTableEntry* EventAddTelepathy(int* a1);
+BattleEventHandlerTableEntry* EventAddMoody(int* a1);
+BattleEventHandlerTableEntry* EventAddOvercoat(int* a1);
+BattleEventHandlerTableEntry* EventAddPoisonTouch(int* a1);
+BattleEventHandlerTableEntry* EventAddRegenerator(int* a1);
+BattleEventHandlerTableEntry* EventAddBigPecks(int* a1);
+BattleEventHandlerTableEntry* EventAddSandRush(int* a1);
+BattleEventHandlerTableEntry* EventAddWonderSkin(int* a1);
+BattleEventHandlerTableEntry* EventAddAnalytic(int* a1);
+BattleEventHandlerTableEntry* EventAddIllusion(int* a1);
+BattleEventHandlerTableEntry* EventAddImposter(int* a1);
+BattleEventHandlerTableEntry* EventAddInfiltrator(int* a1);
+BattleEventHandlerTableEntry* EventAddMummy(int* a1);
+BattleEventHandlerTableEntry* EventAddMoxie(int* a1);
+BattleEventHandlerTableEntry* EventAddJustified(int* a1);
+BattleEventHandlerTableEntry* EventAddRattled(int* a1);
+BattleEventHandlerTableEntry* EventAddMagicBounce(int* a1);
+BattleEventHandlerTableEntry* EventAddSapSipper(int* a1);
+BattleEventHandlerTableEntry* EventAddPrankster(int* a1);
+BattleEventHandlerTableEntry* EventAddSandForce(int* a1);
+BattleEventHandlerTableEntry* EventAddRoughSkin(int* a1);
+BattleEventHandlerTableEntry* EventAddZenMode(int* a1);
+BattleEventHandlerTableEntry* EventAddVictoryStar(int* a1);
+BattleEventHandlerTableEntry* EventAddMoldBreaker(int* a1);
+BattleEventHandlerTableEntry* EventAddMoldBreaker(int* a1);
+void HandlerAddStatusFailedCommon(BattleEventItem* a1, ServerFlow* serverFlow, int pokemonSlot, int* work);
+ConditionData Condition_MakeSetTurns(int a1);
+ConditionData Condition_MakeTurnParam(int a1, int a2);
+int AddConditionCheckFailOverwrite(ServerFlow* serverFlow, BattleMon* defendingMon, MoveCondition moveCondition, ConditionData condition,u8 overrideMode);
+int AddConditionCheckFailStandard(ServerFlow* serverFlow, BattleMon* defendingMon, int failStatus, int moveCondition);
+int ServerEvent_MoveConditionCheckFail(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, int moveCondition);
+void ServerEvent_AddConditionFailed(ServerFlow* serverFlow, BattleMon* defendingMon, BattleMon* attackingMon, int moveCondition);
+BattleEventItem* ItemEvent_AddTempItem(BattleMon* battleMon, int itemID);
+void BattleEvent_ForceCallHandlers(ServerFlow* a1, BattleEventType a2);
+void SCQUE_PUT_ReservedPos(int* a1, int a2, char* a3, ...);
+unsigned int HEManager_PushStateUseItem(unsigned int* a1, __int16 a2);
+int ServerEvent_CheckHeldItemFail(ServerFlow* a1, BattleMon* a2, int a3);
+int ItemGetParam(u16 a1, ItemField a2);
+void ServerControl_ChangeHeldItem(ServerFlow* serverFlow, BattleMon* battleMon, int itemID, int consumeItem);
 
 extern u32 g_GameBeaconSys;
 extern SystemUI* g_SystemUI;
