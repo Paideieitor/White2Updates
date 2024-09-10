@@ -1,6 +1,6 @@
 # White2Updates
 Code Injection Patches to upgrade the White 2 gameplay experience while making a ROM Hack
-This are the precompliled legacy patches, I would not combine them with the actual patches and they probably don't compile due to changes in the ESDBs and include_all.h
+These are the compliled patches, do NOT combine them with the patches in this repository outside of the ``Compiled Patches`` folder
 
 ## Patches
 ### Hard Level Caps
@@ -10,7 +10,6 @@ This are the precompliled legacy patches, I would not combine them with the actu
 ### Dynamic Speed
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
   - Fully functional with speed/priority items and the moves After You and Quash
-  - To detect when After You and Quash are used (without using move ID) I use the game variable 16400, if you are already using it change it at the ```ORDER_ALTERING_MOVE_VAR``` definition, and compile and install the new patch
   - I've tested several scenearios and they all work fine, if you find a bug or a missing feature let me know :)
 
 ## How to Install
@@ -23,17 +22,11 @@ This are the precompliled legacy patches, I would not combine them with the actu
   - If the patch requires any other modification like changing a narc or text editing it will be covered in the notes of the patch
 
 ## Compatibility
-All legacy patches are independent and compatible with each other, you can combine them as you wish
+All these compiled patches are independent and compatible with each other, you can combine them as you wish
 
 ## Compiling the code
-If you want to change some numbers or just mess around with the code, follow this steps:
-  - Download the [White 2 Development Headers](https://github.com/kingdom-of-ds-hacking/swan)
-  - Install the [ARM GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
-  - Move the modified .cpp and .h files to the same folder along the swan-master folder
-  - Launch the cmd from that folder and run `arm-none-eabi-g++ -r -mthumb -march=armv5t -Os <patch name>.cpp -Iswan-master -o <patch name>.elf`
-  - Open CTRMap and go to the Extras tab, click "Convert ELF to DLL" and select the .yml file obtained from the folder of the modified patch
-  - Next on file selection screen, select the `<patch name>.elf` file you previously compiled and make sure the *install to /patches* checkbox is enabled
-  - Save your project and export your ROM
+Follow this [guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/)
+I heard that the guy who made it is pretty handsome
 
 ## Issues Reporting/Contribute
 You can message me on this discord at dararoraro
