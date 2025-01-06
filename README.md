@@ -1,14 +1,18 @@
 # White2Updates
 Code Injection Patches to upgrade the White 2 gameplay. This code is fully compatible with the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/), using a different environment will probably require some changes to the code.
 
-## Patches
+## Features
 ### Hard Level Caps
   - Limits the maximum level a pokemon can be
+  - If the level cap variable is set to 0 the level cap is ignored (0 is the default value)
   - Set the game variable 16415 to the level cap you want using CTRMap or some other editor:
     - To do that use the command WorkSet ```EventWorks.Set(16415, <new level cap>)``` in the script that should change the levelcap
 ### Dynamic Speed
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
   - Fully functional with speed/priority items and the moves After You and Quash
+### Gen6 crit changes
+  - Crits do 1.5 times the damage instead of doubling it
+  - Crit stages updated
 
 ## How to Install
 ### Installing tools
@@ -35,8 +39,7 @@ To install the patches you will need to compile the 4 CPP files in the pathces f
     - Select the ELF file you want to compile
     - Choose a name for the DLL file
   - If you didn't enable the *install to /patches* checkbox you will have to move the DLL files to the *vfs/data/patches* folder in your CTRMAP project
-### Final Steps
-Once everything is done create a ROM clicking ``File -> Export ROM`` or using the shortcut ``Ctrl + E``
+  - Once everything is done create a ROM clicking ``File -> Export ROM`` or using the shortcut ``Ctrl + E``
 
 ## Issues Reporting/Contribute
 You can message me on this discord at dararoraro

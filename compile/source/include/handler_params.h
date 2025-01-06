@@ -3,8 +3,6 @@
 
 #include "defs.h"
 
-struct ServerFlow;
-
 struct SWAN_ALIGNED(4) HandlerParam_StrParams
 {
     u16 ID;
@@ -31,6 +29,8 @@ struct HandlerParam_SendLast
     u8 pokeID;
     HandlerParam_StrParams exStr;
 };
+
+struct ServerFlow;
 
 extern "C" b32 BattleHandler_SetString(ServerFlow* serverFlow, HandlerParam_StrParams* params);
 

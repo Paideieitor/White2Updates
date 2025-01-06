@@ -111,6 +111,7 @@ struct SWAN_ALIGNED(32) MainModule
 extern "C" BtlSetup* MainModule_GetBtlSetup(MainModule* main);
 extern "C" BtlType MainModule_GetBattleType(MainModule* main);
 extern "C" void* MainModule_GetPlayerStatus(MainModule* main);
+extern "C" int MainModule_GetDebugFlag();
 
 extern "C" BtlType BtlSetup_GetBattleType(MainModule* main);
 

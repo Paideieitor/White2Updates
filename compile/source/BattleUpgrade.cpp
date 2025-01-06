@@ -5,6 +5,11 @@
 #include "include/server_events.h"
 #include "include/handler_params.h"
 
+#include "include/moves.h"
+#include "include/battle_events.h"
+#include "include/types.h"
+#include "include/abilities.h"
+
 #if ADD_LEVEL_CAP || DISABLE_EVS
 
 extern "C" u32 CalcBaseExpGain(BattleMon * defeatedMon, u32 keySystemLevelAdjust);
@@ -18,6 +23,9 @@ extern "C" u16* EventWork_GetWkPtr(EventWorkSave* eventWork, int swkId);
 extern "C" u16 GetLvlCap() {
     EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
     u16* lvlCap = EventWork_GetWkPtr(eventWork, LVL_CAP_VAR);
+
+    if (*lvlCap == 0)
+        *lvlCap = 100;
 
     return *lvlCap;
 }
@@ -179,7 +187,6 @@ extern "C" void THUMB_BRANCH_SAFESTACK_AddExpAndEVs(ServerFlow * serverFlow, Bat
 #define ACTION_ORDER_GET_PRIO(actionOrder) (actionOrder[i].field_8 >> 16) & 0x3FFFFF
 #define ACTION_ORDER_GET_SPECIAL_PRIO(actionOrder) ((actionOrder[i].field_8 >> 13) & 0x7)
 
-extern "C" u32 BattleRandom(u32 range);
 extern "C" u32 j_j_FaintRecord_GetCount_1(FaintRecord* faintRecord, u32 turn);
 extern "C" u32 Handler_IsPosOpenForRevivedMon(ServerFlow* serverFlow);
 extern "C" void SortActionOrderBySpeed(ServerFlow* serverFlow, ActionOrderWork* actionOrder, u32 remainingActions);
@@ -460,6 +467,114 @@ extern "C" u32 THUMB_BRANCH_BattleHandler_SendLast(ServerFlow* serverFlow, Handl
 }
 
 #endif // DYNAMIC_SPEED
+
+#if GEN6_CRIT
+
+b32 THUMB_BRANCH_RollCritical(u32 critStage)
+{
+    u8 CRIT_STAGE_CHANCES[] = { 16, 8, 2, 1, 1 };
+    return BattleRandom(CRIT_STAGE_CHANCES[critStage]) == 0;
+}
+
+#endif // GEN6_CRIT
+
+#if GEN6_CRIT || EXPAND_FIELD_EFFECTS
+
+extern "C" u32 CalcBaseDamage(u32 power, u32 attack, u32 level, u32 defense);
+extern "C" u32 WeatherPowerMod(u32 weather, u32 type);
+extern "C" u32 TypeEffectivenessPowerMod(u32 damage, u32 typeEffectiveness);
+
+extern "C" u32 THUMB_BRANCH_SAFESTACK_ServerEvent_CalcDamage(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, 
+    MoveParam* moveParam, u32 typeEffectiveness, u32 targetDmgRatio, u32 critFlag, u32 battleDebugMode, u16* destDamage) {
+    u32 category = PML_MoveGetCategory(moveParam->moveID);
+    u32 isFixedDamage = 0;
+    BattleEventVar_Push();
+    BattleEventVar_SetConstValue(VAR_TYPE_EFFECTIVENESS, typeEffectiveness);
+    u32 attackingSlot = BattleMon_GetID(attackingMon);
+    BattleEventVar_SetConstValue(VAR_ATTACKING_MON, attackingSlot);
+    u32 defendingSlot = BattleMon_GetID(defendingMon);
+    BattleEventVar_SetConstValue(VAR_DEFENDING_MON, defendingSlot);
+    BattleEventVar_SetConstValue(VAR_CRITICAL_FLAG, critFlag);
+    BattleEventVar_SetConstValue(VAR_MOVE_TYPE, moveParam->moveType);
+    BattleEventVar_SetConstValue(VAR_MOVE_ID, moveParam->moveID);
+    BattleEventVar_SetConstValue(VAR_MOVE_CATEGORY, category);
+    BattleEventVar_SetValue(VAR_FIXED_DAMAGE, 0);
+    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_1);
+
+    u32 finalDamage = BattleEventVar_GetValue(VAR_FIXED_DAMAGE);
+    if (finalDamage) {
+        isFixedDamage = 1;
+    }
+    else {
+        u32 power = ServerEvent_GetMovePower(serverFlow, attackingMon, defendingMon, moveParam);
+        u32 attack = ServerEvent_GetAttackPower(serverFlow, attackingMon, defendingMon, moveParam, critFlag);
+        u32 defense = ServerEvent_GetTargetDefenses(serverFlow, attackingMon, defendingMon, moveParam, critFlag);
+        u8 level = BattleMon_GetValue(attackingMon, VALUE_LEVEL);
+        u32 baseDamage = CalcBaseDamage(power, attack, level, defense);
+        u32 damage = baseDamage;
+        if (targetDmgRatio != 4096) {
+            damage = fixed_round(baseDamage, targetDmgRatio);
+        }
+
+        u32 weather = ServerEvent_GetWeather(serverFlow);
+        u32 weatherDmgRatio = WeatherPowerMod(weather, moveParam->moveType);
+        if (weatherDmgRatio != 4096) {
+            damage = fixed_round(damage, weatherDmgRatio);
+        }
+
+#if EXPAND_FIELD_EFFECTS
+        u32 terrain = ServerEvent_GetTerrain(serverFlow);
+        u32 terrainDmgRatio = TerrainPowerMod(serverFlow, attackingMon, defendingMon, terrain, moveParam->moveType);
+        if (terrainDmgRatio != 4096) {
+            damage = fixed_round(damage, terrainDmgRatio);
+        }
+#endif 
+        if (critFlag) {
+#if GEN6_CRIT
+            damage = (u32)((float)damage * 1.5f);
+#else
+            damage *= 2;
+#endif
+        }
+
+        if (!MainModule_GetDebugFlag() && ServerFlow_IsCompetitorScenarioMode(serverFlow)) {
+            u32 damageRoll = 85;
+            if (!battleDebugMode) {
+                damageRoll = (100 - BattleRandom(16u));
+            }
+            damage = damageRoll * damage / 100;
+        }
+
+        PokeType moveType = (PokeType)moveParam->moveType;
+        if (moveType != TYPE_NULL) {
+            u32 stab = ServerEvent_SameTypeAttackBonus(serverFlow, attackingMon, moveType);
+            damage = fixed_round(damage, stab);
+        }
+
+        u32 damageAfterType = TypeEffectivenessPowerMod(damage, typeEffectiveness);
+        if (category == CATEGORY_PHYSICAL
+            && BattleMon_GetStatus(attackingMon) == CONDITION_BURN
+            && BattleMon_GetValue(attackingMon, VALUE_EFFECTIVE_ABILITY) != ABIL062_GUTS) {
+            damageAfterType = 50 * damageAfterType / 100u;
+        }
+        if (!damageAfterType) {
+            damageAfterType = 1;
+        }
+
+        BattleEventVar_SetMulValue(VAR_RATIO, 4096, 41, 0x20000);
+        BattleEventVar_SetValue(VAR_DAMAGE, damageAfterType);
+        BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_2);
+        int damageRatio = BattleEventVar_GetValue(VAR_RATIO);
+        int damageAfterProc2 = BattleEventVar_GetValue(VAR_DAMAGE);
+        finalDamage = fixed_round(damageAfterProc2, damageRatio);
+    }
+    BattleEvent_CallHandlers(serverFlow, EVENT_MOVE_DAMAGE_PROCESSING_END);
+    BattleEventVar_Pop();
+    *destDamage = (u16)finalDamage;
+
+    return isFixedDamage;
+}
+#endif // EXPAND_FIELD_EFFECTS || GEN6_CRIT
 
 // Dummy hook to permanently load this patch with the ARM9 and avoid the PMC memory leak.
 int THUMB_BRANCH_ARM9_0x020091A8(int result) {

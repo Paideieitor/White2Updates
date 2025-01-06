@@ -149,10 +149,52 @@ struct BattleParty
     u8 numCoverPos;
 };
 
+enum MoveCondition
+{
+    CONDITION_NONE = 0x0,
+    CONDITION_PARALYSIS = 0x1,
+    CONDITION_SLEEP = 0x2,
+    CONDITION_FREEZE = 0x3,
+    CONDITION_BURN = 0x4,
+    CONDITION_POISON = 0x5,
+    CONDITION_CONFUSION = 0x6,
+    CONDITION_ATTRACT = 0x7,
+    CONDITION_BIND = 0x8,
+    CONDITION_NIGHTMARE = 0x9,
+    CONDITION_CURSE = 0xA,
+    CONDITION_TAUNT = 0xB,
+    CONDITION_TORMENT = 0xC,
+    CONDITION_DISABLE = 0xD,
+    CONDITION_YAWN = 0xE,
+    CONDITION_HEALBLOCK = 0xF,
+    CONDITION_GASTROACID = 0x10,
+    CONDITION_FORESIGHT = 0x11,
+    CONDITION_LEECHSEED = 0x12,
+    CONDITION_EMBARGO = 0x13,
+    CONDITION_PERISHSONG = 0x14,
+    CONDITION_INGRAIN = 0x15,
+    CONDITION_BLOCK = 0x16,
+    CONDITION_ENCORE = 0x17,
+    CONDITION_ROOST = 0x18,
+    CONDITION_MOVELOCK = 0x19,
+    CONDITION_CHARGELOCK = 0x1A,
+    CONDITION_CHOICELOCK = 0x1B,
+    CONDITION_MUSTHIT = 0x1C,
+    CONDITION_LOCKON = 0x1D,
+    CONDITION_FLOATING = 0x1E,
+    CONDITION_KNOCKEDDOWN = 0x1F,
+    CONDITION_TELEKINESIS = 0x20,
+    CONDITION_SKYDROP = 0x21,
+    CONDITION_ACCURACYUP = 0x22,
+    CONDITION_AQUARING = 0x23,
+    CONDITION_24 = 0x24,
+};
+
 extern "C" u32 BattleMon_GetID(BattleMon* battleMon);
 extern "C" b32 BattleMon_IsFainted(BattleMon* battleMon);
 extern "C" ItemID BattleMon_GetHeldItem(BattleMon* battleMon);
 extern "C" u32 BattleMon_GetValue(BattleMon* battleMon, BattleMonValue value);
+extern "C" MoveCondition BattleMon_GetStatus(BattleMon* battleMon);
 extern "C" u32 BattleMon_GetConfrontRecCount(BattleMon* battleMon);
 extern "C" u32 BattleMon_GetConfrontedPokeID(BattleMon* battleMon, u32 confronted);
 extern "C" PartyPkm* BattleMon_GetSrcData(BattleMon* battleMon);
@@ -161,6 +203,7 @@ extern "C" u32 BattleParty_GetPartyCount(BattleParty * party);
 extern "C" BattleMon * BattleParty_GetMonData(BattleParty * party, u32 idx);
 extern "C" BattleMon* BattleParty_GetPartyMember(BattleParty* party, u32 idx);
 
+extern "C" u32 BattleRandom(u32 range);
 extern "C" b32 CheckHPDebug(BattleMon* battleMon);
 
 #endif // __BATTLE_MON_H

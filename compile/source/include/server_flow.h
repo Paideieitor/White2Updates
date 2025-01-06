@@ -288,6 +288,7 @@ struct SWAN_ALIGNED(8) ServerFlow
 };
 
 extern "C" u32 ServerFlow_ReqChangePokeForServer(ServerFlow * serverFlow, u16 * a2);
+extern "C" b32 ServerFlow_IsCompetitorScenarioMode(ServerFlow* serverFlow);
 extern "C" u32 ActionOrder_Proc(ServerFlow* serverFlow, ActionOrderWork* actionOrder);
 
 extern "C" b32 ServerControl_TurnCheck(ServerFlow* serverFlow);

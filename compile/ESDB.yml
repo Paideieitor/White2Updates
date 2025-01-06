@@ -111568,7 +111568,7 @@ Symbols:
   - Name: dword_21AE348
     Segment: 0x5
     Address: 0x21ae349
-  - Name: sub_21AE34C
+  - Name: ServerFlow_IsCompetitorScenarioMode
     Segment: 0x5
     Address: 0x21ae34d
   - Name: loc_21AE35C
