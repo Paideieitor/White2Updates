@@ -7,7 +7,7 @@ struct SWAN_ALIGNED(4) HandlerParam_StrParams
 {
     u16 ID;
     short flags;
-    int type;
+    int subProcID;
     int args[8];
 };
 

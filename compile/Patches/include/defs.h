@@ -11,7 +11,7 @@
 
 #include "swantypes.h"
 
-#define DEBUG_PRINT true
+#define DEBUG_PRINT 1
 #if DEBUG_PRINT
 #include "kPrint.h"
 #define DPRINT(format) k::Print(format)
@@ -20,6 +20,8 @@
 #define DPRINT(format)
 #define DPRINTF(format, ...)
 #endif
+
+#define ARRAY_COUNT(arr) sizeof(arr) / sizeof(arr[0])
 
 struct SWAN_ALIGNED(2) StrBuf
 {
@@ -35,5 +37,18 @@ extern "C" u32 fixed_round(u32 value, u32 ratio);
 
 extern u32 g_GameBeaconSys;
 #define GAME_DATA *(GameData**)(g_GameBeaconSys + 4)
+
+struct PassPowerState
+{
+    u32 remainFrames[16];
+    u8 effectSrcIDs[16];
+    u16 effectValues[16];
+    u8 lastUsed;
+    u8 field_71;
+    u16 field_72;
+};
+extern PassPowerState g_PassPowerState;
+static u32* PASSPOWER_EXPLORING_CHANCES = (u32*)0x208FE4C;
+#define PASSPOWER_EFF_EXPLORING 0xD
 
 #endif // __DEFS_H

@@ -1,7 +1,8 @@
 #include "settings.h"
+#include "GameVariables.h"
+#include "BattleUpgrade.h"
 
 #include "include/server_flow.h"
-
 #include "include/server_events.h"
 #include "include/handler_params.h"
 
@@ -17,18 +18,6 @@ extern "C" u32 ScaleExpGainedByLevel(BattleMon * battleMon, u32 expToAdd, u32 cu
 extern "C" u32 PassPower_ApplyEXP(u32 baseExp);
 extern "C" void AddEVs(BattleMon * battleMon, BattleMon * defeatedMon, CalcExpWork * calcExpWork);
 extern "C" u32 PML_UtilGetPkmLvExp(u16 species, u16 form, int level);
-extern "C" EventWorkSave* GameData_GetEventWork(GameData* gameData);
-extern "C" u16* EventWork_GetWkPtr(EventWorkSave* eventWork, int swkId);
-
-extern "C" u16 GetLvlCap() {
-    EventWorkSave* eventWork = GameData_GetEventWork(GAME_DATA);
-    u16* lvlCap = EventWork_GetWkPtr(eventWork, LVL_CAP_VAR);
-
-    if (*lvlCap == 0)
-        *lvlCap = 100;
-
-    return *lvlCap;
-}
 
 extern "C" void THUMB_BRANCH_SAFESTACK_AddExpAndEVs(ServerFlow * serverFlow, BattleParty * party, BattleMon * defeatedMon, CalcExpWork * partyCalcExpWork) {
     BtlSetup* btlSetup = MainModule_GetBtlSetup(serverFlow->mainModule);
@@ -272,7 +261,6 @@ extern "C" void PokeSet_SortBySpeedDynamic(ServerFlow* serverFlow, ActionOrderWo
             if (!BattleMon_IsFainted(actionOrder[i].battleMon)) {
                 speedStats[i] = (u16)ServerEvent_CalculateSpeed(serverFlow, actionOrder[i].battleMon, 1);
 
-
                 priority[i] = ACTION_ORDER_GET_PRIO(actionOrder);
                 // Special priority takes into account item & ability prio boosts (1 = no added prio).
                 int specialPriority = ACTION_ORDER_GET_SPECIAL_PRIO(actionOrder);
@@ -384,6 +372,7 @@ extern "C" int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* serverFlow, 
                 serverFlow->flowResult = 3;
                 return serverFlow->numActOrder;
             }
+
             u32 faintedCount = j_j_FaintRecord_GetCount_1(&serverFlow->faintRecord, 0);
             if (Handler_IsPosOpenForRevivedMon(serverFlow) || faintedCount) {
                 ServerFlow_ReqChangePokeForServer(serverFlow, &serverFlow->field_4CE);
@@ -408,6 +397,7 @@ extern "C" int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* serverFlow, 
                 ServerControl_CheckActivation(serverFlow);
                 SortActionOrderBySpeed(serverFlow, &actionOrderWork[currentActionIdx], (u32)serverFlow->numActOrder - currentActionIdx);
             }
+
             procAction = ActionOrder_Proc(serverFlow, &actionOrderWork[currentActionIdx]);
 
             if (interruptActionFlag != 1) // skip speed calcs if after you was used
@@ -436,7 +426,6 @@ extern "C" int THUMB_BRANCH_ServerFlow_ActOrderProcMain(ServerFlow* serverFlow, 
         return currentActionIdx + 1;
     }
 }
-
 
 extern "C" u32 THUMB_BRANCH_BattleHandler_InterruptAction(ServerFlow* serverFlow, HandlerParam_InterruptPoke* params) {
     if (!ActionOrder_InterruptReserve(serverFlow, params->pokeID))
@@ -470,10 +459,11 @@ extern "C" u32 THUMB_BRANCH_BattleHandler_SendLast(ServerFlow* serverFlow, Handl
 
 #if GEN6_CRIT
 
-b32 THUMB_BRANCH_RollCritical(u32 critStage)
+u8 CRIT_STAGES[5] = { 16, 8, 2, 1, 1 };
+
+extern "C" b32 THUMB_BRANCH_RollCritical(u32 critStage)
 {
-    u8 CRIT_STAGE_CHANCES[] = { 16, 8, 2, 1, 1 };
-    return BattleRandom(CRIT_STAGE_CHANCES[critStage]) == 0;
+    return BattleRandom(CRIT_STAGES[critStage]) == 0;
 }
 
 #endif // GEN6_CRIT
@@ -481,10 +471,10 @@ b32 THUMB_BRANCH_RollCritical(u32 critStage)
 #if GEN6_CRIT || EXPAND_FIELD_EFFECTS
 
 extern "C" u32 CalcBaseDamage(u32 power, u32 attack, u32 level, u32 defense);
-extern "C" u32 WeatherPowerMod(u32 weather, u32 type);
+extern "C" u32 WeatherPowerMod(u32 weather, u32 subProcID);
 extern "C" u32 TypeEffectivenessPowerMod(u32 damage, u32 typeEffectiveness);
 
-extern "C" u32 THUMB_BRANCH_SAFESTACK_ServerEvent_CalcDamage(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, 
+extern "C" u32 THUMB_BRANCH_SAFESTACK_ServerEvent_CalcDamage(ServerFlow * serverFlow, BattleMon * attackingMon, BattleMon * defendingMon,
     MoveParam* moveParam, u32 typeEffectiveness, u32 targetDmgRatio, u32 critFlag, u32 battleDebugMode, u16* destDamage) {
     u32 category = PML_MoveGetCategory(moveParam->moveID);
     u32 isFixedDamage = 0;
@@ -575,8 +565,3 @@ extern "C" u32 THUMB_BRANCH_SAFESTACK_ServerEvent_CalcDamage(ServerFlow* serverF
     return isFixedDamage;
 }
 #endif // EXPAND_FIELD_EFFECTS || GEN6_CRIT
-
-// Dummy hook to permanently load this patch with the ARM9 and avoid the PMC memory leak.
-int THUMB_BRANCH_ARM9_0x020091A8(int result) {
-    return result;
-}

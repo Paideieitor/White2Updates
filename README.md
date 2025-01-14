@@ -1,49 +1,68 @@
 # White2Updates
-Code Injection Patches to upgrade the White 2 gameplay. This code is fully compatible with the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/), using a different environment will probably require some changes to the code.
+Code Injection Patches to upgrade the Pokémon White 2 Edition gameplay. 
+This code is fully compatible with the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/).
 
 ## Features
+All the features are active by default unless it is specified
+To personalize the patch modify the ``settings.h`` file (I don't recomend modifying the non-boolean definitions unless you know what you are doing) and then build the DLL
 ### Hard Level Caps
-  - Limits the maximum level a pokemon can be
+  - Limits the maximum level a Pokémon can be
   - If the level cap variable is set to 0 the level cap is ignored (0 is the default value)
+  - Rare Candies ignore the level cap, you can change that in the ``settings.h`` file
   - Set the game variable 16415 to the level cap you want using CTRMap or some other editor:
-    - To do that use the command WorkSet ```EventWorks.Set(16415, <new level cap>)``` in the script that should change the levelcap
+    - To change the levelcap use the command WorkSet ``EventWorks.Set(16415, <new level cap>)`` in a script
+### Disable EVs
+  - Removes the gain of EVs from defeating Pokémons, independetly of the EV gain value in the Personal NARC
+  - Does NOT prevent the gain of EVs through EV items like *Protein*
+### Infinite Rare Candy Item
+  - Allows you to level up a Pokémon until the level cap (100 by default).
+  - Respects the hard level cap if that patch is active
+  - The default item ID for this is 622, you can change this in the ``settings.h`` file
+  - It can be registered, to do so the item data file needs to be modified, you can use the file named ``622`` in the ``NARCS/024`` folder
+  - This repository does not provide graphical or text changes, so the items will have their vanilla appearance unless you change it
+### Infinite Repel Item
+  - Allows you to toggle the repel effect on and off
+  - Removes the functionality of regular repel effect items like Super Repel
+  - The default item ID for this is 623, you can change this in the ``settings.h`` file
+  - It can be registered, to do so the item data file needs to be modified, you can use the file named ``623`` in the ``NARCS/024`` folder
+  - In order for the Infinite Repel Item to display the correct message when being activated or desactivated from the Registered menu you will have to modify the scripts 10144 and 10130 respectivelly
+  - This repository does not provide graphical or text changes, so the items will have their vanilla appearance unless you change it
+### Repel Effect Removes Shaking Grass
+  - Removes the chance of a shaking grass or a fishing spot appearing while the repel effect is active
 ### Dynamic Speed
   - Instead of calculating action order at the begining of every turn, the game updates it depending on the most actualized speed stats and priority
   - Fully functional with speed/priority items and the moves After You and Quash
 ### Gen6 crit changes
-  - Crits do 1.5 times the damage instead of doubling it
-  - Crit stages updated
+  - Crits damage boost updated to Gen6 (1.5 multiplier instead of doubling the damage)
+  - Crit stages updated to Gen6
 
 ## How to Install
 ### Installing tools
-  - Install [CTRMap-Community Edition](https://github.com/kingdom-of-ds-hacking/CTRMap-CE) as well as the [CTRMapV](https://github.com/kingdom-of-ds-hacking/CTRMapV) plugin
-  - Install the CTRMapV plugin (without it you won't be able to open a Pokemon White 2 ROM)
-  - Create an extracted folder of the contents of your ROM, then create a new project
+  - Set up a *Pokémon White 2 Edition USA* CTRMap project following this [guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/bw_b2w2-using_ctrmap/)
   - Download [PMC](https://github.com/kingdom-of-ds-hacking/PMC), go to the extras tab of CTRMap and click *Install/Update PMC* (You only need to do this the first time you create a new project)
   - Make sure there is a `patches` directory at *vfs/data/patches*, if there isn't create one
-  - Move any patch(DLL file) you want to install in the *vfs/data/patches* folder
+  - Move ``White2Updates.dll`` in the *vfs/data/patches* folder
   - Create a ROM clicking ``File -> Export ROM`` or using the shortcut ``Ctrl + E``
 
-### Compiling the code
-Before compiling make sure to open the ``settings.h`` file with your prefered text editor, here you can modify the patches you will be installing, I don't recomend modifying the non-boolean definitions unless you know what you are doing.
-To install the patches you will need to compile the 4 CPP files in the pathces folder, follow this steps:
-  - If you don't have a Code Injection environment follow the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/)
-  - Move the source code in *compile/source* of this repository to your environment
-  - Open a cmd terminal (if you are in Windows go to the path input box, type "cmd" and click Enter)
-  - Input the following commands (substitute the parts bettwen [] with the path in your computer):
-    - ``arm-none-eabi-g++ [Patches path]/BattleUpgrade.cpp -I [swan path] -I [NitroKernel/include path] -o [Output path]/BattleUpgradeelf -r -mthumb -march=armv5t -Os``
-  - You should have now an ELF file, open CTRMap and go to the ``Extras`` tab and do the following:
-    - Make sure the *install to /patches* checkbox is enabled
-    - ``LShift + Click`` on the *Convert ELF to DLL* button
-    - Select the ESDB file that you can find in the *compile* folder of this repository
-    - Select the ELF file you want to compile
-    - Choose a name for the DLL file
-  - If you didn't enable the *install to /patches* checkbox you will have to move the DLL files to the *vfs/data/patches* folder in your CTRMAP project
-  - Once everything is done create a ROM clicking ``File -> Export ROM`` or using the shortcut ``Ctrl + E``
+### Building the DLL
+If you have followed the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/) you will already have all the tools you need to build, but if you havent
+  - Set up a *Pokémon White 2 Edition USA* CTRMap project following this [guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/bw_b2w2-using_ctrmap/)
+  - Download [PMC](https://github.com/kingdom-of-ds-hacking/PMC), go to the extras tab of CTRMap and click *Install/Update PMC* (You only need to do this the first time you create a new project)
+  - Make sure there is a `patches` directory at *vfs/data/patches*, if there isn't create one
+  - Install the [ARM GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
+Once you have set up:
+  - Open ``buildDLL.bat`` with your prefered text editor
+  - Change the *CTRMAP* variable to the location of ``CTRMap.jar`` in your computer
+  - Change the *OUTPUT_DIR* variable to the path where you want the DLL to be moved, I recommend putting it directly in the ``patches`` folder of your CTRMap project
+  - Save the changes you just made
+  - Double click the ``buildDLL.bat`` file and a command prompt window should appear (if any errors pop up you can contact me through Discord, @dararoraro)
+  - ``White2Updates.dll`` should be in the output folder you selected
+  - If it is not already, move ``White2Updates.dll`` in the ``vfs/data/patches`` folder of your CTRMap project
+  - Create a ROM clicking ``File -> Export ROM`` or using the shortcut ``Ctrl + E``
 
-## Issues Reporting/Contribute
-You can message me on this discord at dararoraro
-If you are having troubles compiling the code or running CTRMap, I recommend joining [Kingdom of DS Hacking](https://discord.gg/zAtqJDW2jC) and the [DS Modding Community](https://discord.gg/YBtdN3aXfv )
+## Reporting Issues/Contributing
+You can message me through Discord, @dararoraro
+If you are having troubles building the patches or running CTRMap, I recommend joining [Kingdom of DS Hacking](https://discord.gg/zAtqJDW2jC) and the [DS Modding Community](https://discord.gg/YBtdN3aXfv)
 
 ## Credits
 * Hello007 - CTRMap and the Gen V code injection system

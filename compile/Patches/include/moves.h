@@ -11,5 +11,6 @@ enum MoveCategory
 };
 
 extern "C" u32 PML_MoveGetCategory(u32 moveID);
+extern "C" u32 PML_MoveGetMaxPP(u32 moveID, u32 ppUpStage);
 
 #endif // __MOVES_H

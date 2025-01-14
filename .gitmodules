@@ -1,0 +1,9 @@
+[submodule "include/swan"]
+	path = compile/ExternalDependencies/swan
+	url = git@github.com:kingdom-of-ds-hacking/swan.git
+[submodule "include/extlib"]
+	path = compile/ExternalDependencies/extlib
+	url = https://github.com/HelloOO7/ExtLib.git
+[submodule "include/NitroKernel"]
+	path = compile/ExternalDependencies/NitroKernel
+	url = git@github.com:HelloOO7/NitroKernel.git
