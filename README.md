@@ -35,11 +35,10 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
 ### Gen6 crit changes
   - Crits damage boost updated to Gen6 (1.5 multiplier instead of doubling the damage)
   - Crit stages updated to Gen6
-### Ability Expantion (Up to Gen6)
+### Ability Expansion (Up to Gen6)
   - Every single ability from Gen6 has been added to the battle engine
   - This patch needs some text files to be modified, you have to move all the files in the ``NARCS/002`` folder to your CTRMap project folder at ``vfs/data/a/0/0/2``
   - To change a pokemon ability to an expanded just modify the ability ID in that particular Pokémon Personal NARC (the ability IDs are preservet from vanilla games, but you can check them in ``BattleUpgrade.h``)
-
   - Big shoutout to [Spago](https://github.com/SpagoAsparago) who already did this, this patch adds the abilities that where missing from his patch and attempts to fix some bugs and inconsistencies with the vanilla mechanics
 
 ## How to Install
