@@ -38,7 +38,7 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
 ### Ability Expantion (Up to Gen6)
   - Every single ability from Gen6 has been added to the battle engine
   - This patch needs some text files to be modified, you have to move the files named ``18`` and ``19`` in the ``NARCS/002`` folder to your CTRMap project folder at ``vfs/data/a/0/0/2``
-  - To change a pokemon ability to an expanded just modify the ability ID in that particular Pokémon Personal NARC (the ability IDs are preservet from vanilla games, but you can check them in ``BattleUpgrade.h``)
+  - To change a pokemon ability to an expanded just modify the ability ID in that particular Pokémon Personal NARC (the ability IDs are preserved from vanilla games, but you can check them in ``BattleUpgrade.h``)
 
   - Big shoutout to [Spago](https://github.com/SpagoAsparago) who already did this, this patch adds the abilities that where missing from his patch and attempts to fix some bugs and inconsistencies with the vanilla mechanics
 
