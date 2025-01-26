@@ -1,6 +1,7 @@
 #ifndef __TYPES_H
 #define __TYPES_H
 
+typedef u32 POKE_TYPE;
 enum PokeType
 {
 	TYPE_NORMAL = 0x0,
@@ -22,5 +23,18 @@ enum PokeType
 	TYPE_DARK = 0x10,
 	TYPE_NULL = 0x11,
 };
+
+enum TypeEffectiveness
+{
+	EFFECTIVENESS_IMMUNE = 0x0,
+	EFFECTIVENESS_1_4 = 0x1,
+	EFFECTIVENESS_1_2 = 0x2,
+	EFFECTIVENESS_1 = 0x3,
+	EFFECTIVENESS_2 = 0x4,
+	EFFECTIVENESS_4 = 0x5,
+};
+
+extern "C" u16 PokeTypePair_MakeMonotype(u16 type);
+extern "C" TypeEffectiveness GetTypeEffectiveness(POKE_TYPE moveType, POKE_TYPE pokemonType);
 
 #endif // __TYPES_H

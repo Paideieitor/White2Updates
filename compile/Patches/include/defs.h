@@ -1,12 +1,14 @@
 #ifndef __DEFS_H
 #define __DEFS_H
 
-#ifdef __GNUC__
-#define SWAN_PACKED __attribute__((__packed__))
-#define SWAN_ALIGNED(x) __attribute__((aligned(x)))
-#else
+#ifdef _CONSOLE
 #define SWAN_PACKED
 #define SWAN_ALIGNED(x)
+#define SWAN_NORETURN
+#else
+#define SWAN_PACKED __attribute__((__packed__))
+#define SWAN_ALIGNED(x) __attribute__((aligned(x)))
+#define SWAN_NORETURN __attribute__((noreturn))
 #endif
 
 #include "swantypes.h"

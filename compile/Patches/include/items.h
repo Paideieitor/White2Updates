@@ -5,6 +5,7 @@
 
 #define REG_ITEM(regID, itemID) (regID << 10) | itemID
 
+typedef u32 ITEM_ID;
 enum ItemID
 {
 	IT_NULL = 0x0,
@@ -972,8 +973,14 @@ enum ItemField
 	ITSTAT_FRIENDSHIP3 = 0x3E,
 };
 
+struct BattleEventItem;
+
 extern "C" void* PML_ItemReadDataFile(u32 itemID, int dataType, HeapID heapID);
 extern "C" u32 PML_ItemGetParam(ItemData* itemData, ItemField itemField);
+extern "C" b32 PML_ItemIsBerry(u16 itemId);
+extern "C" b32 PML_ItemIsMail(u16 itemId);
+
+extern "C" int CommonGetItemParam(BattleEventItem* item, ItemField itemField);
 
 #endif // __ITEMS_H
 

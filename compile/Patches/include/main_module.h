@@ -4,6 +4,7 @@
 #include "defs.h"
 
 #include "battle_setup.h"
+#include "battle_client.h"
 
 struct MainModule;
 
@@ -16,14 +17,7 @@ struct PokeCon
     u32 forServer;
 };
 
-struct EscapeInfo
-{
-    u32 count;
-    u8 clientID[4];
-};
-
 #define BtlServerWk u8
-#define BtlClientWk u8
 struct SWAN_ALIGNED(32) MainModule
 {
     BtlSetup* btlSetup;
@@ -111,7 +105,9 @@ struct SWAN_ALIGNED(32) MainModule
 extern "C" BtlSetup* MainModule_GetBtlSetup(MainModule* main);
 extern "C" BtlType MainModule_GetBattleType(MainModule* main);
 extern "C" void* MainModule_GetPlayerStatus(MainModule* main);
+extern "C" u32 MainModule_PokeIDToPokePos(MainModule* mainModule, PokeCon* pokeCon, u32 pokemonSlot);
 extern "C" int MainModule_GetDebugFlag();
+extern "C" b32 MainModule_IsAllyMonID(u32 slot1, u32 slot2);
 
 extern "C" BtlType BtlSetup_GetBattleType(MainModule* main);
 

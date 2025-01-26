@@ -3,6 +3,8 @@
 
 #include "defs.h"
 
+struct ServerFlow;
+
 enum BattleEventVar
 {
 	VAR_NULL = 0x0,
@@ -257,16 +259,79 @@ enum BattleEventType
 	EVENT_AFTER_MOVE = 0xA4,
 };
 
-struct ServerFlow;
+struct BattleEventItem;
+
+typedef void(*BattleEventHandler)(BattleEventItem* item, ServerFlow* serverFlow, u32 pokemonSlot, u32* work);
+
+struct BattleEventHandlerTableEntry
+{
+	BattleEventType eventType;
+	BattleEventHandler handler;
+};
+
+typedef b32(*BattleEventSkipCheckHandler)(void* handle, void* work, u32 factorType, u32 eventType, u16 subID, u8 pokeID);
+
+enum BattleEventItemType
+{
+	EVENTITEM_MOVE = 0x0,
+	EVENTITEM_POS = 0x1,
+	EVENTITEM_SIDE = 0x2,
+	EVENTITEM_FIELD = 0x3,
+	EVENTITEM_ABILITY = 0x4,
+	EVENTITEM_ITEM = 0x5,
+	EVENTITEM_ISOLATED = 0x6,
+	EVENTITEM_MAX = 0x7,
+};
+
+enum BattleEventPriority
+{
+	EVENTPRI_MOVE_DEFAULT = 0x0,
+	EVENTPRI_POS_DEFAULT = 0x1,
+	EVENTPRI_SIDE_DEFAULT = 0x2,
+	EVENTPRI_FIELD_DEFAULT = 0x3,
+	EVENTPRI_ABILITY_POISON_TOUCH = 0x4,
+	EVENTPRI_ABILITY_DEFAULT = 0x5,
+	EVENTPRI_ITEM_DEFAULT = 0x6,
+	EVENTPRI_ABILITY_STALL = 0x7,
+	EVENTPRI_MAX = 0x8,
+};
+
+struct SWAN_ALIGNED(4) BattleEventItem
+{
+	BattleEventItem* prev;
+	BattleEventItem* next;
+	const BattleEventHandlerTableEntry* handlerTable;
+	BattleEventSkipCheckHandler skipCheckHandler;
+	BattleEventItemType factorType;
+	u32 priority;
+	u32 flags;
+	u32 work[7];
+	u16 subID;
+	u8 dependID;
+	u8 pokeID;
+};
+
+extern "C" BattleEventItem * BattleEvent_AddItem(BattleEventItemType eventType, u16 subID, BattleEventPriority mainPriority, u32 subPriority, u32 dependID, const BattleEventHandlerTableEntry * handlerTable, u16 NumHandlers);
+extern "C" void BattleEventItem_Remove(BattleEventItem* item);
+
+extern "C" BattleEventItem* ItemEvent_AddItem(BattleMon* battleMon);
+extern "C" void ItemEvent_RemoveItem(BattleMon* battleMon);
+extern "C" BattleEventItem* ItemEvent_AddItemCore(BattleMon* battleMon, ITEM_ID itemID);
+extern "C" void BattleEventItem_SetTempItemFlag(BattleEventItem* item);
+extern "C" void BattleEventItem_SetWorkValue(BattleEventItem* item, u32 idx, u32 value);
 
 extern "C" void BattleEventVar_Push();
 extern "C" void BattleEventVar_Pop();
-extern "C" u32 BattleEventVar_SetValue(BattleEventVar eventVar, int value);
-extern "C" u32 BattleEventVar_SetConstValue(BattleEventVar eventVar, int value);
-extern "C" u32 BattleEventVar_SetMulValue(BattleEventVar eventVar, int value1, int value2, int value3);
+extern "C" void BattleEventVar_SetValue(BattleEventVar eventVar, int value);
+extern "C" void BattleEventVar_SetConstValue(BattleEventVar eventVar, int value);
+extern "C" void BattleEventVar_SetMulValue(BattleEventVar eventVar, int value1, int value2, int value3);
+extern "C" u32 BattleEventVar_RewriteValue(BattleEventVar battleEvent, int value);
+extern "C" void BattleEventVar_SetRewriteOnceValue(BattleEventVar battleEvent, int value);
+extern "C" void BattleEventVar_MulValue(BattleEventVar battleEvent, int value);
 extern "C" int BattleEventVar_GetValue(BattleEventVar eventVar);
 
 extern "C" void BattleEvent_CallHandlers(ServerFlow* serverFlow, BattleEventType event);
+extern "C" void BattleEvent_ForceCallHandlers(ServerFlow* serverFlow, BattleEventType event);
 
 #endif // __BATTLE_EVENTS_H
 

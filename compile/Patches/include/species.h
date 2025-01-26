@@ -1,6 +1,7 @@
 #ifndef __SPECIES_H
 #define __SPECIES_H
 
+typedef u32 SPECIES;
 enum Species 
 {
 	PK000_NULL = 0x0,
@@ -656,5 +657,8 @@ enum Species
 	PKMAX = 0x28A,
 };
 
+typedef u32 ITEM_ID;
+
+extern "C" b32 HandlerCommon_IsUnremovableItem(SPECIES species, ITEM_ID itemID);
 
 #endif // __SPECIES_H

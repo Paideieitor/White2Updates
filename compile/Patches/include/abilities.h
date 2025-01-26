@@ -1,6 +1,9 @@
 #ifndef __ABILITIES_H
 #define __ABILITIES_H
 
+#include "defs.h"
+
+typedef u32 ABILITY;
 enum AbilID
 {
 	ABIL_NULL = 0x0,
@@ -169,5 +172,169 @@ enum AbilID
 	ABIL163_TURBOBLAZE = 0xA3,
 	ABIL164_TERAVOLT = 0xA4,
 };
+
+typedef BattleEventHandlerTableEntry* (*AbilityEventAddFunc)(u32*);
+
+struct BattleMon;
+
+struct AbilityEventAddTable
+{
+	// AbilID
+	ABILITY ability;
+	AbilityEventAddFunc func;
+};
+
+extern "C" BattleEventHandlerTableEntry* EventAddIntimidate(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddClearBody(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddInnerFocus(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSteadfast(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddThickFat(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHyperCutter(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHugePower(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTintedLens(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSpeedBoost(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddBlaze(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTorrent(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddOvergrow(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSwarm(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddGuts(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSkillLink(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddKeenEye(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSimple(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSolidRock(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMarvelScale(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRivalry(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddLeafGuard(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDrizzle(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDrought(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSandStream(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSnowWarning(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddAirLock(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTechnician(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddOblivious(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHydration(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPoisonHeal(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddIceBody(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRainDish(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddShieldDust(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddAdaptability(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSereneGrace(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSolarPower(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSwiftSwim(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddChlorophyll(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddShedSkin(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTangledFeet(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddQuickFeet(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHustle(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddBattleArmor(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSuperLuck(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddAngerPoint(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSniper(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddIronFist(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddCompoundEyes(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRockHead(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddReckless(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddStatic(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPoisonPoint(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddFlameBody(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddEffectSpore(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPlusMinus(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddCuteCharm(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSandVeil(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSnowCloak(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTrace(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddNormalize(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRoughSkin(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddNaturalCure(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSynchronize(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDownload(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSturdy(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHeatproof(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddUnaware(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDrySkin(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddVoltAbsorb(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddWaterAbsorb(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMotorDrive(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddLimber(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddInsomnia(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddOwnTempo(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMagmaArmor(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddWaterVeil(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddImmunity(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddScrappy(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSoundproof(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddLevitate(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddFlowerGift(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddFlashFire(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddForewarn(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddAnticipation(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddFrisk(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddAftermath(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRunAway(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddColorChange(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMoldBreaker(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTruant(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddLightningRod(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddStormDrain(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSlowStart(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDamp(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddWonderGuard(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddStall(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddForecast(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSuctionCups(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddLiquidOoze(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddKlutz(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddStickyHold(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPressure(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMagicGuard(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddBadDreams(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPickup(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddUnburden(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddStench(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddShadowTag(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddArenaTrap(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMagnetPull(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPickpocket(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSheerForce(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDefiant(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddDefeatist(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMultiscale(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHeavyMetal(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddLightMetal(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddContrary(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddUnnerve(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddCursedBody(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHealer(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddFriendGuard(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddWeakArmor(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddToxicBoost(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddFlareBoost(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddHarvest(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddTelepathy(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMoody(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddOvercoat(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPoisonTouch(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRegenerator(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddBigPecks(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSandRush(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddWonderSkin(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddAnalytic(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddIllusion(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddImposter(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddInfiltrator(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMummy(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMoxie(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddJustified(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRattled(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddMagicBounce(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSapSipper(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddPrankster(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddSandForce(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddRoughSkin(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddZenMode(u32* handlerAmount);
+extern "C" BattleEventHandlerTableEntry* EventAddVictoryStar(u32* handlerAmount);
+
+extern "C" u32 AbilityEvent_GetSubPriority(BattleMon* battleMon);
+extern "C" BattleEventPriority GetHandlerMainPriority(u32* handlerAmount);
 
 #endif // __ABILITIES_H
