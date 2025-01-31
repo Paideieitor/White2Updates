@@ -154,4 +154,7 @@ struct SWAN_ALIGNED(4) BtlSetup
 	u32 field_148;
 };
 
+extern "C" u32 GetSidePos(BattleStyle battleStyle, u8 attackingPos, u8 a3);
+extern "C" b32 IsCenterInTripleBattle(u32 battlePos);
+
 #endif // __BATTLE_SETUP_H

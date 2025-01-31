@@ -319,6 +319,7 @@ extern "C" void ItemEvent_RemoveItem(BattleMon* battleMon);
 extern "C" BattleEventItem* ItemEvent_AddItemCore(BattleMon* battleMon, ITEM_ID itemID);
 extern "C" void BattleEventItem_SetTempItemFlag(BattleEventItem* item);
 extern "C" void BattleEventItem_SetWorkValue(BattleEventItem* item, u32 idx, u32 value);
+extern "C" void ItemEvent_PushRun(BattleEventItem* item, ServerFlow* serverFlow, u32 pokemonSlot);
 
 extern "C" void BattleEventVar_Push();
 extern "C" void BattleEventVar_Pop();
@@ -329,6 +330,7 @@ extern "C" u32 BattleEventVar_RewriteValue(BattleEventVar battleEvent, int value
 extern "C" void BattleEventVar_SetRewriteOnceValue(BattleEventVar battleEvent, int value);
 extern "C" void BattleEventVar_MulValue(BattleEventVar battleEvent, int value);
 extern "C" int BattleEventVar_GetValue(BattleEventVar eventVar);
+extern "C" b32 BattleEventVar_GetValueIfExist(BattleEventVar battleEvent, u32* a2);
 
 extern "C" void BattleEvent_CallHandlers(ServerFlow* serverFlow, BattleEventType event);
 extern "C" void BattleEvent_ForceCallHandlers(ServerFlow* serverFlow, BattleEventType event);

@@ -2134,3 +2134,129 @@ Symbols:
   - Name: BattleMon_AddSubstituteDamage
     Segment: 0xA7
     Address: 0x21bc5dd
+  - Name: ServerFlow_SetupBeforeFirstTurn
+    Segment: 0xA7
+    Address: 0x219f5c9
+  - Name: ServerControl_SwitchInCore    
+    Segment: 0xA7
+    Address: 0x21a13d9
+  - Name: PokeCon_GetBattleParty
+    Segment: 0xA7
+    Address: 0x219d409
+  - Name: BattleMon_GetSpecies
+    Segment: 0xA7
+    Address: 0x21bac85
+  - Name: PokeSet_Remove
+    Segment: 0xA7
+    Address: 0x21a506d
+  - Name: ServerEvent_ApplyDamageToRecover
+    Segment: 0xA7
+    Address: 0x21aa711
+  - Name: ServerEvent_CheckDamageToRecover
+    Segment: 0xA7
+    Address: 0x21aa6b5
+  - Name: ServerControl_AddConditionCheckFail
+    Segment: 0xA7
+    Address: 0x21a6291
+  - Name: AddConditionCheckFailOverwrite
+    Segment: 0xA7
+    Address: 0x21a631d
+  - Name: AddConditionCheckFailStandard
+    Segment: 0xA7
+    Address: 0x21a97cd
+  - Name: ServerEvent_MoveConditionCheckFail
+    Segment: 0xA7
+    Address: 0x21a662d
+  - Name: ServerEvent_AddConditionFailed
+    Segment: 0xA7
+    Address: 0x21a6695
+  - Name: HandlerHex
+    Segment: 0xA7
+    Address: 0x21cc88d
+  - Name: BattleEventVar_GetValueIfExist
+    Segment: 0xA7
+    Address: 0x21bcfe1
+  - Name: CommonConditionCodeMatch
+    Segment: 0xA7
+    Address: 0x21c2a41
+  - Name: ItemEvent_PushRun
+    Segment: 0xA7
+    Address: 0x21c28ad
+  - Name: CommonStatusReaction
+    Segment: 0xA7
+    Address: 0x21c29c1
+  - Name: j_j_Tables_IsAbilityMultitype
+    Segment: 0xA7
+    Address: 0x21ad729
+  - Name: j_j_IsTraceFailAbility
+    Segment: 0xA7
+    Address: 0x21bfb39
+  - Name: j_j_IsTraceFailAbility0
+    Segment: 0xA7
+    Address: 0x21bfb49
+  - Name: j_j_j_IsTraceFailAbility1
+    Segment: 0xA7
+    Address: 0x21ccd49
+  - Name: j_j_IsRolePlayFailAbility
+    Segment: 0xA7
+    Address: 0x21cb1d1
+  - Name: j_CheckSkillSwapFailAbility
+    Segment: 0xA7
+    Address: 0x21a7aad
+  - Name: j_CheckSkillSwapFailAbility0
+    Segment: 0xA7
+    Address: 0x21a7abd
+  - Name: MultiplyValueByRatio
+    Segment: 0xA7
+    Address: 0x21bd391
+  - Name: ServerEvent_CalcMoveHealAmount
+    Segment: 0xA7
+    Address: 0x21ab539
+  - Name: sys_memcpy
+    Segment: 0x0
+    Address: 0x207894c
+  - Name: GetSidePos
+    Segment: 0xA7
+    Address: 0x219c4cd
+  - Name: BtlSetup_GetBattleStyle
+    Segment: 0xA7
+    Address: 0x219bdc1
+  - Name: IsCenterInTripleBattle
+    Segment: 0xA7
+    Address: 0x219d30d
+  - Name: ServerControl_Fight
+    Segment: 0xA7
+    Address: 0x21a1981
+  - Name: CheckEncoreMoveChange
+    Segment: 0xA7
+    Address: 0x21a1931
+  - Name: ServerControl_CheckMoveExeSleepCure
+    Segment: 0xA7
+    Address: 0x21a3ebd
+  - Name: ServerEvent_MoveExecuteFail
+    Segment: 0xA7
+    Address: 0x21a3d59
+  - Name: ServerControl_CheckMoveExeFreezeThaw
+    Segment: 0xA7
+    Address: 0x21a3ee9
+  - Name: Move_SearchIndex
+    Segment: 0xA7
+    Address: 0x21bafb9
+  - Name: Move_GetPP
+    Segment: 0xA7
+    Address: 0x21badc5
+  - Name: Condition_MakeTurnParam
+    Segment: 0xA7
+    Address: 0x21ce1ed
+  - Name: MoveEvent_ForceRemoveItemFromBattleMon
+    Segment: 0xA7
+    Address: 0x21c5c41
+  - Name: HandlerThrash
+    Segment: 0xA7
+    Address: 0x21c7a6d
+  - Name: HandlerThrashEnd
+    Segment: 0xA7
+    Address: 0x21c7ae1
+  - Name: MakeCondition
+    Segment: 0xA7
+    Address: 0x21bd615

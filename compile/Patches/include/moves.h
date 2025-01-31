@@ -682,4 +682,6 @@ extern "C" b32 getMoveFlag(MOVE_ID moveID, MoveFlag moveFlag);
 
 extern "C" void HandlerThiefStart(BattleEventItem* item, ServerFlow* serverFlow, u32 pokemonSlot, u32* work);
 
+extern "C" void MoveEvent_ForceRemoveItemFromBattleMon(BattleMon* battleMon, MOVE_ID moveID);
+
 #endif // __MOVES_H

@@ -3,14 +3,16 @@
 SET GCC=arm-none-eabi-g++
 SET LD=arm-none-eabi-ld
 SET JAVA=java
-SET CTRMAP=..\CTRMap\CTRMAP.jar
+SET CTRMAP_DIR=PasteHereYourCTRMapPath
+SET OUTPUT_DIR=PasteHereYourOutputPath
+
+SET CTRMAP=%CTRMAP_DIR%\CTRMAP.jar
 SET RPMTOOL=%JAVA% -cp %CTRMAP% rpm.cli.RPMTool
 
 SET BUILD_DIR=build
 SET PATCHES_DIR=Patches
 SET SWAN_DIR=ExternalDependencies\swan
 SET NK_DIR=ExternalDependencies\NitroKernel\include
-SET CTRMAP_PROJECT_DIR=..\W2U\W2U_CTRMap
 
 SET GAME_VARS_PATCH=GameVariables
 SET BATTL_UPG_PATCH=BattleUpgrade
@@ -28,7 +30,7 @@ SET KOL_ITEMS_ARM_ELF=%BUILD_DIR%\%KOL_ITEMS_PATCH%ARM.o
 
 SET OUTPUT_PATCH=White2Updates
 SET OUTPUT_ELF=%BUILD_DIR%\%OUTPUT_PATCH%.elf
-SET OUTPUT_DLL=%CTRMAP_PROJECT_DIR%\vfs\data\patches\%OUTPUT_PATCH%.dll
+SET OUTPUT_DLL=%OUTPUT_DIR%\%OUTPUT_PATCH%.dll
 
 SET ESDB=ESDB.yml
 

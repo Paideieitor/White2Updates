@@ -19,5 +19,10 @@ extern "C" void ServerEvent_ItemSetDecide(ServerFlow* serverFlow, BattleMon* bat
 extern "C" void ServerEvent_ItemRewriteDone(ServerFlow* serverFlow, BattleMon* battleMon);
 extern "C" void ServerEvent_CheckMultihitHits(ServerFlow* serverFlow, BattleMon* attackingMon, MOVE_ID moveID, HitCheckParam* params);
 extern "C" void ServerEvent_NotifyAirLock(ServerFlow* serverFlow);
+extern "C" void ServerEvent_ApplyDamageToRecover(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon);
+extern "C" u32 ServerEvent_CheckDamageToRecover(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, MoveParam* moveParam);
+extern "C" u32 ServerEvent_MoveConditionCheckFail(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, CONDITION condition);
+extern "C" void ServerEvent_AddConditionFailed(ServerFlow* serverFlow, BattleMon* defendingMon, BattleMon* attackingMon, CONDITION condition);
+extern "C" u32 ServerEvent_MoveExecuteFail(ServerFlow* serverFlow, BattleMon* attackingMon, MOVE_ID moveID, u32 failCause);
 
 #endif // __SERVER_EVENTS_H

@@ -13,6 +13,8 @@
 
 #include "swantypes.h"
 
+#include "nds/mem.h"
+
 #define DEBUG_PRINT 1
 #if DEBUG_PRINT
 #include "kPrint.h"
@@ -32,8 +34,6 @@ struct SWAN_ALIGNED(2) StrBuf
 	u32 magic;
 	u16 string[];
 };
-
-extern "C" void sys_memset(const void* ptr, u8 value, size_t size);
 
 extern "C" u32 fixed_round(u32 value, u32 ratio);
 

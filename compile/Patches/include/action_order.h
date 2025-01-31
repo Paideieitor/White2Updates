@@ -10,9 +10,9 @@ struct SWAN_ALIGNED(4) ActionOrderWork
 {
     BattleMon* battleMon;
     BattleActionParam action;
-    u32 field_8;
-    u8 field_C;
-    u8 fDone;
+    u32 speed;
+    u8 partyID;
+    u8 done;
     u8 field_E;
     u8 field_F;
 };

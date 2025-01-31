@@ -16,17 +16,14 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
   - Does NOT prevent the gain of EVs through EV items like *Protein*
 ### Infinite Rare Candy Item
   - Allows you to level up a Pokémon until the level cap (100 by default).
+  - Make sure to read the ``NARCS/README.md`` to know which files you need to use
   - Respects the hard level cap if that patch is active
   - The default item ID for this is 622, you can change this in the ``settings.h`` file
-  - It can be registered, to do so the item data file needs to be modified, you can use the file named ``622`` in the ``NARCS/024`` folder
-  - This repository does not provide graphical or text changes, so the items will have their vanilla appearance unless you change it
 ### Infinite Repel Item
   - Allows you to toggle the repel effect on and off
+  - Make sure to read the ``NARCS/README.md`` to know which files you need to use
   - Removes the functionality of regular repel effect items like Super Repel
   - The default item ID for this is 623, you can change this in the ``settings.h`` file
-  - It can be registered, to do so the item data file needs to be modified, you can use the file named ``623`` in the ``NARCS/024`` folder
-  - In order for the Infinite Repel Item to display the correct message when being activated or desactivated from the Registered menu you will have to modify the scripts 10144 and 10130 respectivelly
-  - This repository does not provide graphical or text changes, so the items will have their vanilla appearance unless you change it
 ### Repel Effect Removes Shaking Grass
   - Removes the chance of a shaking grass or a fishing spot appearing while the repel effect is active
 ### Dynamic Speed
@@ -35,11 +32,11 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
 ### Gen6 crit changes
   - Crits damage boost updated to Gen6 (1.5 multiplier instead of doubling the damage)
   - Crit stages updated to Gen6
-### Ability Expansion (Up to Gen6)
-  - Every single ability from Gen6 has been added to the battle engine
-  - This patch needs some text files to be modified, you have to move all the files in the ``NARCS/002`` folder to your CTRMap project folder at ``vfs/data/a/0/0/2``
+### Ability Expansion (Up to Gen7)
+  - Every single ability from Gen6 and Gen7 has been added to the battle engine
+  - Make sure to read the ``NARCS/README.md`` to know which files you need to use
   - To change a pokemon ability to an expanded just modify the ability ID in that particular Pokémon Personal NARC (the ability IDs are preservet from vanilla games, but you can check them in ``BattleUpgrade.h``)
-  - Big shoutout to [Spago](https://github.com/SpagoAsparago) who already did this, this patch adds the abilities that where missing from his patch and attempts to fix some bugs and inconsistencies with the vanilla mechanics
+  - Big shoutout to [Spago](https://github.com/SpagoAsparago) who made the first Gen6 ability expansion, this patch adds the abilities that where missing from his patch and attempts to fix some bugs and inconsistencies with the vanilla mechanics
 
 ## How to Install
 ### Installing tools
@@ -47,7 +44,7 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
   - Download [PMC](https://github.com/kingdom-of-ds-hacking/PMC), go to the extras tab of CTRMap and click *Install/Update PMC* (You only need to do this the first time you create a new project)
   - Make sure there is a `patches` directory at *vfs/data/patches*, if there isn't create one
   - Move ``White2Updates.dll`` in the *vfs/data/patches* folder
-  - Make sure to read the features section and add any NARC file specified in the features you want to install
+  - Make sure to read the ``NARCS/README.md`` to know which files you need to use
   - Create a ROM clicking ``File -> Export ROM`` or using the shortcut ``Ctrl + E``
 
 ### Building the DLL

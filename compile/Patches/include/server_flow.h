@@ -357,6 +357,10 @@ extern "C" void ServerControl_DamageProcessingEnd(ServerFlow* serverFlow, MovePa
 extern "C" void ServerControl_ChangeWeatherAfter(ServerFlow* serverFlow, WEATHER weather);
 extern "C" b32 ServerControl_ChangeWeatherCheck(ServerFlow* serverFlow, WEATHER weather, u32 turns);
 extern "C" b32 ServerControl_CheckFainted(ServerFlow* serverFlow, BattleMon* battleMon);
+extern "C" void ServerControl_SwitchInCore(ServerFlow* serverFlow, u32 clientID, u32 switchInSlot, u32 switchOutSlot);
+extern "C" u32 ServerControl_Fight(ServerFlow* serverFlow, BattleMon* attackingMon, BattleAction_Fight* actionParams, u32 speed);
+extern "C" void ServerControl_CheckMoveExeSleepCure(ServerFlow* serverFlow, BattleMon* attackingMon);
+extern "C" b32 ServerControl_CheckMoveExeFreezeThaw(ServerFlow* serverFlow, BattleMon* attackingMon, MOVE_ID moveID);
 
 enum ServerCommandID
 {
@@ -466,12 +470,14 @@ extern "C" u32 ServerDisplay_MoveAnimation(ServerFlow* serverFlow, MOVE_ID moveI
 extern "C" void ServerDisplay_SimpleHP(ServerFlow* serverFlow, BattleMon* currentMon, int damage, b32 sendCommand);
 
 extern "C" BattleMon* PokeCon_GetBattleMon(PokeCon* pokeCon, u32 index);
+extern "C" BattleParty* PokeCon_GetBattleParty(PokeCon* pokeCon, u32 idx);
 
 extern "C" void PokeSet_SeekStart(PokeSet* pokeSet);
 extern "C" BattleMon* PokeSet_SeekNext(PokeSet* pokeSet);
 extern "C" void PokeSet_Clear(PokeSet* pokeSet);
 extern "C" u32 PokeSet_GetCount(PokeSet* pokeSet);
 extern "C" u32 PokeSet_GetCountMax(PokeSet* pokeSet);
+extern "C" void PokeSet_Remove(PokeSet* pokeSet, BattleMon* battleMon);
 
 extern "C" BattleMon* Handler_GetBattleMon(ServerFlow* serverFlow, u32 pokemonSlot);
 extern "C" u32 Handler_PokeIDToPokePos(ServerFlow* serverFlow, u32 pokemonSlot);
@@ -480,6 +486,10 @@ extern "C" u32 Handler_ReqMoveTargetAuto(ServerFlow * serverFlow, u32 attackingS
 extern "C" b32 Handler_CheckMatchup(ServerFlow* serverFlow);
 extern "C" b32 HandlerCommon_CheckIfCanStealPokeItem(ServerFlow* serverFlow, u32 thiefSlot, u32 targetSlot);
 extern "C" b32 HandlerCommon_CheckTargetMonID(u32 pokemonSlot);
+
+extern "C" u32 AddConditionCheckFailOverwrite(ServerFlow * serverFlow, BattleMon * defendingMon, CONDITION condition, ConditionData condData, u8 overrideMode);
+extern "C" u32 AddConditionCheckFailStandard(ServerFlow * serverFlow, BattleMon * defendingMon, u32 failStatus, CONDITION condition);
+extern "C" b32 CommonConditionCodeMatch(ServerFlow* serverFlow, u32 pokemonSlot, CONDITION condition);
 
 extern "C" b32 AbilityEvent_RollEffectChance(ServerFlow* serverFlow, u32 effectChance);
 

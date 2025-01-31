@@ -110,6 +110,7 @@ extern "C" int MainModule_GetDebugFlag();
 extern "C" b32 MainModule_IsAllyMonID(u32 slot1, u32 slot2);
 
 extern "C" BtlType BtlSetup_GetBattleType(MainModule* main);
+extern "C" BattleStyle BtlSetup_GetBattleStyle(MainModule* mainModule);
 
 extern "C" u32 TrainerInfo_GetRegion(void* trainerInfo);
 extern "C" b32 IsTrainerOT(BoxPkm* pkm, void* trainerInfo);

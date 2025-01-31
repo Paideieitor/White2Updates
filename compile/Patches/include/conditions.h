@@ -1,6 +1,8 @@
 #ifndef __CONDITIONS_H
 #define __CONDITIONS_H
 
+struct BattleMon;
+
 typedef u32 CONDITION;
 enum MoveCondition
 {
@@ -80,5 +82,7 @@ extern "C" void Condition_SetMonID(ConditionData* condData, u32 pokemonSlot);
 extern "C" u32 Condition_GetTurnMax(ConditionData condData);
 extern "C" ConditionData Condition_MakeTurn(u32 turns);
 extern "C" ConditionData Condition_MakePoke(u32 pokemonSlot);
+extern "C" ConditionData Condition_MakeTurnParam(u32 maxTurns, u32 param);
+extern "C" ConditionData MakeCondition(MoveCondition condition, BattleMon* battleMon, ConditionData* condData);
 
 #endif // __CONDITIONS_H

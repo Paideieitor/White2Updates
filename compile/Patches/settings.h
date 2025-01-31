@@ -21,7 +21,7 @@
 
 #define GEN6_CRIT 1
 
-#define WEATHER_ABILITY_TURNS 255 // 255 means infinite turns
+#define WEATHER_ABILITY_TURNS 5 // 255 means infinite turns
 
 #define EXPAND_ABILITIES 1
 	#define GEN9_PROTEAN 1
@@ -29,18 +29,17 @@
 	#define GEN7_SYMBIOSIS_GEMS 0
 	#define SYMBIOSIS_DEBUG 0
 	#define GEN6_PARENTAL_BOND 0
-
-#define EXPAND_MOVES 0
+	#define EMERGENCY_EXIT_DEBUG 0
+	#define BERSERK_DEBUG 0
+	#define GEN9_BATTLE_BOND 1
 
 #define EXPAND_FIELD_EFFECTS (EXPAND_ABILITIES || EXPAND_MOVES)
-	#define TERRAIN_ABILITY_TURNS 255 // 255 means infinite turns
+	#define TERRAIN_ABILITY_TURNS 5 // 255 means infinite turns
 	#define TERRAIN_GEN7_DMG 0
 	#define ELECTRIC_TERRAIN_MOVE_ANIM 351
 	#define GRASSY_TERRAIN_MOVE_ANIM 312
 	#define MISTY_TERRAIN_MOVE_ANIM 54
 	#define PSYCHIC_TERRAIN_MOVE_ANIM 505
-
-#define EXPAND_ITEMS 0
 
 // VARIABLES
 #define LVL_CAP_VAR 16415

@@ -8,10 +8,13 @@
 #include "types.h"
 #include "species.h"
 #include "stat_stage.h"
+#include "moves.h"
 
 #include "pml/poke_party.h"
 
 extern "C" u32 PokeParty_GetParam(PartyPkm* pPkm, PkmField field, void* extra);
+
+struct BattleAction_Fight;
 
 struct SWAN_ALIGNED(1) StatStageParam
 {
@@ -174,5 +177,9 @@ extern "C" BattleMon* BattleParty_GetPartyMember(BattleParty* party, u32 idx);
 
 extern "C" u32 BattleRandom(u32 range);
 extern "C" b32 CheckHPDebug(BattleMon* battleMon);
+
+extern "C" MOVE_ID CheckEncoreMoveChange(BattleMon* attackingMon, BattleAction_Fight* actionParams);
+extern "C" u32 Move_SearchIndex(BattleMon* battleMon, MOVE_ID moveID);
+extern "C" u32 Move_GetPP(BattleMon* battleMon, u32 moveSlot);
 
 #endif // __BATTLE_MON_H
