@@ -32,6 +32,9 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
 ### Gen6 crit changes
   - Crits damage boost updated to Gen6 (1.5 multiplier instead of doubling the damage)
   - Crit stages updated to Gen6
+### Gen6 weather abilities
+  - Weather triggered by abilites like Drizzle now last 5 turns
+  - You can change the value in ``settings.h``
 ### Ability Expansion (Up to Gen7)
   - Every single ability from Gen6 and Gen7 has been added to the battle engine
   - Make sure to read the ``NARCS/README.md`` to know which files you need to use
