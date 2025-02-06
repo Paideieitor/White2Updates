@@ -2,8 +2,6 @@
 Code Injection Patches to upgrade the Pokémon White 2 Edition gameplay. 
 This code is fully compatible with the [Code Injection set up Guide](https://ds-pokemon-hacking.github.io/docs/generation-v/guides/b2w2-code_injection_set_up/).
 
-THE DYNAMIC SPEED AND ABILITY EXPANSION PATCHES CURRENTLY INTRODUCE A SEVERE BUG THAT ALTERS THE TURN ORDER WHEN A POKEMON IS FAINTED, I'M WORKING ON FIXING IT
-
 ## Features
 All the features are active by default unless it is specified
 To personalize the patch modify the ``settings.h`` file (I don't recomend modifying the non-boolean definitions unless you know what you are doing) and then build the DLL
