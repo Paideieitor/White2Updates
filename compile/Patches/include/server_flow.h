@@ -7,6 +7,7 @@
 #include "action_order.h"
 #include "handler_params.h"
 #include "field_effects.h"
+#include "battle_events.h"
 
 typedef u32 MOVE_ID;
 typedef u32 WEATHER;
@@ -280,7 +281,7 @@ struct SWAN_ALIGNED(8) ServerFlow
     CALC_DAMAGE_REC* calcDamageEnemy;
     POKESET_STACK_UNIT pokesetUnit[7];
     u32 pokesetStackPtr;
-    PokeSet pokeSet_1A68;
+    PokeSet currentpokeSet;
     MoveParam* moveParam;
     MoveParam* moveParamOriginal;
     PosPoke posPoke;
@@ -334,6 +335,14 @@ struct EffectivenessRecorder
     u32 effectiveness[24];
 };
 
+struct FRONT_POKE_SEEK_WORK
+{
+    u8 clientIdx;
+    u8 pokeIdx;
+    u8 endFlag;
+    u8 unk;
+};
+
 extern "C" u32 ServerFlow_ReqChangePokeForServer(ServerFlow * serverFlow, u16 * a2);
 extern "C" b32 ServerFlow_IsCompetitorScenarioMode(ServerFlow* serverFlow);
 extern "C" u32 ActionOrder_Proc(ServerFlow* serverFlow, ActionOrderWork* actionOrder);
@@ -361,6 +370,10 @@ extern "C" void ServerControl_SwitchInCore(ServerFlow* serverFlow, u32 clientID,
 extern "C" u32 ServerControl_Fight(ServerFlow* serverFlow, BattleMon* attackingMon, BattleAction_Fight* actionParams, u32 speed);
 extern "C" void ServerControl_CheckMoveExeSleepCure(ServerFlow* serverFlow, BattleMon* attackingMon);
 extern "C" b32 ServerControl_CheckMoveExeFreezeThaw(ServerFlow* serverFlow, BattleMon* attackingMon, MOVE_ID moveID);
+extern "C" void ServerControl_MoveCore(ServerFlow* serverFlow, u32 clientID, int partyMon1, int partyMon2, b32 a5);
+extern "C" void ServerControl_AfterMove(ServerFlow* serverFlow, u32 clientID, int partyMon1, int partyMon2);
+extern "C" b32 ServerControl_IsGuaranteedHit(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon);
+extern "C" b32 ServerControl_CheckNoEffectCore(ServerFlow* serverFlow, u16* moveID, BattleMon* attackingMon, BattleMon* defendingMon, int dmgAffRec, BattleEventType eventType);
 
 enum ServerCommandID
 {
@@ -468,6 +481,7 @@ extern "C" void ServerDisplay_SetConditionFlag(ServerFlow* serverFlow, BattleMon
 extern "C" void ServerDisplay_SetTurnFlag(ServerFlow* serverFlow, BattleMon* battleMon, TurnFlag flag);
 extern "C" u32 ServerDisplay_MoveAnimation(ServerFlow* serverFlow, MOVE_ID moveID, MoveAnimCtrl* moveAnimCtrl, u16 animBuffer);
 extern "C" void ServerDisplay_SimpleHP(ServerFlow* serverFlow, BattleMon* currentMon, int damage, b32 sendCommand);
+extern "C" void ServerDisplay_SkillSwap(ServerFlow* serverFlow, BattleMon* attackingMon, PokeSet* targetSet);
 
 extern "C" BattleMon* PokeCon_GetBattleMon(PokeCon* pokeCon, u32 index);
 extern "C" BattleParty* PokeCon_GetBattleParty(PokeCon* pokeCon, u32 idx);
@@ -486,6 +500,9 @@ extern "C" u32 Handler_ReqMoveTargetAuto(ServerFlow * serverFlow, u32 attackingS
 extern "C" b32 Handler_CheckMatchup(ServerFlow* serverFlow);
 extern "C" b32 HandlerCommon_CheckIfCanStealPokeItem(ServerFlow* serverFlow, u32 thiefSlot, u32 targetSlot);
 extern "C" b32 HandlerCommon_CheckTargetMonID(u32 pokemonSlot);
+extern "C" b32 Handler_IsMonSwitchOutInterrupted(ServerFlow* serverFlow);
+extern "C" b32 Handler_IsTargetInRange(ServerFlow* serverFlow, u32 attackingSlot, u32 defendingSlot, MOVE_ID moveID);
+extern "C" b32 Handler_IsSimulationMode(ServerFlow* serverFlow);
 
 extern "C" u32 AddConditionCheckFailOverwrite(ServerFlow * serverFlow, BattleMon * defendingMon, CONDITION condition, ConditionData condData, u8 overrideMode);
 extern "C" u32 AddConditionCheckFailStandard(ServerFlow * serverFlow, BattleMon * defendingMon, u32 failStatus, CONDITION condition);
@@ -499,7 +516,12 @@ extern "C" void HEManager_PopState(u32* HEManager, u32 HEID);
 extern "C" u32 HitCheck_IsMultiHitMove(HitCheckParam* hitCheck);
 
 extern "C" u32 PosPoke_GetPokeExistPos(PosPoke* posPoke, u32 battleSlot);
+extern "C" b32 DoesBattleMonExist(PosPoke* posPoke, u32 battleSlot);
 
-extern "C" void TurnFlag_Set(BattleMon * battleMon, TurnFlag flag);
+extern "C" void TurnFlag_Set(BattleMon* battleMon, TurnFlag flag);
+extern "C" b32 BattleMon_GetTurnFlag(BattleMon* battleMon, TurnFlag turnFlag);
+
+extern "C" void FRONT_POKE_SEEK_InitWork(FRONT_POKE_SEEK_WORK* frontSet, ServerFlow* serverFlow);
+extern "C" b32 FRONT_POKE_SEEK_GetNext(FRONT_POKE_SEEK_WORK* frontSet, ServerFlow* serverFlow, BattleMon** battleMon);
 
 #endif // __SERVER_FLOW_H

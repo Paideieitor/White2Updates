@@ -269,7 +269,7 @@ struct BattleEventHandlerTableEntry
 	BattleEventHandler handler;
 };
 
-typedef b32(*BattleEventSkipCheckHandler)(void* handle, void* work, u32 factorType, u32 eventType, u16 subID, u8 pokeID);
+typedef b32(*BattleEventSkipCheckHandler)(BattleEventItem* item, void* work, u32 factorType, u32 eventType, u16 subID, u8 pokeID);
 
 enum BattleEventItemType
 {
@@ -320,6 +320,7 @@ extern "C" BattleEventItem* ItemEvent_AddItemCore(BattleMon* battleMon, ITEM_ID 
 extern "C" void BattleEventItem_SetTempItemFlag(BattleEventItem* item);
 extern "C" void BattleEventItem_SetWorkValue(BattleEventItem* item, u32 idx, u32 value);
 extern "C" void ItemEvent_PushRun(BattleEventItem* item, ServerFlow* serverFlow, u32 pokemonSlot);
+extern "C" void BattleEventItem_AttachSkipCheckHandler(BattleEventItem* item, BattleEventSkipCheckHandler handler);
 
 extern "C" void BattleEventVar_Push();
 extern "C" void BattleEventVar_Pop();
@@ -334,6 +335,8 @@ extern "C" b32 BattleEventVar_GetValueIfExist(BattleEventVar battleEvent, u32* a
 
 extern "C" void BattleEvent_CallHandlers(ServerFlow* serverFlow, BattleEventType event);
 extern "C" void BattleEvent_ForceCallHandlers(ServerFlow* serverFlow, BattleEventType event);
+
+extern "C" b32 HandlerUnnerveSkipCheck(BattleEventItem* item, void* work, u32 factorType, u32 eventType, u16 subID, u8 pokeID);
 
 #endif // __BATTLE_EVENTS_H
 

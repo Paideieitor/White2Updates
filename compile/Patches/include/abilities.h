@@ -338,5 +338,6 @@ extern "C" u32 AbilityEvent_GetSubPriority(BattleMon* battleMon);
 extern "C" BattleEventPriority GetHandlerMainPriority(u32* handlerAmount);
 
 extern "C" b32 j_j_IsRolePlayFailAbility(ABILITY ability);
+extern "C" b32 j_CheckSkillSwapFailAbility(ABILITY ability);
 
 #endif // __ABILITIES_H

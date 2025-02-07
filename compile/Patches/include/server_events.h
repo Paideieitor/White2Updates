@@ -24,5 +24,6 @@ extern "C" u32 ServerEvent_CheckDamageToRecover(ServerFlow* serverFlow, BattleMo
 extern "C" u32 ServerEvent_MoveConditionCheckFail(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon, CONDITION condition);
 extern "C" void ServerEvent_AddConditionFailed(ServerFlow* serverFlow, BattleMon* defendingMon, BattleMon* attackingMon, CONDITION condition);
 extern "C" u32 ServerEvent_MoveExecuteFail(ServerFlow* serverFlow, BattleMon* attackingMon, MOVE_ID moveID, u32 failCause);
+extern "C" void ServerEvent_AbilityNullified(ServerFlow* serverFlow, BattleMon* battleMon);
 
 #endif // __SERVER_EVENTS_H

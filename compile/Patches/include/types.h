@@ -35,6 +35,7 @@ enum TypeEffectiveness
 };
 
 extern "C" u16 PokeTypePair_MakeMonotype(u16 type);
+extern "C" u16 PokeTypePair_Make(u16 type1, u16 type2);
 extern "C" TypeEffectiveness GetTypeEffectiveness(POKE_TYPE moveType, POKE_TYPE pokemonType);
 
 #endif // __TYPES_H

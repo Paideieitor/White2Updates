@@ -1516,7 +1516,7 @@ Symbols:
   - Name: CommonRedirectMove
     Segment: 0xA7
     Address: 0x21c0d51
-  - Name: j_j_IsComboMove
+  - Name: IsComboMove
     Segment: 0xA7
     Address: 0x21c0db9
   - Name: j_IsComboMove
@@ -2260,3 +2260,201 @@ Symbols:
   - Name: MakeCondition
     Segment: 0xA7
     Address: 0x21bd615
+  - Name: ItemGetParam
+    Segment: 0xA7
+    Address: 0x21bd8c5
+  - Name: Handler_IsMonSwitchOutInterrupted
+    Segment: 0xA7
+    Address: 0x21abe8d
+  - Name: Handler_IsTargetInRange
+    Segment: 0xA7
+    Address: 0x21abe11
+  - Name: HandlerFollowMeBaitTarget
+    Segment: 0xA7
+    Address: 0x21c6459
+  - Name: BattleHandler_SwapPoke
+    Segment: 0xA7
+    Address: 0x21adf51
+  - Name: MainModule_PokeIDToClientID
+    Segment: 0xA7
+    Address: 0x219c689
+  - Name: ServerControl_MoveCore
+    Segment: 0xA7
+    Address: 0x21a0f25
+  - Name: ServerControl_AfterMove
+    Segment: 0xA7
+    Address: 0x21a0fcd
+  - Name: BattleParty_FindPartyMon
+    Segment: 0xA7
+    Address: 0x219d5cd
+  - Name: ServerEvent_CheckStatStageChangeSuccess
+    Segment: 0xA7
+    Address: 0x21ab309
+  - Name: ServerEvent_StatStageChangeFail
+    Segment: 0xA7
+    Address: 0x21ab379
+  - Name: ServerControl_StatStageChangeCore
+    Segment: 0xA7
+    Address: 0x21a6af9
+  - Name: ServerEvent_CheckSubstituteInteraction
+    Segment: 0xA7
+    Address: 0x21a6c1d
+  - Name: ServerDisplay_StatStageLimit
+    Segment: 0xA7
+    Address: 0x21a95a5
+  - Name: BattleMon_IsSubstituteActive
+    Segment: 0xA7
+    Address: 0x21bc5bd
+  - Name: ServerDisplay_StatStage
+    Segment: 0xA7
+    Address: 0x21a95e5
+  - Name: ServerEvent_StatStageChangeApplied
+    Segment: 0xA7
+    Address: 0x21ab3b5
+  - Name: BattleHandler_Execute
+    Segment: 0xA7
+    Address: 0x21ac499
+  - Name: HEManager_PopWork
+    Segment: 0xA7
+    Address: 0x21b0a29
+  - Name: BattleHandler_ChangeStatStage
+    Segment: 0xA7
+    Address: 0x21acdd1
+  - Name: PosPoke_IsExist
+    Segment: 0xA7
+    Address: 0x21acef5
+  - Name: CommonLeppaBerryLastMoveID
+    Segment: 0xA7
+    Address: 0x21c2ba1
+  - Name: CommonLeppaBerryEnableMoveID
+    Segment: 0xA7
+    Address: 0x21c2bd1
+  - Name: HandlerLeppaBerryCommon
+    Segment: 0xA7
+    Address: 0x21c2c05
+  - Name: BattleMon_GetMoveCount
+    Segment: 0xA7
+    Address: 0x21bac89
+  - Name: Move_GetMissingPP
+    Segment: 0xA7
+    Address: 0x21bad8d
+  - Name: Move_GetID
+    Segment: 0xA7
+    Address: 0x21bad01
+  - Name: HandlerOranBerryUse
+    Segment: 0xA7
+    Address: 0x21c2d7d
+  - Name: HandlerSitrusBerryUse
+    Segment: 0xA7
+    Address: 0x21c2df1
+  - Name: CommonPinchBerry
+    Segment: 0xA7
+    Address: 0x21c3021
+  - Name: doesNatureAffectStat
+    Segment: 0x0
+    Address: 0x201da91
+  - Name: CommonStatBoostBerry
+    Segment: 0xA7
+    Address: 0x21c3251
+  - Name: HandlerEnigmaBerryUse
+    Segment: 0xA7
+    Address: 0x21c32d5
+  - Name: CommonResistBerry
+    Segment: 0xA7
+    Address: 0x21c3541
+  - Name: Handler_IsSimulationMode
+    Segment: 0xA7
+    Address: 0x21aba45
+  - Name: HandlerJabocaRowapBerryUse
+    Segment: 0xA7
+    Address: 0x21c39e9
+  - Name: PML_PersonalGetParamSingle
+    Segment: 0x0
+    Address: 0x201ef49
+  - Name: PokeTypePair_Make
+    Segment: 0xA7
+    Address: 0x21ce561
+  - Name: ServerDisplay_SkillSwap
+    Segment: 0xA7
+    Address: 0x21a78fd
+  - Name: HandlerChoiceItemCommonMoveLock
+    Segment: 0xA7
+    Address: 0x21c423d
+  - Name: HandlerChoiceItemCommonItemChange
+    Segment: 0xA7
+    Address: 0x21c4285
+  - Name: HandlerChoiceBandPower
+    Segment: 0xA7
+    Address: 0x21c41b1
+  - Name: ServerEvent_AbilityNullified
+    Segment: 0xA7
+    Address: 0x21a6799
+  - Name: ServerEvent_SwitchIn
+    Segment: 0xA7
+    Address: 0x21a1671
+  - Name: ServerEvent_AfterSwitchInPrevious
+    Segment: 0xA7
+    Address: 0x21a16d5
+  - Name: HandlerGastroAcid
+    Segment: 0xA7
+    Address: 0x21cb0e9
+  - Name: Condition_MakePermanent
+    Segment: 0xA7
+    Address: 0x21ce241
+  - Name: EventAddGastroAcid
+    Segment: 0xA7
+    Address: 0x21cb0dd
+  - Name: flowsub_CheckNoEffect_Protect
+    Segment: 0xA7
+    Address: 0x21a2f95
+  - Name: ServerControl_IsGuaranteedHit
+    Segment: 0xA7
+    Address: 0x21a2e0d
+  - Name: ServerControl_CheckNoEffectCore
+    Segment: 0xA7
+    Address: 0x21a31d1
+  - Name: BattleMon_GetTurnFlag
+    Segment: 0xA7
+    Address: 0x21bb3f1
+  - Name: AbilityPopup_DisplayStart
+    Segment: 0xA7
+    Address: 0x021D3BF5
+  - Name: DoesBattleMonExist
+    Segment: 0xA7
+    Address: 0x21ac87d
+  - Name: BattleHandler_AbilityPopupAdd
+    Segment: 0xA7
+    Address: 0x21ac83d
+  - Name: ServerCommand_AbilityPopupIn
+    Segment: 0xA7
+    Address: 0x21b8a75
+  - Name: BattleViewCmd_AbilityPopup_DisplayWait
+    Segment: 0xA7
+    Address: 0x21d0391
+  - Name: BattleViewCmd_AbilityPopup_DisplayStart
+    Segment: 0xA7
+    Address: 0x21d0381
+  - Name: GetSideFromMonID
+    Segment: 0xA7
+    Address: 0x219d35d
+  - Name: BattleEventItem_AttachSkipCheckHandler
+    Segment: 0xA7
+    Address: 0x21bcb71
+  - Name: ServerControl_AddCondition
+    Segment: 0xA7
+    Address: 0x21a6401
+  - Name: ServerControl_ClearMonDependentEffects
+    Segment: 0xA7
+    Address: 0x21a8c09
+  - Name: BattleHandler_ChangeAbility
+    Segment: 0xA7
+    Address: 0x21ad5e1
+  - Name: ServerControl_UnnerveAction
+    Segment: 0xA7
+    Address: 0x21a7acd
+  - Name: FRONT_POKE_SEEK_InitWork
+    Segment: 0xA7
+    Address: 0x21a0d9d
+  - Name: FRONT_POKE_SEEK_GetNext
+    Segment: 0xA7
+    Address: 0x21a0e35

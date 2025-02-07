@@ -677,6 +677,7 @@ extern "C" u32 PML_MoveGetMaxPP(MOVE_ID moveID, u32 ppUpStage);
 extern "C" u32 PML_MoveGetParam(MOVE_ID moveID, MoveField field);
 
 extern "C" b32 Move_IsUsable(BattleMon* battleMon, MOVE_ID moveID);
+extern "C" b32 IsComboMove(MOVE_ID moveID);
 
 extern "C" b32 getMoveFlag(MOVE_ID moveID, MoveFlag moveFlag);
 

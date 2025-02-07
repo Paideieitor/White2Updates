@@ -232,6 +232,43 @@ struct SWAN_ALIGNED(4) HandlerParam_Switch
     u8 intrDisable;
 };
 
+struct HandlerParam_SetItem
+{
+    HandlerParam_Header header;
+    u16 itemID;
+    u8 pokeID;
+    u8 clearConsume;
+    u8 clearConsumeOtherPoke;
+    u8 clearConsumePokeID;
+    u8 callConsumedEvent;
+    HandlerParam_StrParams exStr;
+};
+
+struct HandlerParam_SwapPoke
+{
+    HandlerParam_Header header;
+    u8 pokeID1;
+    u8 pokeID2;
+    HandlerParam_StrParams exStr;
+};
+
+struct HandlerParam_PP
+{
+    HandlerParam_Header header;
+    u8 volume;
+    u8 pokeID;
+    u8 moveSlot;
+    u8 flags;
+    HandlerParam_StrParams exStr;
+};
+
+struct SWAN_ALIGNED(4) HandlerParam_RemoveSideEffect
+{
+    HandlerParam_Header header;
+    u8 flags[3];
+    u8 side;
+};
+
 
 extern "C" HandlerParam_Header* BattleHandler_PushWork(ServerFlow* serverFlow, BattleHandlerEffect battleHandler, u32 currentSlot);
 extern "C" void BattleHandler_PopWork(ServerFlow* serverFlow, void* handlerParms);

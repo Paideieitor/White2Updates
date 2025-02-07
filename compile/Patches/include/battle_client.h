@@ -170,5 +170,9 @@ extern "C" void BattleViewCmd_AddAnim(u32 animID);
 extern "C" b32 BattleViewCmd_WaitEffect();
 extern "C" void BattleViewCmd_StartMessageStandard(BtlvCore* btlvCore, int msgID, u32 narcIdx);
 extern "C" b32 BattleViewCmd_WaitMessage(BtlvCore* btlvCore);
+extern "C" b32 BattleViewCmd_AbilityPopup_DisplayWait(BtlvCore* btlvCore, u8 battlePos);
+extern "C" void BattleViewCmd_AbilityPopup_DisplayStart(BtlvCore* btlvCore, u32 battlePos, u8 flag);
+
+extern "C" int BattleParty_FindPartyMon(BattleParty* battleParty, BattleMon* battleMon);
 
 #endif // __BATTLE_CLIENT_H

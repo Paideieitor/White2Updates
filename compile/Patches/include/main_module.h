@@ -108,6 +108,7 @@ extern "C" void* MainModule_GetPlayerStatus(MainModule* main);
 extern "C" u32 MainModule_PokeIDToPokePos(MainModule* mainModule, PokeCon* pokeCon, u32 pokemonSlot);
 extern "C" int MainModule_GetDebugFlag();
 extern "C" b32 MainModule_IsAllyMonID(u32 slot1, u32 slot2);
+extern "C" u32 MainModule_PokeIDToClientID(u32 battleSlot);
 
 extern "C" BtlType BtlSetup_GetBattleType(MainModule* main);
 extern "C" BattleStyle BtlSetup_GetBattleStyle(MainModule* mainModule);

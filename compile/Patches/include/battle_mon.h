@@ -167,6 +167,9 @@ extern "C" void BattleMon_ConsumeItem(BattleMon* battleMon, u16 itemID);
 extern "C" b32 BattleMon_IsStatChangeValid(BattleMon* battleMon, StatStage stat, int volume);
 extern "C" ConditionData BattleMon_GetMoveCondition(BattleMon* battleMon, CONDITION condition);
 extern "C" void BattleMon_CureMoveCondition(BattleMon* battleMon, CONDITION condition);
+extern "C" u32 BattleMon_GetMoveCount(BattleMon* battleMon);
+extern "C" b32 BattleMon_IsSubstituteActive(BattleMon* battleMon);
+
 extern "C" void CureStatusCondition(BattleMon* battleMon);
 
 extern "C" u32 DivideMaxHPZeroCheck(BattleMon* battleMon, u32 denominator);
@@ -177,9 +180,12 @@ extern "C" BattleMon* BattleParty_GetPartyMember(BattleParty* party, u32 idx);
 
 extern "C" u32 BattleRandom(u32 range);
 extern "C" b32 CheckHPDebug(BattleMon* battleMon);
+extern "C" u32 GetSideFromMonID(u32 battleSlot);
 
 extern "C" MOVE_ID CheckEncoreMoveChange(BattleMon* attackingMon, BattleAction_Fight* actionParams);
 extern "C" u32 Move_SearchIndex(BattleMon* battleMon, MOVE_ID moveID);
 extern "C" u32 Move_GetPP(BattleMon* battleMon, u32 moveSlot);
+extern "C" u32 Move_GetMissingPP(BattleMon* battleMon, u32 moveSlot);
+extern "C" MOVE_ID Move_GetID(BattleMon* battleMon, u32 moveSlot);
 
 #endif // __BATTLE_MON_H

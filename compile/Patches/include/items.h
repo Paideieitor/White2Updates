@@ -979,6 +979,7 @@ extern "C" void* PML_ItemReadDataFile(u32 itemID, int dataType, HeapID heapID);
 extern "C" u32 PML_ItemGetParam(ItemData* itemData, ItemField itemField);
 extern "C" b32 PML_ItemIsBerry(u16 itemId);
 extern "C" b32 PML_ItemIsMail(u16 itemId);
+extern "C" u32 ItemGetParam(u16 itemID, ItemField field);
 
 extern "C" int CommonGetItemParam(BattleEventItem* item, ItemField itemField);
 
