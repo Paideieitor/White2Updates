@@ -77,5 +77,5 @@ If you are having troubles building the patches or running CTRMap, I recommend j
 * Hello007 - CTRMap and the Gen V code injection system
 * PlatinumMaster - Gen V code injection system
 * totally_anonymous - IDB documentation
-* SpagoAsparago - Template for this README
-* CH340, totally_anonymous, Sunk, klark, Trusty Peaches and Brom - Aswering my questions and resolving doubts
+* SpagoAsparago - Original Gen6 ability expansion
+* CH340, totally_anonymous, Sunk, klark, Trusty Peaches and Brom - Aswering my questions, resolving doubts and hanging around
