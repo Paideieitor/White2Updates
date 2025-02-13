@@ -25,5 +25,11 @@ extern "C" u32 ServerEvent_MoveConditionCheckFail(ServerFlow* serverFlow, Battle
 extern "C" void ServerEvent_AddConditionFailed(ServerFlow* serverFlow, BattleMon* defendingMon, BattleMon* attackingMon, CONDITION condition);
 extern "C" u32 ServerEvent_MoveExecuteFail(ServerFlow* serverFlow, BattleMon* attackingMon, MOVE_ID moveID, u32 failCause);
 extern "C" void ServerEvent_AbilityNullified(ServerFlow* serverFlow, BattleMon* battleMon);
+extern "C" b32 ServerEvent_CheckHiding(ServerFlow * serverFlow, BattleMon * attackingMon, BattleMon * defendingMon);
+extern "C" u32 ServerEvent_CheckChargeUpFail(ServerFlow * serverFlow, BattleMon * attackingMon, PokeSet * targetSet);
+extern "C" u32 ServerEvent_CheckChargeUpSkip(ServerFlow * serverFlow, BattleMon * battleMon, MOVE_ID moveID);
+extern "C" void ServerEvent_ChargeUpSkip(ServerFlow * serverFlow, BattleMon * attackingMon);
+extern "C" b32 ServerEvent_ChargeUpRelease(ServerFlow * serverFlow, BattleMon * attackingMon, PokeSet * targetSet);
+extern "C" void ServerEvent_CheckSideEffectParam(ServerFlow* serverFlow, u32 battleSlot, SIDE_EFFECT sideEffect, u32 side, ConditionData* condData);
 
 #endif // __SERVER_EVENTS_H

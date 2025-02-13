@@ -2458,3 +2458,174 @@ Symbols:
   - Name: FRONT_POKE_SEEK_GetNext
     Segment: 0xA7
     Address: 0x21a0e35
+  - Name: Handler_IsSideEffectActive
+    Segment: 0xA7
+    Address: 0x21abe45
+  - Name: Handler_GetExistFrontPokePos
+    Segment: 0xA7
+    Address: 0x21ab881
+  - Name: Handler_GetTempWork
+    Segment: 0xA7
+    Address: 0x21abca1
+  - Name: HandlerChargePower
+    Segment: 0xA7
+    Address: 0x21c7791
+  - Name: BattleMon_TransformCheck
+    Segment: 0xA7
+    Address: 0x21bc595
+  - Name: BattleMon_ChangeForm
+    Segment: 0xA7
+    Address: 0x21bbf19
+  - Name: BattleMon_SetupBySrcData
+    Segment: 0xA7
+    Address: 0x21ba73d
+  - Name: MoveWork_ClearSurface
+    Segment: 0xA7
+    Address: 0x21ba991
+  - Name: BattleMon_ClearFormChange
+    Segment: 0x5
+    Address: 0x21bab7d
+  - Name: BattleMon_ClearUsedMoveFlag
+    Segment: 0xA7
+    Address: 0x21baba5
+  - Name: ClearCounter
+    Segment: 0xA7
+    Address: 0x21babdd
+  - Name: BattleMon_ClearComboMoveData
+    Segment: 0xA7
+    Address: 0x21bc6c9
+  - Name: BattleMon_IllusionBreak
+    Segment: 0xA7
+    Address: 0x21bc46d
+  - Name: BattleMon_RemoveSubstitute
+    Segment: 0xA7
+    Address: 0x21bc5b1
+  - Name: ClearMoveStatusWork
+    Segment: 0xA7
+    Address: 0x21bbbf9
+  - Name: ResetStatStages
+    Segment: 0xA7
+    Address: 0x21bac09
+  - Name: PokeParty_SetParam
+    Segment: 0x0
+    Address: 0x201cd49
+  - Name: PokeParty_RecalcStats
+    Segment: 0x0
+    Address: 0x201d621
+  - Name: BattleMon_ClearForSwitchOut
+    Segment: 0xA7
+    Address: 0x21bbd31
+  - Name: MainModule_BattlePosToViewPos
+    Segment: 0xA7
+    Address: 0x219c71d
+  - Name: BattleViewCmd_ChangeForm_Start
+    Segment: 0xA7
+    Address: 0x21d04a1
+  - Name: BattleViewCmd_ChangeForm_Wait
+    Segment: 0xA7
+    Address: 0x21d04bd
+  - Name: ServerCommand_ChangeForm
+    Segment: 0xA7
+    Address: 0x21b8a0d
+  - Name: Turnflag_Clear
+    Segment: 0xA7
+    Address: 0x21bbc81
+  - Name: ConditionData_MakePoke
+    Segment: 0xA7
+    Address: 0x21bd5f1
+  - Name: ServerEvent_CheckHiding
+    Segment: 0xA7
+    Address: 0x21aa4a1
+  - Name: BattleMon_GetHideCondition
+    Segment: 0xA7
+    Address: 0x21bb449
+  - Name: ServerControl_ChargeUpMoveUse
+    Segment: 0xA7
+    Address: 0x21a36ed
+  - Name: ServerEvent_CheckChargeUpFail
+    Segment: 0xA7
+    Address: 0x21aa205
+  - Name: ServerDisplay_MoveFail
+    Segment: 0xA7
+    Address: 0x21a9271
+  - Name: ServerEvent_CheckChargeUpSkip
+    Segment: 0xA7
+    Address: 0x21aa279
+  - Name: ServerControl_HideTurnStart
+    Segment: 0xA7
+    Address: 0x21a3809
+  - Name: ServerDisplay_AddCondition
+    Segment: 0xA7
+    Address: 0x21a9775
+  - Name: ServerEvent_ChargeUpSkip
+    Segment: 0xA7
+    Address: 0x21aa3d1
+  - Name: ServerEvent_ChargeUpRelease
+    Segment: 0xA7
+    Address: 0x21aa401
+  - Name: ServerControl_ChargeUpLockClear
+    Segment: 0xA7
+    Address: 0x21a3945
+  - Name: ServerDisplay_MoveAvoid
+    Segment: 0xA7
+    Address: 0x21a9285
+  - Name: ServerFlow_CheckPokeHideAvoid
+    Segment: 0xA7
+    Address: 0x21a3321
+  - Name: HIDE_CONDITION_FLAGS
+    Segment: 0xA7
+    Address: 0x21d74d0
+  - Name: ServerDisplay_ResetConditionFlag
+    Segment: 0xA7
+    Address: 0x21a9c69
+  - Name: ServerFlow_ClearPokeNoActionFlag
+    Segment: 0xA7
+    Address: 0x219f73d
+  - Name: Condition_CheckForceSwitchFail
+    Segment: 0xA7
+    Address: 0x21a7589
+  - Name: ServerEvent_CheckForceSwitch
+    Segment: 0xA7
+    Address: 0x21a753d
+  - Name: BattleHandler_SetConditionFlag
+    Segment: 0xA7
+    Address: 0x21ad2f9
+  - Name: GetNumHandlersWithPriority
+    Segment: 0xA7
+    Address: 0x21bdd59
+  - Name: BattleField_Free
+    Segment: 0xA7
+    Address: 0x21d5aed
+  - Name: BagSave_Init
+    Segment: 0x0
+    Address: 0x2007fd9
+  - Name: FaintRecord_Add
+    Segment: 0xA7
+    Address: 0x21a8b79
+  - Name: Handler_PokePosToPokeID
+    Segment: 0xA7
+    Address: 0x21abba1
+  - Name: GetSideFromOpposingMonID
+    Segment: 0xA7
+    Address: 0x219d36d
+  - Name: CommonCreateSideEffect
+    Segment: 0xA7
+    Address: 0x21cade5
+  - Name: ServerEvent_CheckSideEffectParam
+    Segment: 0xA7
+    Address: 0x21ab701
+  - Name: SideEvent_AddItem
+    Segment: 0xA7
+    Address: 0x21ad399
+  - Name: BattleHandler_AddSideEffect
+    Segment: 0xA7
+    Address: 0x21ad351
+  - Name: Condition_MakeBadlyPoisoned
+    Segment: 0xA7
+    Address: 0x21ce2d9
+  - Name: ServerEvent_CheckDamageEffectiveness
+    Segment: 0xA7
+    Address: 0x21aab91
+  - Name: Condition_CheckUnaffectedByType
+    Segment: 0xA7
+    Address: 0x21aac2d

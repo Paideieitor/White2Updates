@@ -15,7 +15,7 @@ enum Weather
     WEATHER_SANDSTORM = 4,
 };
 
-typedef int FIELD_EFFECT;
+typedef u32 FIELD_EFFECT;
 enum FieldEffect
 {
     FLDEFF_WEATHER = 0x0,
@@ -34,6 +34,25 @@ struct FieldEffectEventAddTable
 {
     FIELD_EFFECT fieldEffect;
     FieldEffectEventAddFunc handlers;
+};
+
+typedef u32 SIDE_EFFECT;
+enum SideEffect
+{
+    SIDEEFF_REFLECT = 0x0,
+    SIDEEFF_LIGHT_SCREEN = 0x1,
+    SIDEEFF_SAFEGUARD = 0x2,
+    SIDEEFF_MIST = 0x3,
+    SIDEEFF_TAILWIND = 0x4,
+    SIDEEFF_LUCKY_CHANT = 0x5,
+    SIDEEFF_SPIKES = 0x6,
+    SIDEEFF_TOXIC_SPIKES = 0x7,
+    SIDEEFF_STEALTH_ROCK = 0x8,
+    SIDEEFF_WIDE_GUARD = 0x9,
+    SIDEEFF_QUICK_GUARD = 0xA,
+    SIDEEFF_RAINBOW = 0xB,
+    SIDEEFF_SEA_OF_FIRE = 0xC,
+    SIDEEFF_SWAMP = 0xD,
 };
 
 #endif // __FIELD_EFFECT_H

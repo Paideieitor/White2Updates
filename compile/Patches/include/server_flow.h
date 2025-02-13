@@ -11,6 +11,7 @@
 
 typedef u32 MOVE_ID;
 typedef u32 WEATHER;
+typedef u32 SIDE_EFFECT;
 
 struct ServerCommandQueue;
 struct ArcTool;
@@ -374,6 +375,8 @@ extern "C" void ServerControl_MoveCore(ServerFlow* serverFlow, u32 clientID, int
 extern "C" void ServerControl_AfterMove(ServerFlow* serverFlow, u32 clientID, int partyMon1, int partyMon2);
 extern "C" b32 ServerControl_IsGuaranteedHit(ServerFlow* serverFlow, BattleMon* attackingMon, BattleMon* defendingMon);
 extern "C" b32 ServerControl_CheckNoEffectCore(ServerFlow* serverFlow, u16* moveID, BattleMon* attackingMon, BattleMon* defendingMon, int dmgAffRec, BattleEventType eventType);
+extern "C" b32 ServerControl_HideTurnStart(ServerFlow * serverFlow, BattleMon * attackingMon, u32 attackingPos, PokeSet * targetSet, u16 moveID);
+extern "C" CONDITION_FLAG ServerControl_ChargeUpLockClear(ServerFlow * serverFlow, BattleMon * attackingMon);
 
 enum ServerCommandID
 {
@@ -477,11 +480,15 @@ extern "C" void ServerDisplay_AddMessageImpl(ServerCommandQueue* serverCommandQu
 extern "C" u32 ServerDisplay_IllusionSet(ServerFlow* serverFlow, u16* a2);
 extern "C" void ServerDisplay_AbilityPopupAdd(ServerFlow* serverFlow, BattleMon* battleMon);
 extern "C" void ServerDisplay_AbilityPopupRemove(ServerFlow* serverFlow, BattleMon* battleMon);
-extern "C" void ServerDisplay_SetConditionFlag(ServerFlow* serverFlow, BattleMon* battleMon, ConditionFlag flag);
+extern "C" void ServerDisplay_SetConditionFlag(ServerFlow* serverFlow, BattleMon* battleMon, CONDITION_FLAG flag);
 extern "C" void ServerDisplay_SetTurnFlag(ServerFlow* serverFlow, BattleMon* battleMon, TurnFlag flag);
 extern "C" u32 ServerDisplay_MoveAnimation(ServerFlow* serverFlow, MOVE_ID moveID, MoveAnimCtrl* moveAnimCtrl, u16 animBuffer);
 extern "C" void ServerDisplay_SimpleHP(ServerFlow* serverFlow, BattleMon* currentMon, int damage, b32 sendCommand);
 extern "C" void ServerDisplay_SkillSwap(ServerFlow* serverFlow, BattleMon* attackingMon, PokeSet* targetSet);
+extern "C" void ServerDisplay_AddCondition(ServerFlow * serverFlow, BattleMon * battleMon, MoveCondition condition, ConditionData condData);
+extern "C" void ServerDisplay_MoveFail(ServerFlow * serverFlow);
+extern "C" void ServerDisplay_MoveAvoid(ServerFlow* serverFlow, BattleMon* attackingMon);
+extern "C" void ServerDisplay_ResetConditionFlag(ServerFlow* serverFlow, BattleMon* battleMon, CONDITION_FLAG conditionFlag);
 
 extern "C" BattleMon* PokeCon_GetBattleMon(PokeCon* pokeCon, u32 index);
 extern "C" BattleParty* PokeCon_GetBattleParty(PokeCon* pokeCon, u32 idx);
@@ -495,6 +502,7 @@ extern "C" void PokeSet_Remove(PokeSet* pokeSet, BattleMon* battleMon);
 
 extern "C" BattleMon* Handler_GetBattleMon(ServerFlow* serverFlow, u32 pokemonSlot);
 extern "C" u32 Handler_PokeIDToPokePos(ServerFlow* serverFlow, u32 pokemonSlot);
+extern "C" u32 Handler_PokePosToPokeID(ServerFlow* serverFlow, u32 pokePos);
 extern "C" u32 Handler_ExpandPokeID(ServerFlow* serverFlow, u16 pokePos, u8* battleSlots);
 extern "C" u32 Handler_ReqMoveTargetAuto(ServerFlow * serverFlow, u32 attackingSlot, MOVE_ID moveID);
 extern "C" b32 Handler_CheckMatchup(ServerFlow* serverFlow);
@@ -503,10 +511,16 @@ extern "C" b32 HandlerCommon_CheckTargetMonID(u32 pokemonSlot);
 extern "C" b32 Handler_IsMonSwitchOutInterrupted(ServerFlow* serverFlow);
 extern "C" b32 Handler_IsTargetInRange(ServerFlow* serverFlow, u32 attackingSlot, u32 defendingSlot, MOVE_ID moveID);
 extern "C" b32 Handler_IsSimulationMode(ServerFlow* serverFlow);
+extern "C" b32 Handler_IsSideEffectActive(ServerFlow* serverFlow, u32 side, SIDE_EFFECT sideEffect);
+extern "C" u32 Handler_GetExistFrontPokePos(ServerFlow* serverFlow, u32 pokemonSlot);
+extern "C" u8* Handler_GetTempWork(ServerFlow* serverFlow);
 
 extern "C" u32 AddConditionCheckFailOverwrite(ServerFlow * serverFlow, BattleMon * defendingMon, CONDITION condition, ConditionData condData, u8 overrideMode);
 extern "C" u32 AddConditionCheckFailStandard(ServerFlow * serverFlow, BattleMon * defendingMon, u32 failStatus, CONDITION condition);
+extern "C" void Condition_CheckForceSwitchFail(ServerFlow * serverFlow, BattleMon * battleMon);
 extern "C" b32 CommonConditionCodeMatch(ServerFlow* serverFlow, u32 pokemonSlot, CONDITION condition);
+extern "C" b32 CommonDamageRecoverCheck(ServerFlow* serverFlow, u32 pokemonSlot, POKE_TYPE pokeType);
+extern "C" void CommonTypeRecoverHP(ServerFlow* serverFlow, u32 pokemonSlot, u32 hearPercent);
 
 extern "C" b32 AbilityEvent_RollEffectChance(ServerFlow* serverFlow, u32 effectChance);
 
@@ -517,9 +531,14 @@ extern "C" u32 HitCheck_IsMultiHitMove(HitCheckParam* hitCheck);
 
 extern "C" u32 PosPoke_GetPokeExistPos(PosPoke* posPoke, u32 battleSlot);
 extern "C" b32 DoesBattleMonExist(PosPoke* posPoke, u32 battleSlot);
+extern "C" u8 GetSideFromOpposingMonID(u32 battleSlot);
+extern "C" void Condition_CheckUnaffectedByType(ServerFlow* serverFlow, BattleMon* battleMon);
 
 extern "C" void TurnFlag_Set(BattleMon* battleMon, TurnFlag flag);
+extern "C" void Turnflag_Clear(BattleMon* battleMon, TurnFlag flag);
 extern "C" b32 BattleMon_GetTurnFlag(BattleMon* battleMon, TurnFlag turnFlag);
+
+extern "C" void FaintRecord_Add(FaintRecord * faintRecord, u8 battleSlot);
 
 extern "C" void FRONT_POKE_SEEK_InitWork(FRONT_POKE_SEEK_WORK* frontSet, ServerFlow* serverFlow);
 extern "C" b32 FRONT_POKE_SEEK_GetNext(FRONT_POKE_SEEK_WORK* frontSet, ServerFlow* serverFlow, BattleMon** battleMon);

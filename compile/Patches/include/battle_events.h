@@ -338,5 +338,7 @@ extern "C" void BattleEvent_ForceCallHandlers(ServerFlow* serverFlow, BattleEven
 
 extern "C" b32 HandlerUnnerveSkipCheck(BattleEventItem* item, void* work, u32 factorType, u32 eventType, u16 subID, u8 pokeID);
 
+extern "C" u32 GetNumHandlersWithPriority(BattleEventPriority priority, u32 handlerAmount);
+
 #endif // __BATTLE_EVENTS_H
 

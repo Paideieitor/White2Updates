@@ -172,6 +172,8 @@ extern "C" void BattleViewCmd_StartMessageStandard(BtlvCore* btlvCore, int msgID
 extern "C" b32 BattleViewCmd_WaitMessage(BtlvCore* btlvCore);
 extern "C" b32 BattleViewCmd_AbilityPopup_DisplayWait(BtlvCore* btlvCore, u8 battlePos);
 extern "C" void BattleViewCmd_AbilityPopup_DisplayStart(BtlvCore* btlvCore, u32 battlePos, u8 flag);
+extern "C" void BattleViewCmd_ChangeForm_Start(BtlvCore * btlvCore, u32 viewPos);
+extern "C" b32 BattleViewCmd_ChangeForm_Wait(BtlvCore * btlvCore);
 
 extern "C" int BattleParty_FindPartyMon(BattleParty* battleParty, BattleMon* battleMon);
 

@@ -84,6 +84,8 @@ extern "C" ConditionData Condition_MakeTurn(u32 turns);
 extern "C" ConditionData Condition_MakePoke(u32 pokemonSlot);
 extern "C" ConditionData Condition_MakeTurnParam(u32 maxTurns, u32 param);
 extern "C" ConditionData Condition_MakePermanent();
-extern "C" ConditionData MakeCondition(MoveCondition condition, BattleMon* battleMon, ConditionData* condData);
+extern "C" ConditionData MakeCondition(CONDITION condition, BattleMon* battleMon, ConditionData* condData);
+extern "C" ConditionData ConditionData_MakePoke(u32 battleSlot);
+extern "C" ConditionData Condition_MakeBadlyPoisoned();
 
 #endif // __CONDITIONS_H

@@ -175,6 +175,7 @@ struct HandlerParam_ChangeForm
     u8 pokeID;
     u8 newForm;
     u8 dontResetOnSwitch;
+    u8 pad;
     HandlerParam_StrParams exStr;
 };
 
@@ -206,7 +207,7 @@ struct SWAN_ALIGNED(4) HandlerParam_Damage
 struct HandlerParam_ChangeAbility
 {
     HandlerParam_Header header;
-    ABILITY ability;
+    u16 ability;
     u8 pokeID;
     u8 sameAbilityEffective;
     u8 skipSwitchInEvent;
@@ -269,6 +270,29 @@ struct SWAN_ALIGNED(4) HandlerParam_RemoveSideEffect
     u8 side;
 };
 
+struct SWAN_ALIGNED(4) HandlerParam_SetConditionFlag
+{
+    HandlerParam_Header header;
+    CONDITION_FLAG flag;
+    u8 pokeID;
+};
+
+struct HandlerParam_ActivateItem
+{
+    HandlerParam_Header header;
+    u8 pokeID;
+    u8 ateBerry;
+    u16 itemID;
+};
+
+struct HandlerParam_AddSideEffect
+{
+    HandlerParam_Header header;
+    SIDE_EFFECT sideEffect;
+    ConditionData condData;
+    u8 side;
+    HandlerParam_StrParams exStr;
+};
 
 extern "C" HandlerParam_Header* BattleHandler_PushWork(ServerFlow* serverFlow, BattleHandlerEffect battleHandler, u32 currentSlot);
 extern "C" void BattleHandler_PopWork(ServerFlow* serverFlow, void* handlerParms);

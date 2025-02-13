@@ -35,14 +35,20 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
 ### Gen6 weather abilities
   - Weather triggered by abilites like Drizzle now last 5 turns
   - You can change the value in ``settings.h``
-### Ability Expansion (Up to Gen8)
-  - Every single ability from Gen6, Gen7 and Gen8 has been added to the battle engine
+### Full Ability Expansion
+  - Every single ability from Gen6, Gen7, Gen8 and Gen9 has been added to the battle engine
   - Make sure to read the ``NARCS/README.md`` to know which files you need to use
   - To change a pokemon ability to an expanded just modify the ability ID in that particular Pokémon Personal NARC (the ability IDs are preservet from vanilla games, but you can check them in ``BattleUpgrade.h``)
   - Big shoutout to [Spago](https://github.com/SpagoAsparago) who made the first Gen6 ability expansion, this patch adds the abilities that where missing from his patch and attempts to fix some bugs and inconsistencies with the vanilla mechanics
 
 WARNING: CURRENTLY THE PERSONAL NARC CAN ONLY HOLD UP TO ABILITY ID NUMBER 255 SO ANY ABILITY OVER THAT NUMBER CAN'T BE GIVEN TO A POKEMON, THIS REQUIRES AN EXPANSION OF THE PERSONAL NARC WHICH WILL COME SOON
-Also Unseen Fist doesn't ignore Quick Guard and Wide Guard, ill fix that in the Side Effect Expansion
+- Unseen Fist doesn't ignore Quick Guard and Wide Guard, ill fix that in the Side Effect Expansion.
+- Zero to Hero, displays the form change animation before switching out
+- Commander probably breaks in Rotation Battles (not tested)
+- Commander is compatible with Triple Battles (Tatsugiri can enter an "Out of Reach" Dondozo)
+- Hadron Engines message it's too long if used by an enemy, so part of the message is not shown
+- Coestar will choose a random ally in Triple Battles if it's in the center (so if one of the allies is boosted and the other one is not Flamigo could not boost on switch in)
+- Let me know any bugs or wrong mechanics that you find
 
 ## How to Install
 ### Installing tools

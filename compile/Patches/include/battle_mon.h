@@ -13,6 +13,8 @@
 #include "pml/poke_party.h"
 
 extern "C" u32 PokeParty_GetParam(PartyPkm* pPkm, PkmField field, void* extra);
+extern "C" void PokeParty_SetParam(PartyPkm * pPkm, PkmField field, u32 data);
+extern "C" void PokeParty_RecalcStats(PartyPkm * pPoke);
 
 struct BattleAction_Fight;
 
@@ -94,6 +96,10 @@ struct SWAN_ALIGNED(4) BattleMon
     u8 battleSlot;
     u8 baseAttack;
     u8 flags;
+    // 1000 0000 unk
+    // 0100 0000 mon is disguised by Illusion
+    // 0010 0000 mon has transformed using Transform or Impostor
+    // 0001 1111 form when battle started
     ConditionData conditions[36];
     u8 moveConditionCounter[36];
     u8 confrontRecCount;
@@ -158,7 +164,7 @@ extern "C" PartyPkm* BattleMon_GetSrcData(BattleMon* battleMon);
 extern "C" b32 BattleMon_CheckIfMoveCondition(BattleMon* battleMon, CONDITION condition);
 extern "C" b32 BattleMon_IsFullHP(BattleMon* battleMon);
 extern "C" b32 BattleMon_CanBattle(BattleMon* battleMon);
-extern "C" b32 BattleMon_GetConditionFlag(BattleMon* battleMon, ConditionFlag conditionFlag);
+extern "C" b32 BattleMon_GetConditionFlag(BattleMon* battleMon, CONDITION_FLAG conditionFlag);
 extern "C" u16 BattleMon_GetPokeType(BattleMon* battleMon);
 extern "C" b32 BattleMon_HasType(BattleMon* battleMon, POKE_TYPE type);
 extern "C" SPECIES BattleMon_GetSpecies(BattleMon* battleMon);
@@ -169,6 +175,15 @@ extern "C" ConditionData BattleMon_GetMoveCondition(BattleMon* battleMon, CONDIT
 extern "C" void BattleMon_CureMoveCondition(BattleMon* battleMon, CONDITION condition);
 extern "C" u32 BattleMon_GetMoveCount(BattleMon* battleMon);
 extern "C" b32 BattleMon_IsSubstituteActive(BattleMon* battleMon);
+extern "C" u32 BattleMon_TransformCheck(BattleMon* battleMon);
+extern "C" b32 BattleMon_ChangeForm(BattleMon* battleMon, u32 form);
+extern "C" void BattleMon_SetupBySrcData(BattleMon* battleMon, PartyPkm* partyPkm, b32 resetHP, b32 resetAbility);
+extern "C" void BattleMon_ClearFormChange(BattleMon * battleMon);
+extern "C" void BattleMon_ClearUsedMoveFlag(BattleMon * battleMon);
+extern "C" void BattleMon_ClearComboMoveData(BattleMon * battleMon);
+extern "C" void BattleMon_IllusionBreak(BattleMon * battleMon);
+extern "C" void BattleMon_RemoveSubstitute(BattleMon * battleMon);
+extern "C" CONDITION_FLAG BattleMon_GetHideCondition(BattleMon * battleMon);
 
 extern "C" void CureStatusCondition(BattleMon* battleMon);
 
@@ -181,6 +196,10 @@ extern "C" BattleMon* BattleParty_GetPartyMember(BattleParty* party, u32 idx);
 extern "C" u32 BattleRandom(u32 range);
 extern "C" b32 CheckHPDebug(BattleMon* battleMon);
 extern "C" u32 GetSideFromMonID(u32 battleSlot);
+extern "C" u8* MoveWork_ClearSurface(BattleMon* battleMon);
+extern "C" void ClearCounter(BattleMon * battleMon);
+extern "C" void ClearMoveStatusWork(BattleMon * battleMon, b32 removeStatus);
+extern "C" void ResetStatStages(StatStageParam * statChanges);
 
 extern "C" MOVE_ID CheckEncoreMoveChange(BattleMon* attackingMon, BattleAction_Fight* actionParams);
 extern "C" u32 Move_SearchIndex(BattleMon* battleMon, MOVE_ID moveID);
