@@ -42,6 +42,7 @@ To personalize the patch modify the ``settings.h`` file (I don't recomend modify
   - Big shoutout to [Spago](https://github.com/SpagoAsparago) who made the first Gen6 ability expansion, this patch adds the abilities that where missing from his patch and attempts to fix some bugs and inconsistencies with the vanilla mechanics
 
 WARNING: CURRENTLY THE PERSONAL NARC CAN ONLY HOLD UP TO ABILITY ID NUMBER 255 SO ANY ABILITY OVER THAT NUMBER CAN'T BE GIVEN TO A POKEMON, THIS REQUIRES AN EXPANSION OF THE PERSONAL NARC WHICH WILL COME SOON
+- RKS System is not implemented
 - Unseen Fist doesn't ignore Quick Guard and Wide Guard, ill fix that in the Side Effect Expansion.
 - Zero to Hero, displays the form change animation before switching out
 - Commander probably breaks in Rotation Battles (not tested)
